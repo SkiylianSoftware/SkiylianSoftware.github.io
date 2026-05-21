@@ -35,7 +35,12 @@ def fetch_uploads(playlist_id, label="uploads"):
         )
         if page_token:
             url += f"&pageToken={page_token}"
-        data = api_get(url)
+        resp = requests.get(url, timeout=30)
+        if resp.status_code == 404:
+            print(f"Playlist {playlist_id} not found (no content yet), skipping {label}", file=sys.stderr)
+            return []
+        resp.raise_for_status()
+        data = resp.json()
         for item in data.get("items", []):
             snippet = item.get("snippet", {})
             resource = snippet.get("resourceId", {})

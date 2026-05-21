@@ -110,17 +110,6 @@ permalink: /stats/
       <span class="stat-label">Forks</span>
     </div>
   </div>
-  {% if gh.top_repos.size > 0 %}
-    <h3 style="font-size:0.9rem;margin:0.5rem 0;opacity:0.7;">Most Starred Repos</h3>
-    <div class="repo-list">
-      {% for repo in gh.top_repos %}
-        <a href="{{ repo.url }}" target="_blank" class="repo-item">
-          <span class="repo-name">{{ repo.name }}</span>
-          <span class="repo-meta">&#9733; {{ repo.stars }} &#x2442; {{ repo.forks }}{% if repo.language %} &middot; {{ repo.language }}{% endif %}</span>
-        </a>
-      {% endfor %}
-    </div>
-  {% endif %}
 {% endif %}
 
 <style>

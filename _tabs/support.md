@@ -34,16 +34,17 @@ permalink: /support/
 }
 .support-card {
   display: block;
-  background: var(--card-bg, #1e1e1e);
+  background: rgba(13, 13, 30, 0.8);
+  border: 1px solid rgba(45, 212, 191, 0.08);
   border-radius: 10px;
   padding: 1.5rem;
   text-decoration: none;
-  transition: transform 0.15s, border-color 0.15s;
-  border: 1px solid transparent;
+  transition: border-color 0.2s, transform 0.15s;
 }
 .support-card:hover {
   transform: translateY(-3px);
-  border-color: var(--link-color, #888);
+  border-color: rgba(45, 212, 191, 0.3);
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.08);
 }
 .support-card h3 {
   margin: 0 0 0.5rem;

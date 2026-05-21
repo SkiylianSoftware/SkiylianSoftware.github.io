@@ -10,7 +10,7 @@
   icon: "fab fa-github"
   url: "https://code.skiylia.dev"
 
-- type: email
+- type: custom
   icon: "fas fa-envelope"
   url: "mailto:skiyliansoftware@gmail.com"
   noblank: true

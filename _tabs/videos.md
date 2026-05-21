@@ -6,11 +6,20 @@ order: 1
 permalink: /videos/
 ---
 
-<div class="video-grid">
+<div class="sort-bar">
+  <label>Sort by:</label>
+  <button class="sort-btn active" data-sort="date" onclick="sortGrid(this, 'date')">Date</button>
+  <button class="sort-btn" data-sort="views" onclick="sortGrid(this, 'views')">Views</button>
+  <button class="sort-btn" data-sort="duration" onclick="sortGrid(this, 'duration')">Duration</button>
+</div>
+
+<div id="video-grid" class="video-grid">
   {% assign videos = site.data.youtube_main.videos %}
   {% if videos.size > 0 %}
     {% for video in videos %}
-      <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}" onclick="openPlayer(this)">
+      <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}"
+           data-published="{{ video.published }}" data-views="{{ video.view_count | default: 0 }}"
+           data-duration="{{ video.duration_seconds | default: 0 }}" onclick="openPlayer(this)">
         <div class="thumb-wrap">
           <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy">
           <div class="play-overlay"><i class="fas fa-play"></i></div>
@@ -57,10 +66,29 @@ function openPlayer(el) {
   document.getElementById('modal-link').href = 'https://www.youtube.com/watch?v=' + id;
   document.getElementById('video-modal').classList.add('open');
 }
+
 function closePlayer() {
   document.getElementById('player-wrap').innerHTML = '';
   document.getElementById('video-modal').classList.remove('open');
 }
+
+function sortGrid(btn, mode) {
+  document.querySelectorAll('.sort-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var grid = document.getElementById('video-grid');
+  var cards = Array.from(grid.children);
+  cards.sort(function(a, b) {
+    if (mode === 'date') {
+      return new Date(b.getAttribute('data-published')) - new Date(a.getAttribute('data-published'));
+    } else if (mode === 'views') {
+      return parseInt(b.getAttribute('data-views')) - parseInt(a.getAttribute('data-views'));
+    } else if (mode === 'duration') {
+      return parseInt(b.getAttribute('data-duration')) - parseInt(a.getAttribute('data-duration'));
+    }
+  });
+  cards.forEach(function(c) { grid.appendChild(c); });
+}
+
 document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closePlayer(); });
 </script>
 

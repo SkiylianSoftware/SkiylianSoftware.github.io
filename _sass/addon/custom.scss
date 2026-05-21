@@ -1,0 +1,136 @@
+/* Space starfield background */
+body {
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(45, 212, 191, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(192, 132, 252, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(45, 212, 191, 0.02) 0%, transparent 50%),
+    var(--main-bg);
+}
+
+/* Stars */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 55% 60%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 85% 70%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 50% 90%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1.5px 1.5px at 30% 75%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 5% 55%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 75% 5%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 45% 35%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 95% 50%, rgba(255,255,255,0.4), transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+/* Accent color usage */
+.section-title {
+  border-bottom-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+.video-card, .playlist-card {
+  border: 1px solid rgba(45, 212, 191, 0.08);
+}
+
+.video-card:hover, .playlist-card:hover {
+  border-color: rgba(45, 212, 191, 0.25);
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.1);
+}
+
+.live-badge {
+  background: linear-gradient(135deg, #2dd4bf, #c084fc) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2dd4bf, #14b8a6) !important;
+}
+
+/* Nav link active color */
+.nav-item.active .nav-link {
+  color: #2dd4bf !important;
+}
+
+/* Sidebar link styling */
+.nav-link i {
+  color: #c084fc;
+}
+
+.nav-item.active .nav-link i {
+  color: #2dd4bf;
+}
+
+/* Duration badge styling */
+.duration-badge {
+  background: rgba(10, 10, 20, 0.85) !important;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+}
+
+/* Pagination active */
+.page-item.active .page-link {
+  background: rgba(45, 212, 191, 0.2) !important;
+  border-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+/* Sort bar styling */
+.sort-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sort-bar label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-right: 0.25rem;
+}
+
+.sort-btn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  background: transparent;
+  color: #8888aa;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sort-btn:hover {
+  border-color: rgba(45, 212, 191, 0.5);
+  color: #c8c8d4;
+}
+
+.sort-btn.active {
+  background: rgba(45, 212, 191, 0.15);
+  border-color: #2dd4bf;
+  color: #2dd4bf;
+}
+
+/* Twitch/purple accent used for icons */
+.vod-card .play-overlay i {
+  color: #c084fc;
+}

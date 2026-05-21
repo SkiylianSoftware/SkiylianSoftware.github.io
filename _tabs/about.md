@@ -1,5 +1,6 @@
 ---
 layout: page
+icon: "fa-solid fa-user"
 title: About
 order: 4
 permalink: /about/

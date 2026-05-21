@@ -1,0 +1,97 @@
+theme: jekyll-theme-chirpy
+
+lang: en
+timezone: Europe/London
+
+title: Skye
+tagline: Software engineer, automation enthusiast, train liker
+description: >-
+  The official website for Skye / skiylia. Watch videos, catch livestreams,
+  and explore the archive of content from YouTube, Twitch, and more.
+
+url: ""
+
+github:
+  username: SkiylianSoftware
+
+twitter:
+  username: skiylia_
+
+social:
+  name: Skye
+  email: skiyliansoftware@gmail.com
+  links:
+    - https://github.com/SkiylianSoftware
+    - https://www.youtube.com/@skiylia
+    - https://twitch.tv/skiylia
+
+theme_mode: dark
+
+avatar: https://yt3.googleusercontent.com/BtNidDhSb_vNcUXQALblvcBNOdYXF3iqI3Nj6m3nTaoVmunOum2B7aFXQACtuFt1f5YDFOGP5Q=s900-c-k-c0x00ffffff-no-rj
+
+toc: true
+
+paginate: 10
+
+baseurl: ""
+
+kramdown:
+  footnote_backlink: "&#8617;&#xfe0e;"
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+collections:
+  tabs:
+    output: true
+    sort_by: order
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      comments: true
+      toc: true
+      permalink: /posts/:title/
+  - scope:
+      path: _drafts
+    values:
+      comments: false
+  - scope:
+      path: ""
+      type: tabs
+    values:
+      layout: page
+      permalink: /:title/
+
+sass:
+  style: compressed
+
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  profile: false
+  blanklines: false
+  ignore:
+    envs: [development]
+
+exclude:
+  - "*.gem"
+  - "*.gemspec"
+  - docs
+  - tools
+  - README.md
+  - LICENSE
+  - purgecss.js
+  - "*.config.js"
+  - "package*.json"
+  - scripts
+  - .github

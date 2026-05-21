@@ -5,6 +5,10 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
@@ -15,7 +19,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-          cache: pip
 
       - name: Install dependencies
         run: |
@@ -42,5 +45,16 @@ jobs:
           git config --local user.email "skiyliansoftware@gmail.com"
           git add --force _data/
           git add _config.yml
-          git diff --cached --quiet || git commit -m "Auto-update site data [skip ci]"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-update site data"
+            git push
+          fi
+
+      - name: Trigger site deploy
+        if: success()
+        run: |
+          gh workflow run "Build and Deploy" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

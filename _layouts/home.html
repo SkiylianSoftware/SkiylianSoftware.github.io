@@ -5,7 +5,9 @@ layout: default
 {% if site.data.site_meta.description %}
   <div class="channel-hero">
     <div class="hero-main">
-      <img src="{{ site.data.site_meta.avatar_url | default: site.avatar }}" alt="" class="hero-avatar" width="80" height="80" loading="lazy">
+      <div class="hero-avatar-wrap">
+        <img src="{{ site.data.site_meta.avatar_url | default: site.avatar }}" alt="" class="hero-avatar" width="96" height="96" loading="lazy">
+      </div>
       <div class="hero-text">
         <p class="hero-description">{{ site.data.site_meta.description }}</p>
         <div class="hero-stats">
@@ -20,14 +22,12 @@ layout: default
           {% endif %}
         </div>
 
-        {% if site.data.milestones.current %}
-          <div class="milestone-banner" id="milestone-banner">
-            {% if site.data.milestones.current.type == "subs" %}
-              &#11088; {{ site.data.milestones.current.count }} subscribers! {{ site.data.milestones.current.message }}
-            {% elsif site.data.milestones.current.type == "views" %}
-              &#128293; {{ site.data.milestones.current.count }} views! {{ site.data.milestones.current.message }}
-            {% elsif site.data.milestones.current.type == "videos" %}
-              &#127916; {{ site.data.milestones.current.count }} videos! {{ site.data.milestones.current.message }}
+        {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.type %}
+          <div class="milestone-banner">
+            {% if site.data.milestones.current.count >= 1000 %}
+              &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }} -- {{ site.data.milestones.current.message }}
+            {% elsif site.data.milestones.current.count > 0 %}
+              &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }}! {{ site.data.milestones.current.message }}
             {% endif %}
           </div>
         {% endif %}
@@ -184,21 +184,18 @@ layout: default
   <div class="playlist-grid">
     {% assign playlists = site.data.playlists.playlists %}
     {% for playlist in playlists limit: 4 %}
-      <div class="playlist-card">
-        <a href="{{ playlist.url }}" target="_blank">
-          {% if playlist.thumbnail %}
-            <img src="{{ playlist.thumbnail }}" alt="" loading="lazy" class="playlist-thumb">
+      <a href="{{ playlist.url }}" target="_blank" class="playlist-card">
+        {% if playlist.thumbnail %}
+          <img src="{{ playlist.thumbnail }}" alt="" loading="lazy" class="playlist-thumb">
+        {% endif %}
+        <div class="playlist-info">
+          <h3>{{ playlist.title }}</h3>
+          {% if playlist.description %}
+            <p class="playlist-desc">{{ playlist.description | truncate: 100 }}</p>
           {% endif %}
-          <div class="playlist-info">
-            <h3>{{ playlist.title }}</h3>
-            {% if playlist.description %}
-              <p class="playlist-desc">{{ playlist.description | truncate: 120 }}</p>
-            {% endif %}
-            {% if playlist.item_count %}
-              <span class="count">{{ playlist.item_count }} videos</span>
-            {% endif %}
-          </div>
-        </a>
+          <span class="playlist-count">{{ playlist.item_count }} videos</span>
+        </div>
+      </a>
       </div>
     {% endfor %}
   </div>
@@ -252,13 +249,20 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 @keyframes pulse { 0%{opacity:1} 50%{opacity:0.6} 100%{opacity:1} }
 .live-title { margin: 0.75rem 0; font-weight: 500; }
 
-.channel-hero { padding: 1.5rem 0; margin-bottom: 1rem; }
-.hero-main { display: flex; align-items: center; gap: 1rem; max-width: 700px; margin: 0 auto 1rem; }
-.hero-avatar { border-radius: 50%; flex-shrink: 0; }
-.hero-text { flex: 1; }
+.channel-hero { padding: 1.5rem 0; margin-bottom: 1rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+.hero-main { display: flex; align-items: flex-start; gap: 1.5rem; }
+.hero-avatar-wrap { flex-shrink: 0; }
+.hero-avatar { border-radius: 50%; display: block; }
+.hero-text { flex: 1; min-width: 0; }
 .hero-description { font-size: 1rem; line-height: 1.6; margin: 0 0 0.5rem; opacity: 0.9; }
 .hero-stats { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.65; }
-.hero-links { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.hero-links { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+
+@media (max-width: 500px) {
+  .hero-main { flex-direction: column; align-items: center; text-align: center; }
+  .hero-avatar-wrap { margin-bottom: 0.5rem; }
+  .hero-stats { justify-content: center; }
+}
 
 .milestone-banner {
   margin-top: 0.75rem;
@@ -330,16 +334,33 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
   gap: 1rem;
   margin: 1rem 0;
 }
-.video-card, .playlist-card {
-  background: var(--card-bg, #1e1e1e);
+.video-card {
+  background: rgba(13, 13, 30, 0.8);
+  border: 1px solid rgba(45, 212, 191, 0.08);
   border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.15s;
   cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
 }
-.video-card:hover { transform: translateY(-3px); }
-.playlist-card:hover { transform: translateY(-3px); }
-.playlist-card a { text-decoration: none; color: inherit; display: flex; gap: 0.75rem; padding: 0.75rem; }
+.video-card:hover { border-color: rgba(45, 212, 191, 0.3); transform: translateY(-3px); box-shadow: 0 0 20px rgba(45, 212, 191, 0.08); }
+
+.playlist-card {
+  display: block;
+  background: rgba(13, 13, 30, 0.8);
+  border: 1px solid rgba(45, 212, 191, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.playlist-card:hover { border-color: rgba(45, 212, 191, 0.3); transform: translateY(-3px); box-shadow: 0 0 20px rgba(45, 212, 191, 0.08); }
+.playlist-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.playlist-info { padding: 0.75rem; }
+.playlist-info h3 { font-size: 0.9rem; margin: 0 0 0.25rem; line-height: 1.3; }
+.playlist-desc { font-size: 0.8rem; margin: 0 0 0.3rem; opacity: 0.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.playlist-count { font-size: 0.78rem; opacity: 0.5; }
+
 .thumb-wrap { position: relative; }
 .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
 .play-overlay {
@@ -365,7 +386,7 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 .playlist-info { flex: 1; min-width: 0; }
 .playlist-info h3 { font-size: 0.9rem; margin: 0 0 0.2rem; line-height: 1.3; }
 .playlist-desc { font-size: 0.8rem; margin: 0 0 0.3rem; opacity: 0.65; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.playlist-card .count { font-size: 0.78rem; opacity: 0.7; }
+.playlist-card .count { display: none; }
 
 .section-title { margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--border-color, #333); padding-bottom: 0.4rem; font-size: 1.1rem; }
 .text-center { text-align: center; }

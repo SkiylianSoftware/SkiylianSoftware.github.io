@@ -1,10 +1,14 @@
 - type: youtube
   icon: "fab fa-youtube"
-  url: "https://www.youtube.com/@skiylia"
+  url: "https://watch.skiylia.dev"
 
 - type: twitch
   icon: "fab fa-twitch"
-  url: "https://twitch.tv/skiylia"
+  url: "https://live.skiylia.dev"
+
+- type: github
+  icon: "fab fa-github"
+  url: "https://code.skiylia.dev"
 
 - type: email
   icon: "fas fa-envelope"

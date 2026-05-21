@@ -5,10 +5,10 @@ order: 2
 permalink: /streams/
 ---
 
-<p>Catch me live on <a href="https://twitch.tv/skiylia">Twitch</a>. Past streams are archived on the <a href="https://www.youtube.com/@skiylia/streams">YouTube VODs channel</a>.</p>
+<p>Catch me live on <a href="https://live.skiylia.dev">Twitch</a>. Past streams are archived on the <a href="https://vods.skiylia.dev">YouTube VODs channel</a>.</p>
 
 <div class="stream-grid">
-  {% assign streams = site.data.vods.archives | default: site.data.youtube_vods %}
+  {% assign streams = site.data.youtube_vods.videos %}
   {% if streams.size > 0 %}
     {% for stream in streams %}
       <div class="stream-card">

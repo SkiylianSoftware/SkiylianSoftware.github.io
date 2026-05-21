@@ -14,4 +14,4 @@ I make videos about:
 - **Kerbal Space Program** -- Rocket science (the hard way)
 - And whatever else catches my interest
 
-I stream on Twitch and upload edited highlights to YouTube. New videos on Saturdays (no promises).
+I stream on [Twitch](https://live.skiylia.dev) and upload edited highlights to [YouTube](https://watch.skiylia.dev). New videos on Saturdays (no promises).

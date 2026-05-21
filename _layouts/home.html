@@ -13,7 +13,7 @@ layout: default
         allowfullscreen>
       </iframe>
       <p class="live-title">{{ site.data.livestream.title }}</p>
-      <a href="https://twitch.tv/skiylia" class="btn btn-primary" target="_blank">Watch on Twitch</a>
+      <a href="https://live.skiylia.dev" class="btn btn-primary" target="_blank">Watch on Twitch</a>
     </div>
   {% elsif site.data.livestream.platform == "youtube" %}
     <div class="live-embed">
@@ -27,20 +27,20 @@ layout: default
         allowfullscreen>
       </iframe>
       <p class="live-title">{{ site.data.livestream.title }}</p>
-      <a href="https://www.youtube.com/@skiylia/streams" class="btn btn-primary" target="_blank">Watch on YouTube</a>
+      <a href="https://watch.skiylia.dev" class="btn btn-primary" target="_blank">Watch on YouTube</a>
     </div>
   {% else %}
     <div class="offline-panel">
       <h2>Currently Offline</h2>
-      <p>We'll be back soon! Check out the latest videos below, or follow me on <a href="https://twitch.tv/skiylia">Twitch</a> and <a href="https://www.youtube.com/@skiylia">YouTube</a> to know when I'm live.</p>
+      <p>We'll be back soon! Check out the latest videos below, or follow me on <a href="https://live.skiylia.dev">Twitch</a> and <a href="https://watch.skiylia.dev">YouTube</a> to know when I'm live.</p>
     </div>
   {% endif %}
 </div>
 
-{% if site.data.videos or site.data.youtube_main %}
+{% if site.data.youtube_main.videos %}
   <h2 class="section-title">Latest Videos</h2>
   <div class="video-grid">
-    {% assign videos = site.data.videos.videos | default: site.data.youtube_main %}
+    {% assign videos = site.data.youtube_main.videos %}
     {% for video in videos limit: 6 %}
       <div class="video-card">
         <a href="{{ video.url }}" target="_blank">
@@ -56,10 +56,10 @@ layout: default
   <p class="text-center"><a href="/videos" class="btn">View All Videos</a></p>
 {% endif %}
 
-{% if site.data.playlists or site.data.playlists.playlists %}
+{% if site.data.playlists.playlists %}
   <h2 class="section-title">Playlists</h2>
   <div class="playlist-grid">
-    {% assign playlists = site.data.playlists.playlists | default: site.data.playlists %}
+    {% assign playlists = site.data.playlists.playlists %}
     {% for playlist in playlists limit: 4 %}
       <div class="playlist-card">
         <a href="{{ playlist.url }}" target="_blank">

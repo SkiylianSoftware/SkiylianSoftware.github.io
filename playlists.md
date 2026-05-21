@@ -6,7 +6,7 @@ permalink: /playlists/
 ---
 
 <div class="playlist-grid">
-  {% assign playlists = site.data.playlists.playlists | default: site.data.playlists %}
+  {% assign playlists = site.data.playlists.playlists %}
   {% if playlists.size > 0 %}
     {% for playlist in playlists %}
       <div class="playlist-card">

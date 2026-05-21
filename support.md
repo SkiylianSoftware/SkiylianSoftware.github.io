@@ -18,9 +18,14 @@ permalink: /support/
     <p>Join the channel for exclusive perks and badges.</p>
   </a>
 
-  <a href="https://ko-fi.com/skyecasolw" target="_blank" class="support-card">
+  <a href="https://support.skiylia.dev" target="_blank" class="support-card">
     <h3>Ko-fi</h3>
     <p>Buy me a tea! One-off donations with no subscription.</p>
+  </a>
+
+  <a href="https://store.skiylia.dev" target="_blank" class="support-card">
+    <h3>Merch Store</h3>
+    <p>T-shirts, hoodies, and more -- powered by Fourthwall.</p>
   </a>
 </div>
 

@@ -6,7 +6,7 @@ permalink: /videos/
 ---
 
 <div class="video-grid">
-  {% assign videos = site.data.videos.videos | default: site.data.youtube_main %}
+  {% assign videos = site.data.youtube_main.videos %}
   {% if videos.size > 0 %}
     {% for video in videos %}
       <div class="video-card">

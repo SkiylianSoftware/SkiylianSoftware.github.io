@@ -21,11 +21,51 @@ def api_get(url):
     return resp.json()
 
 
+def parse_duration(iso_duration):
+    if not iso_duration:
+        return 0
+    seconds = 0
+    import re
+    m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', iso_duration)
+    if m:
+        h, mi, s = [int(g) if g else 0 for g in m.groups()]
+        seconds = h * 3600 + mi * 60 + s
+    return seconds
+
+
+def fetch_video_details(video_ids):
+    if not video_ids:
+        return {}
+    details = {}
+    for i in range(0, len(video_ids), 50):
+        batch = video_ids[i:i+50]
+        ids = ",".join(batch)
+        url = (
+            f"https://www.googleapis.com/youtube/v3/videos"
+            f"?part=contentDetails,statistics"
+            f"&id={ids}&key={YOUTUBE_API_KEY}"
+        )
+        data = api_get(url)
+        for item in data.get("items", []):
+            vid = item["id"]
+            cd = item.get("contentDetails", {})
+            stats = item.get("statistics", {})
+            duration = cd.get("duration", "")
+            details[vid] = {
+                "duration": duration,
+                "duration_seconds": parse_duration(duration),
+                "view_count": int(stats.get("viewCount", 0)),
+                "like_count": int(stats.get("likeCount", 0)),
+            }
+    return details
+
+
 def fetch_uploads(playlist_id, label="uploads"):
     if not YOUTUBE_API_KEY:
         print(f"No YOUTUBE_API_KEY set, skipping {label}", file=sys.stderr)
         return []
     videos = []
+    video_ids = []
     page_token = None
     while True:
         url = (
@@ -37,7 +77,7 @@ def fetch_uploads(playlist_id, label="uploads"):
             url += f"&pageToken={page_token}"
         resp = requests.get(url, timeout=30)
         if resp.status_code == 404:
-            print(f"Playlist {playlist_id} not found (no content yet), skipping {label}", file=sys.stderr)
+            print(f"Playlist {playlist_id} not found, skipping {label}", file=sys.stderr)
             return []
         resp.raise_for_status()
         data = resp.json()
@@ -47,6 +87,7 @@ def fetch_uploads(playlist_id, label="uploads"):
             video_id = resource.get("videoId")
             if not video_id:
                 continue
+            video_ids.append(video_id)
             thumbnails = snippet.get("thumbnails", {})
             thumbnail = (
                 thumbnails.get("maxres", {}) or thumbnails.get("high", {}) or thumbnails.get("medium", {})
@@ -62,13 +103,20 @@ def fetch_uploads(playlist_id, label="uploads"):
         page_token = data.get("nextPageToken")
         if not page_token:
             break
+
+    details = fetch_video_details(video_ids)
+    for v in videos:
+        vid = v["video_id"]
+        if vid in details:
+            v.update(details[vid])
+
     return videos
 
 
 def fetch_playlists():
     if not YOUTUBE_API_KEY:
         return []
-    playlists = []
+    all_playlists = []
     page_token = None
     while True:
         url = (
@@ -81,18 +129,21 @@ def fetch_playlists():
         data = api_get(url)
         for item in data.get("items", []):
             snippet = item.get("snippet", {})
-            playlists.append({
+            thumb = snippet.get("thumbnails", {})
+            all_playlists.append({
                 "title": snippet.get("title", ""),
                 "url": f"https://www.youtube.com/playlist?list={item['id']}",
                 "playlist_id": item["id"],
                 "item_count": item.get("contentDetails", {}).get("itemCount", 0),
-                "thumbnail": (snippet.get("thumbnails", {}).get("high", {}) or snippet.get("thumbnails", {}).get("medium", {})).get("url", ""),
-                "description": snippet.get("description", "")[:200],
+                "thumbnail": (thumb.get("high", {}) or thumb.get("medium", {}) or thumb.get("default", {})).get("url", ""),
+                "description": snippet.get("description", ""),
+                "published": snippet.get("publishedAt", ""),
+                "channel_title": snippet.get("channelTitle", ""),
             })
         page_token = data.get("nextPageToken")
         if not page_token:
             break
-    return playlists
+    return all_playlists
 
 
 def fetch_livestream():
@@ -122,19 +173,12 @@ def fetch_livestream():
     }
 
 
-def save(filename, data):
-    path = os.path.join(DATA_DIR, filename)
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
-
-
 def fetch_channel_info():
     if not YOUTUBE_API_KEY:
         return None
     url = (
         f"https://www.googleapis.com/youtube/v3/channels"
-        f"?part=snippet,brandingSettings"
+        f"?part=snippet,brandingSettings,statistics"
         f"&id={CHANNEL_ID}"
         f"&key={YOUTUBE_API_KEY}"
     )
@@ -145,16 +189,22 @@ def fetch_channel_info():
     item = items[0]
     snippet = item.get("snippet", {})
     branding = item.get("brandingSettings", {})
+    stats = item.get("statistics", {})
     thumbnails = snippet.get("thumbnails", {})
     avatar = (
         thumbnails.get("high", {}) or thumbnails.get("medium", {}) or thumbnails.get("default", {})
     ).get("url", "")
     return {
         "title": snippet.get("title", ""),
-        "description": snippet.get("description", "")[:500],
+        "description": snippet.get("description", ""),
         "custom_url": snippet.get("customUrl", ""),
         "avatar_url": avatar,
         "banner_url": branding.get("image", {}).get("bannerExternalUrl", ""),
+        "subscriber_count": int(stats.get("subscriberCount", 0)),
+        "video_count": int(stats.get("videoCount", 0)),
+        "view_count": int(stats.get("viewCount", 0)),
+        "published_at": snippet.get("publishedAt", ""),
+        "country": snippet.get("country", ""),
         "fetched_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -163,12 +213,7 @@ def update_config_avatar(avatar_url):
     config_path = "_config.yml"
     with open(config_path) as f:
         content = f.read()
-    marker = "avatar:"
-    for line in content.splitlines():
-        if line.startswith(marker):
-            old_line = line
-            break
-    old_line = [l for l in content.splitlines() if l.startswith(marker)][0]
+    old_line = [l for l in content.splitlines() if l.startswith("avatar:")][0]
     new_line = f"avatar: {avatar_url}"
     if old_line.strip() == new_line.strip():
         return
@@ -176,6 +221,13 @@ def update_config_avatar(avatar_url):
     with open(config_path, "w") as f:
         f.write(content)
     print(f"Updated avatar in _config.yml: {avatar_url}")
+
+
+def save(filename, data):
+    path = os.path.join(DATA_DIR, filename)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
 def main():

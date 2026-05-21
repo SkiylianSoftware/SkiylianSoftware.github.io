@@ -39,6 +39,12 @@ jobs:
       - name: Merge live status
         run: python scripts/merge_content.py
 
+      - name: Fetch GitHub stats
+        run: python scripts/fetch_github.py
+
+      - name: Track history
+        run: python scripts/track_history.py
+
       - name: Commit and push changes
         run: |
           git config --local user.name "SkiylianSoftware"

@@ -15,15 +15,15 @@ github:
   username: SkiylianSoftware
 
 twitter:
-  username: 
+  username: skiylia_
 
 social:
   name: Skye
   email: skiyliansoftware@gmail.com
   links:
-    - https://github.com/SkiylianSoftware
-    - https://www.youtube.com/@skiylia
-    - https://twitch.tv/skiylia
+    - https://code.skiylia.dev
+    - https://watch.skiylia.dev
+    - https://live.skiylia.dev
 
 theme_mode: dark
 

@@ -60,6 +60,21 @@ def fetch_video_details(video_ids):
     return details
 
 
+import re
+SERIES_RE = re.compile(r'^(?P<game>[^:]+):\s*(?P<series>.+?)#(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$')
+
+def parse_series(title):
+    m = SERIES_RE.match(title)
+    if m:
+        return {
+            "game": m.group("game").strip(),
+            "series_name": m.group("series").strip(),
+            "episode_number": int(m.group("episode")),
+            "episode_title": m.group("subtitle").strip(),
+        }
+    return None
+
+
 def fetch_uploads(playlist_id, label="uploads"):
     if not YOUTUBE_API_KEY:
         print(f"No YOUTUBE_API_KEY set, skipping {label}", file=sys.stderr)
@@ -98,7 +113,8 @@ def fetch_uploads(playlist_id, label="uploads"):
                 "video_id": video_id,
                 "thumbnail": thumbnail,
                 "published": snippet.get("publishedAt", ""),
-                "description": snippet.get("description", "")[:300],
+                "description": snippet.get("description", "")[:500],
+                "series": parse_series(snippet.get("title", "")),
             })
         page_token = data.get("nextPageToken")
         if not page_token:

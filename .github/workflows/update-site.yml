@@ -40,6 +40,6 @@ jobs:
         run: |
           git config --local user.name "SkiylianSoftware"
           git config --local user.email "skiyliansoftware@gmail.com"
-          git add _data/
+          git add --force _data/
           git diff --cached --quiet || git commit -m "Auto-update site data [skip ci]"
           git push

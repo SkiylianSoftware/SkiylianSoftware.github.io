@@ -6,7 +6,9 @@
       "playlist_id": "PLtcVBWxpVqAGZilikTYen8jdI6ZNB3ZTx",
       "item_count": 17,
       "thumbnail": "https://i.ytimg.com/vi/_8kA2xo_Otw/hqdefault.jpg",
-      "description": "I'm playing Transport Fever 2; We're building out the best public transport and freight logistics company in the Normandie region."
+      "description": "I'm playing Transport Fever 2; We're building out the best public transport and freight logistics company in the Normandie region.",
+      "published": "2025-06-22T20:53:32.626078Z",
+      "channel_title": "Skye"
     },
     {
       "title": "Skiylian Stations - StationFlow",
@@ -14,7 +16,9 @@
       "playlist_id": "PLtcVBWxpVqAE8cQ2i4Qciej_BqSC3JEha",
       "item_count": 2,
       "thumbnail": "https://i.ytimg.com/vi/sZXAt_V3wUs/hqdefault.jpg",
-      "description": "I'm playing StationFlow; We're going to design only the most efficient station for passenger pathing!"
+      "description": "I'm playing StationFlow; We're going to design only the most efficient station for passenger pathing!",
+      "published": "2025-05-31T20:16:43.42717Z",
+      "channel_title": "Skye"
     },
     {
       "title": "Infrastructure Programming",
@@ -22,7 +26,9 @@
       "playlist_id": "PLtcVBWxpVqAGpUMpczXUVXYZ6cE5hc9vK",
       "item_count": 3,
       "thumbnail": "https://i.ytimg.com/vi/5JuA_no7P04/hqdefault.jpg",
-      "description": "I'm slowly building up an automation library to help out with the tedious bits of YouTube. This would have been way harder if not for python-youtube, so please do send your love there too: https://git"
+      "description": "I'm slowly building up an automation library to help out with the tedious bits of YouTube. This would have been way harder if not for python-youtube, so please do send your love there too: https://github.com/sns-sdks/python-youtubeOur code:https://github.com/SkiylianSoftware/YT-automation",
+      "published": "2025-02-03T01:02:02.366826Z",
+      "channel_title": "Skye"
     },
     {
       "title": "Astral Skiy - Minecraft",
@@ -30,7 +36,9 @@
       "playlist_id": "PLtcVBWxpVqAEioqiQItkrc8IMAXWhta2N",
       "item_count": 11,
       "thumbnail": "https://i.ytimg.com/vi/XBh6Dd7hz2g/hqdefault.jpg",
-      "description": "I'm playing Modded Minecraft; With a plethora of mods at my disposal in my custom modpack, Astral Skiy, I'm aiming to build a fully functional space station, and explore the far reaches of space. Modp"
+      "description": "I'm playing Modded Minecraft; With a plethora of mods at my disposal in my custom modpack, Astral Skiy, I'm aiming to build a fully functional space station, and explore the far reaches of space. Modpack:https://www.curseforge.com/minecraft/modpacks/astral-skiy",
+      "published": "2024-12-31T16:21:55.230846Z",
+      "channel_title": "Skye"
     },
     {
       "title": "Skiylian Logistics - Mars First Logistics",
@@ -38,7 +46,9 @@
       "playlist_id": "PLtcVBWxpVqAEp7ks-MIF13mfvRq1qMcey",
       "item_count": 18,
       "thumbnail": "https://i.ytimg.com/vi/yW2Mp3-_a64/hqdefault.jpg",
-      "description": "I'm playing Mars First Logistics; We're going to build the best aero-logistical company run by by only the cutest robots you've ever seen!"
+      "description": "I'm playing Mars First Logistics; We're going to build the best aero-logistical company run by by only the cutest robots you've ever seen!",
+      "published": "2024-12-23T18:11:41.648069Z",
+      "channel_title": "Skye"
     },
     {
       "title": "Automated Realism - Kerbal Space Program",
@@ -46,7 +56,9 @@
       "playlist_id": "PLtcVBWxpVqAFeo0e5hMseaNZZwxT2zEno",
       "item_count": 9,
       "thumbnail": "https://i.ytimg.com/vi/_bZh0S2hhz0/hqdefault.jpg",
-      "description": "I'm playing Realistic Progression Zero for KSP, except we're going to be slowly writing a set of scripts with the Kerbal Operating System mod to perform our actions."
+      "description": "I'm playing Realistic Progression Zero for KSP, except we're going to be slowly writing a set of scripts with the Kerbal Operating System mod to perform our actions.",
+      "published": "2024-04-08T18:13:30.587539Z",
+      "channel_title": "Skye"
     }
   ]
 }

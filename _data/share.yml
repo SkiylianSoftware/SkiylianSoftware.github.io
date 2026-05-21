@@ -6,7 +6,3 @@ platforms:
   - type: Reddit
     icon: "fa-brands fa-square-reddit"
     link: "https://www.reddit.com/submit?url=URL&title=TITLE"
-
-  - type: Discord
-    icon: "fab fa-discord"
-    link: "https://discord.gg/YOUR_INVITE_CODE"

@@ -67,6 +67,17 @@ def save(filename, data):
     print(f"Written {path}")
 
 
+def fetch_followers(user_id, token):
+    resp = requests.get(
+        f"{API_URL}/channels/followers?broadcaster_id={user_id}&first=1",
+        headers={"Client-ID": TWITCH_CLIENT_ID, "Authorization": f"Bearer {token}"},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    return data.get("total", 0)
+
+
 def main():
     token = get_app_token()
     if not token:
@@ -80,6 +91,14 @@ def main():
     print(f"Checking Twitch stream status for {TWITCH_USERNAME}...")
     stream = fetch_stream(user_id, token)
     save("twitch.json", stream or {"platform": None, "checked_at": datetime.now(timezone.utc).isoformat()})
+
+    print("Fetching Twitch follower count...")
+    try:
+        followers = fetch_followers(user_id, token)
+        save("twitch_stats.json", {"follower_count": followers, "fetched_at": datetime.now(timezone.utc).isoformat()})
+        print(f"Twitch followers: {followers}")
+    except Exception as e:
+        print(f"Could not fetch Twitch followers: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

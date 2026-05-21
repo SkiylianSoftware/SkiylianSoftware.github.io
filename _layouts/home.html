@@ -19,6 +19,18 @@ layout: default
             <span>{{ site.data.site_meta.view_count }} views</span>
           {% endif %}
         </div>
+
+        {% if site.data.milestones.current %}
+          <div class="milestone-banner" id="milestone-banner">
+            {% if site.data.milestones.current.type == "subs" %}
+              &#11088; {{ site.data.milestones.current.count }} subscribers! {{ site.data.milestones.current.message }}
+            {% elsif site.data.milestones.current.type == "views" %}
+              &#128293; {{ site.data.milestones.current.count }} views! {{ site.data.milestones.current.message }}
+            {% elsif site.data.milestones.current.type == "videos" %}
+              &#127916; {{ site.data.milestones.current.count }} videos! {{ site.data.milestones.current.message }}
+            {% endif %}
+          </div>
+        {% endif %}
       </div>
     </div>
     <div class="hero-links">
@@ -28,6 +40,46 @@ layout: default
     </div>
   </div>
 {% endif %}
+
+<div class="sidebar-widgets">
+  {% if site.data.schedule.streams %}
+    <div class="widget-card">
+      <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Stream Schedule</h3>
+      <div class="widget-body">
+        {% for s in site.data.schedule.streams limit: 2 %}
+          <div class="schedule-item">
+            <span class="schedule-day">{{ s.day }}</span>
+            <span class="schedule-time">{{ s.time }}</span>
+            <span class="schedule-type">{{ s.type }}</span>
+          </div>
+        {% endfor %}
+        <p class="schedule-footnote">All times in UK time</p>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if site.data.favorites.games or site.data.favorites.music %}
+    <div class="widget-card">
+      <h3 class="widget-title"><i class="fas fa-star"></i> Currently Obsessed With</h3>
+      <div class="widget-body">
+        {% for g in site.data.favorites.games %}
+          <div class="obsession-item">
+            {% if g.url %}<a href="{{ g.url }}" target="_blank">{% endif %}
+              <span class="obsession-title">{{ g.title }}</span>
+            {% if g.url %}</a>{% endif %}
+            {% if g.reason %}<span class="obsession-reason">{{ g.reason }}</span>{% endif %}
+          </div>
+        {% endfor %}
+        {% for m in site.data.favorites.music %}
+          <div class="obsession-item">
+            <span class="obsession-title">{{ m.title }}</span>
+            {% if m.reason %}<span class="obsession-reason">{{ m.reason }}</span>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
 
 <div id="live-status" class="live-section">
   {% if site.data.livestream.platform == "twitch" %}
@@ -207,6 +259,70 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 .hero-description { font-size: 1rem; line-height: 1.6; margin: 0 0 0.5rem; opacity: 0.9; }
 .hero-stats { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.85rem; opacity: 0.65; }
 .hero-links { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.milestone-banner {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(45,212,191,0.12), rgba(192,132,252,0.12));
+  border: 1px solid rgba(45,212,191,0.25);
+  font-size: 0.9rem;
+  animation: milestone-glow 3s ease-in-out infinite;
+}
+@keyframes milestone-glow {
+  0%, 100% { border-color: rgba(45,212,191,0.25); }
+  50% { border-color: rgba(192,132,252,0.4); }
+}
+
+.sidebar-widgets {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.widget-card {
+  flex: 1;
+  min-width: 200px;
+  background: var(--card-bg, #1e1e1e);
+  border: 1px solid rgba(45,212,191,0.1);
+  border-radius: 10px;
+  padding: 1rem;
+}
+.widget-title {
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+  opacity: 0.8;
+  border-bottom: 1px solid rgba(45,212,191,0.1);
+  padding-bottom: 0.4rem;
+}
+.widget-body { font-size: 0.85rem; }
+.widget-title i { margin-right: 0.35rem; color: #c084fc; }
+
+.schedule-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+.schedule-day { font-weight: 600; color: #2dd4bf; min-width: 4em; }
+.schedule-time { opacity: 0.8; }
+.schedule-type { opacity: 0.6; font-size: 0.8rem; }
+.schedule-footnote { margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.4; }
+
+.obsession-item {
+  margin-bottom: 0.5rem;
+}
+.obsession-item a { color: inherit; text-decoration: none; }
+.obsession-item a:hover { color: #2dd4bf; }
+.obsession-title {
+  display: block;
+  font-weight: 500;
+}
+.obsession-reason {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
 
 .video-grid, .playlist-grid {
   display: grid;

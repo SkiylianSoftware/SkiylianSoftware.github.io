@@ -246,6 +246,45 @@ def save(filename, data):
     print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
+MILESTONE_SUBS = [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000]
+MILESTONE_VIEWS = [1000, 5000, 10000, 50000, 100000, 500000, 1000000]
+MILESTONE_VIDEOS = [10, 25, 50, 100, 250, 500, 1000]
+
+MILESTONE_MESSAGES = {
+    10: "First double digits!",
+    50: "Halfway to 100!",
+    100: "Triple digits!",
+    250: "Quarter of the way!",
+    500: "Half a thousand!",
+    1000: "The big 1K!",
+    2500: "2.5K and growing!",
+    5000: "5K strong!",
+    10000: "10K! Unreal!",
+    25000: "25K! Amazing!",
+    50000: "50K! Halfway to 100K!",
+    100000: "100K!!! Thank you!",
+}
+
+
+def detect_milestones(subs, views, videos_count):
+    current = {}
+    for m in sorted(MILESTONE_SUBS, reverse=True):
+        if subs >= m:
+            current = {"type": "subs", "count": m, "message": MILESTONE_MESSAGES.get(m, "Milestone!")}
+            break
+    for m in sorted(MILESTONE_VIEWS, reverse=True):
+        if views >= m:
+            if not current or m > (current.get("count", 0) if current.get("type") == "views" else 0):
+                current = {"type": "views", "count": m, "message": f"{m} views!"}
+            break
+    for m in sorted(MILESTONE_VIDEOS, reverse=True):
+        if videos_count >= m:
+            if not current or m > (current.get("count", 0) if current.get("type") == "videos" else 0):
+                current = {"type": "videos", "count": m, "message": f"{m} videos uploaded!"}
+            break
+    return {"current": current, "milestones": None}
+
+
 def main():
     print("Fetching YouTube uploads...")
     videos = fetch_uploads(UPLOADS_PLAYLIST_ID, "main channel uploads")
@@ -268,6 +307,13 @@ def main():
     if info:
         save("site_meta.json", info)
         update_config_avatar(info.get("avatar_url", ""))
+
+        milestones = detect_milestones(
+            info.get("subscriber_count", 0),
+            info.get("view_count", 0),
+            info.get("video_count", 0),
+        )
+        save("milestones.json", milestones)
 
 
 if __name__ == "__main__":

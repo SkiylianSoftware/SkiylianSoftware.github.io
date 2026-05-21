@@ -22,13 +22,15 @@ permalink: /stats/
     <span class="stat-label">Videos Uploaded</span>
   </div>
   <div class="stat-card accent-purple">
-    <span class="stat-value">{% if meta.published_at %}{{ meta.published_at | date: "%Y" }}{% endif %}</span>
+    <span class="stat-value">{{ meta.published_at | truncate: 4, "" }}</span>
     <span class="stat-label">Channel Since</span>
   </div>
 </div>
 
 {% if meta.published_at %}
-  {% assign channel_age_seconds = site.time | date: "%s" | minus: (meta.published_at | date: "%s") %}
+  {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+  {% assign chan_epoch = meta.published_at | date: "%s" | plus: 0 %}
+  {% assign channel_age_seconds = now_epoch | minus: chan_epoch %}
   {% assign channel_age_days = channel_age_seconds | divided_by: 86400 %}
   {% assign channel_age_years = channel_age_days | divided_by: 365 %}
   <div class="insight-box">
@@ -91,6 +93,36 @@ permalink: /stats/
   </div>
 {% endif %}
 
+{% assign gh = site.data.github %}
+{% if gh %}
+  <h2 class="stats-subtitle">GitHub</h2>
+  <div class="stats-grid">
+    <div class="stat-card accent-turquoise">
+      <span class="stat-value">{{ gh.public_repos }}</span>
+      <span class="stat-label">Public Repos</span>
+    </div>
+    <div class="stat-card accent-purple">
+      <span class="stat-value">{{ gh.total_stars }}</span>
+      <span class="stat-label">Total Stars</span>
+    </div>
+    <div class="stat-card accent-turquoise">
+      <span class="stat-value">{{ gh.total_forks }}</span>
+      <span class="stat-label">Forks</span>
+    </div>
+  </div>
+  {% if gh.top_repos.size > 0 %}
+    <h3 style="font-size:0.9rem;margin:0.5rem 0;opacity:0.7;">Most Starred Repos</h3>
+    <div class="repo-list">
+      {% for repo in gh.top_repos %}
+        <a href="{{ repo.url }}" target="_blank" class="repo-item">
+          <span class="repo-name">{{ repo.name }}</span>
+          <span class="repo-meta">&#9733; {{ repo.stars }} &#x2442; {{ repo.forks }}{% if repo.language %} &middot; {{ repo.language }}{% endif %}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endif %}
+
 <style>
 .stats-grid {
   display: grid;
@@ -150,4 +182,29 @@ permalink: /stats/
 }
 .insight-box h3 { margin: 0 0 0.5rem; font-size: 1rem; }
 .insight-box p { margin: 0.3rem 0; }
+
+.repo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0 1rem;
+}
+.repo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--card-bg, #1e1e1e);
+  border: 1px solid rgba(45,212,191,0.08);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.85rem;
+  transition: border-color 0.15s;
+}
+.repo-item:hover {
+  border-color: rgba(45,212,191,0.3);
+}
+.repo-name { font-weight: 500; }
+.repo-meta { font-size: 0.8rem; opacity: 0.65; }
 </style>

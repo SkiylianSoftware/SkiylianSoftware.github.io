@@ -25,6 +25,7 @@ permalink: /streams/
           <div class="meta-row">
             {% if vod.published %}
               <time datetime="{{ vod.published }}">{{ vod.published | date: "%d %b %Y" }}</time>
+              <span class="reltime" datetime="{{ vod.published }}"></span>
             {% endif %}
             {% if vod.view_count and vod.view_count > 0 %}
               <span class="views">{{ vod.view_count }} views</span>

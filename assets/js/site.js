@@ -107,3 +107,16 @@ window.addEventListener('scroll', function() {
   var offset = scrollPos * 0.05;
   bg.style.setProperty('--star-offset', offset + 'px');
 });
+
+/* Relative time display */
+document.addEventListener('DOMContentLoaded', function() {
+  var els = document.querySelectorAll('.reltime');
+  if (!els.length || typeof dayjs === 'undefined') return;
+  dayjs.extend(window.dayjs_plugin_relativeTime);
+  els.forEach(function(el) {
+    var dt = el.getAttribute('datetime');
+    if (!dt) return;
+    var rel = dayjs(dt).fromNow();
+    el.textContent = '\u00b7 ' + rel;
+  });
+});

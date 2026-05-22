@@ -41,6 +41,7 @@ permalink: /playlists/
         {% endif %}
         {% if pl.published %}
           <span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
+          <span class="reltime" datetime="{{ pl.published }}"></span>
         {% endif %}
       </div>
     </div>

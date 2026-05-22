@@ -48,7 +48,7 @@ permalink: /videos/
   <div class="card-body">
     <h3>{{ video.title }}</h3>
     <div class="meta-row">
-      {% if video.published %}<time datetime="{{ video.published }}">{{ video.published | date: "%d %b %Y" }}</time>{% endif %}
+      {% if video.published %}<time datetime="{{ video.published }}">{{ video.published | date: "%d %b %Y" }}</time> <span class="reltime" datetime="{{ video.published }}"></span>{% endif %}
       {% if video.view_count and video.view_count > 0 %}<span class="views">{{ video.view_count }} views</span>{% endif %}
     </div>
     {% if video.series %}<div class="series-badge">{{ video.series.game }} &middot; Ep {{ video.series.episode_number }}</div>{% endif %}

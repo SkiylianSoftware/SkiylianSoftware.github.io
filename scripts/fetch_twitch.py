@@ -36,9 +36,9 @@ def get_user_info(token):
     resp.raise_for_status()
     users = resp.json().get("data", [])
     if not users:
-        return None, None
+        return None, None, None, None
     u = users[0]
-    return u["id"], u.get("broadcaster_type", ""), u.get("view_count", 0)
+    return u["id"], u.get("broadcaster_type", ""), u.get("view_count", 0), u.get("created_at", "")
 
 
 def fetch_stream(user_id, token):
@@ -107,7 +107,7 @@ def main():
     if not token:
         return
 
-    user_id, broadcaster_type, twitch_views = get_user_info(token)
+    user_id, broadcaster_type, twitch_views, twitch_created = get_user_info(token)
     if not user_id:
         print(f"Could not find Twitch user {TWITCH_USERNAME}", file=sys.stderr)
         return
@@ -119,7 +119,7 @@ def main():
     print("Fetching Twitch follower count...")
     try:
         followers = fetch_followers(user_id, token)
-        save("twitch_stats.json", {"follower_count": followers, "broadcaster_type": broadcaster_type, "view_count": twitch_views, "fetched_at": datetime.now(timezone.utc).isoformat()})
+        save("twitch_stats.json", {"follower_count": followers, "broadcaster_type": broadcaster_type, "view_count": twitch_views, "created_at": twitch_created, "fetched_at": datetime.now(timezone.utc).isoformat()})
         print(f"Twitch followers: {followers}")
     except Exception as e:
         print(f"Could not fetch Twitch followers: {e}", file=sys.stderr)

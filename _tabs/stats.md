@@ -14,15 +14,28 @@ group: stats
 {% assign gh = site.data.github %}
 {% assign store = site.data.fourthwall %}
 
+{% assign first_video_date = nil %}
+{% if videos.size > 0 %}
+  {% assign sorted = videos | sort: "published" %}
+  {% assign first_video = sorted[0] %}
+  {% assign first_video_date = first_video.published %}
+{% endif %}
+
 {% assign has_vods = false %}
 {% if vods_list.size > 0 or meta.vods_subscriber_count %}{% assign has_vods = true %}{% endif %}
 
-{% if meta.published_at %}
+{% if first_video_date %}
   {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-  {% assign chan_epoch = meta.published_at | date: "%s" | plus: 0 %}
-  {% assign channel_age_seconds = now_epoch | minus: chan_epoch %}
-  {% assign channel_age_days = channel_age_seconds | divided_by: 86400 %}
-  {% assign channel_age_years = channel_age_days | divided_by: 365 %}
+  {% assign first_epoch = first_video_date | date: "%s" | plus: 0 %}
+  {% assign content_age_seconds = now_epoch | minus: first_epoch %}
+  {% assign content_age_days = content_age_seconds | divided_by: 86400 %}
+  {% assign content_age_years = content_age_days | divided_by: 365 %}
+{% endif %}
+
+{% if twitch.created_at %}
+  {% assign twitch_epoch = twitch.created_at | date: "%s" | plus: 0 %}
+  {% assign twitch_age_days = now_epoch | minus: twitch_epoch | divided_by: 86400 %}
+  {% assign twitch_age_years = twitch_age_days | divided_by: 365 %}
 {% endif %}
 
 <!-- Combined Overview -->
@@ -105,19 +118,19 @@ group: stats
       <span class="stat-label">Avg Views/Video</span>
     </div>
     <div class="stat-card">
-      <span class="stat-value">{{ channel_age_years }}y</span>
-      <span class="stat-label">Channel Age</span>
+      <span class="stat-value">{{ content_age_years }}y</span>
+      <span class="stat-label">Content Age</span>
     </div>
-    {% if channel_age_days > 0 %}
-    {% assign vpm = meta.video_count | times: 30.0 | divided_by: channel_age_days | round: 1 %}
+    {% if content_age_days > 0 %}
+    {% assign vpm = meta.video_count | times: 30.0 | divided_by: content_age_days | round: 1 %}
     <div class="stat-card accent-purple">
       <span class="stat-value">{{ vpm }}</span>
       <span class="stat-label">Videos/Month</span>
     </div>
     {% endif %}
     <div class="stat-card">
-      <span class="stat-value">{{ meta.published_at | truncate: 4, "" }}</span>
-      <span class="stat-label">Since</span>
+      <span class="stat-value">{{ first_video_date | date: "%Y" }}</span>
+      <span class="stat-label">First Video</span>
     </div>
   </div>
 
@@ -181,6 +194,12 @@ group: stats
   <div class="stat-card">
     <span class="stat-value">{{ twitch.broadcaster_type }}</span>
     <span class="stat-label">Type</span>
+  </div>
+  {% endif %}
+  {% if twitch.created_at %}
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ twitch_age_years }}y</span>
+    <span class="stat-label">Account Age</span>
   </div>
   {% endif %}
 </div>

@@ -25,7 +25,9 @@ permalink: /playlists/
     {% endif %}
     <div class="playlist-row-info">
       <h3>{{ pl.title }}</h3>
-      {% if pl.description %}
+      {% if pl.description_parts %}
+        <p class="playlist-row-desc">{{ pl.description_parts | join: "<br>" }}</p>
+      {% elsif pl.description %}
         <p class="playlist-row-desc">{{ pl.description }}</p>
       {% endif %}
       <div class="playlist-row-meta">

@@ -210,7 +210,12 @@ layout: default
         <div class="playlist-row-info">
           <h3>{{ pl.title }}</h3>
           {% if pl.description %}
-            <p class="playlist-row-desc">{{ pl.description }}</p>
+            {% assign desc_parts = pl.description_parts | default: nil %}
+            {% if desc_parts %}
+              <p class="playlist-row-desc">{{ desc_parts | join: "<br>" }}</p>
+            {% elsif pl.description %}
+              <p class="playlist-row-desc">{{ pl.description }}</p>
+            {% endif %}
           {% endif %}
           <div class="playlist-row-meta">
             <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>

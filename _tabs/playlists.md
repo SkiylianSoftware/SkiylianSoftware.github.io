@@ -26,7 +26,7 @@ permalink: /playlists/
     <div class="playlist-row-info">
       <h3>{{ pl.title }}</h3>
       {% if pl.description %}
-        <p class="playlist-row-desc">{{ pl.description | newline_to_br }}</p>
+        <p class="playlist-row-desc">{{ pl.description }}</p>
       {% endif %}
       <div class="playlist-row-meta">
         <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>

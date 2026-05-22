@@ -195,22 +195,38 @@ layout: default
 
 {% if site.data.playlists.playlists %}
   <h2 class="section-title">Playlists</h2>
-  <div class="playlist-grid">
+  <div class="playlist-rows">
     {% assign playlists = site.data.playlists.playlists %}
-    {% for playlist in playlists limit: 4 %}
-      <a href="{{ playlist.url }}" target="_blank" class="playlist-card">
-        {% if playlist.thumbnail %}
-          <img src="{{ playlist.thumbnail }}" alt="" loading="lazy" class="playlist-thumb">
+    {% for pl in playlists limit: 4 %}
+      <a href="{{ pl.url }}" target="_blank" class="playlist-row btn"
+         data-published="{{ pl.published | default: '' }}"
+         data-views="{{ pl.total_views | default: 0 }}"
+         data-duration="{{ pl.total_duration_seconds | default: 0 }}">
+        {% if pl.thumbnail %}
+          <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
         {% endif %}
-        <div class="playlist-info">
-          <h3>{{ playlist.title }}</h3>
-          {% if playlist.description %}
-            <p class="playlist-desc">{{ playlist.description | truncate: 100 }}</p>
+        <div class="playlist-row-info">
+          <h3>{{ pl.title }}</h3>
+          {% if pl.description %}
+            <p class="playlist-row-desc">{{ pl.description | truncate: 120 }}</p>
           {% endif %}
-          <span class="playlist-count">{{ playlist.item_count }} videos</span>
+          <div class="playlist-row-meta">
+            <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>
+            {% if pl.total_duration_seconds and pl.total_duration_seconds > 0 %}
+              {% assign hours = pl.total_duration_seconds | divided_by: 3600 %}
+              {% assign rem = pl.total_duration_seconds | modulo: 3600 %}
+              {% assign mins = rem | divided_by: 60 %}
+              <span class="playlist-row-duration">{{ hours }}h {{ mins }}m</span>
+            {% endif %}
+            {% if pl.total_views and pl.total_views > 0 %}
+              <span class="playlist-row-views">{{ pl.total_views }} views</span>
+            {% endif %}
+            {% if pl.published %}
+              <span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
+            {% endif %}
+          </div>
         </div>
       </a>
-      </div>
     {% endfor %}
   </div>
   <p class="text-center"><a href="/playlists" class="btn">View All Playlists</a></p>
@@ -342,7 +358,7 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
   opacity: 0.6;
 }
 
-.video-grid, .playlist-grid {
+.video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
@@ -357,23 +373,6 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
   transition: border-color 0.2s, transform 0.15s;
 }
 .video-card:hover { border-color: rgba(45, 212, 191, 0.3); transform: translateY(-3px); box-shadow: 0 0 20px rgba(45, 212, 191, 0.08); }
-
-.playlist-card {
-  display: block;
-  background: rgba(13, 13, 30, 0.8);
-  border: 1px solid rgba(45, 212, 191, 0.08);
-  border-radius: 10px;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s, transform 0.15s;
-}
-.playlist-card:hover { border-color: rgba(45, 212, 191, 0.3); transform: translateY(-3px); box-shadow: 0 0 20px rgba(45, 212, 191, 0.08); }
-.playlist-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-.playlist-info { padding: 0.75rem; }
-.playlist-info h3 { font-size: 0.9rem; margin: 0 0 0.25rem; line-height: 1.3; }
-.playlist-desc { font-size: 0.8rem; margin: 0 0 0.3rem; opacity: 0.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.playlist-count { font-size: 0.78rem; opacity: 0.5; }
 
 .thumb-wrap { position: relative; }
 .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }

@@ -111,12 +111,28 @@ window.addEventListener('scroll', function() {
 /* Relative time display */
 document.addEventListener('DOMContentLoaded', function() {
   var els = document.querySelectorAll('.reltime');
-  if (!els.length || typeof dayjs === 'undefined') return;
-  dayjs.extend(window.dayjs_plugin_relativeTime);
+  if (!els.length) return;
   els.forEach(function(el) {
     var dt = el.getAttribute('datetime');
     if (!dt) return;
-    var rel = dayjs(dt).fromNow();
+    var then = new Date(dt);
+    var now = new Date();
+    var diff = now - then;
+    var seconds = Math.floor(diff / 1000);
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+    var days = Math.floor(hours / 24);
+    var weeks = Math.floor(days / 7);
+    var months = Math.floor(days / 30);
+    var years = Math.floor(days / 365);
+    var rel;
+    if (seconds < 60) rel = 'just now';
+    else if (minutes < 60) rel = minutes + 'm ago';
+    else if (hours < 24) rel = hours + 'h ago';
+    else if (days < 7) rel = days + 'd ago';
+    else if (weeks < 5) rel = weeks + 'w ago';
+    else if (months < 12) rel = months + 'mo ago';
+    else rel = years + 'y ago';
     el.textContent = '\u00b7 ' + rel;
   });
 });

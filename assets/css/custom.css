@@ -869,6 +869,8 @@ body::after {
   font-size: 0.7rem; letter-spacing: 0.08em;
   padding: 0.5rem 0.5rem 0.25rem 0.5rem !important;
   opacity: 0.4;
+  color: #2dd4bf !important;
 }
-.nav-group-child .nav-link { padding-left: 1.25rem !important; }
-.nav-group-child .nav-link i { width: 1rem; text-align: center; font-size: 0.8rem; }
+.nav-group-child .nav-link { padding-left: 1.25rem !important; font-size: 0.85rem !important; }
+.nav-group-child .nav-link i { width: 1rem; text-align: center; font-size: 0.8rem !important; }
+.nav-item.active .nav-link { color: #2dd4bf !important; }

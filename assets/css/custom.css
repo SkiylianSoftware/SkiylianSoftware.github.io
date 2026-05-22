@@ -791,7 +791,11 @@ body::after {
   border: 1px solid rgba(45,212,191,0.08);
   text-decoration: none; color: inherit;
   transition: border-color 0.2s, transform 0.15s;
+  border-left: 3px solid transparent;
 }
+.playlist-row.recency-current { border-left-color: #2dd4bf; }
+.playlist-row.recency-recent { border-left-color: #c084fc; }
+.playlist-row.recency-historical { border-left-color: rgba(45,212,191,0.08); }
 .playlist-row:hover {
   transform: translateY(-2px);
 }

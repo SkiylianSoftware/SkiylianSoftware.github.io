@@ -17,7 +17,18 @@ group: media
 {% if playlists.size > 0 %}
 <div class="playlist-rows" id="playlist-rows">
 {% for pl in playlists %}
-  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn"
+  {% if pl.last_updated %}
+    {% assign lu_epoch = pl.last_updated | date: "%s" | plus: 0 %}
+    {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+    {% assign lu_days = now_epoch | minus: lu_epoch | divided_by: 86400 %}
+    {% if lu_days < 90 %}{% assign recency = "current" %}
+    {% elsif lu_days < 365 %}{% assign recency = "recent" %}
+    {% else %}{% assign recency = "historical" %}
+    {% endif %}
+  {% else %}
+    {% assign recency = "historical" %}
+  {% endif %}
+  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn recency-{{ recency }}"
      data-published="{{ pl.published | default: '' }}"
      data-views="{{ pl.total_views | default: 0 }}"
      data-duration="{{ pl.total_duration_seconds | default: 0 }}">

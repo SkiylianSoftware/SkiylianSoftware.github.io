@@ -172,7 +172,7 @@ def enrich_playlist_stats(playlists):
         ids = ",".join(batch)
         url = (
             f"https://www.googleapis.com/youtube/v3/videos"
-            f"?part=contentDetails,statistics"
+            f"?part=contentDetails,statistics,snippet"
             f"&id={ids}&key={YOUTUBE_API_KEY}"
         )
         try:
@@ -184,10 +184,12 @@ def enrich_playlist_stats(playlists):
             cd = item.get("contentDetails", {})
             dur = parse_duration(cd.get("duration", ""))
             stats = item.get("statistics", {})
+            pub = item.get("snippet", {}).get("publishedAt", "")
             video_details[vid] = {
                 "duration_seconds": dur,
                 "view_count": int(stats.get("viewCount", 0)),
                 "like_count": int(stats.get("likeCount", 0)),
+                "published_at": pub,
             }
     for pl in playlists:
         pid = pl["playlist_id"]
@@ -201,6 +203,8 @@ def enrich_playlist_stats(playlists):
         pl["total_likes"] = sum(
             video_details.get(v, {}).get("like_count", 0) for v in vids
         )
+        dates = [video_details.get(v, {}).get("published_at", "") for v in vids if video_details.get(v, {}).get("published_at")]
+        pl["last_updated"] = max(dates) if dates else pl.get("published", "")
     return playlists
 
 

@@ -89,19 +89,37 @@ function toggleMetric(metric) {
 <h2 class="milestones-heading">Milestones</h2>
 <div class="timeline">
   {% for h in history %}
-    {% assign milestone = nil %}
-    {% if h.subs == 100 %}{% assign milestone = "100 subscribers!" %}
-    {% elsif h.subs == 500 %}{% assign milestone = "500 subscribers!" %}
-    {% elsif h.subs == 1000 %}{% assign milestone = "1,000 subscribers!" %}
-    {% elsif h.views == 1000 %}{% assign milestone = "1,000 views!" %}
-    {% elsif h.views == 10000 %}{% assign milestone = "10,000 views!" %}
-    {% endif %}
-    {% if milestone %}
+    {% assign prev_index = forloop.index0 | minus: 1 %}
+    {% if prev_index >= 0 %}
+      {% assign prev = history[prev_index] %}
+      {% assign milestone = nil %}
+      {% if h.subs >= 100 and prev.subs < 100 %}{% assign milestone = "Reached 100 subscribers!" %}
+      {% elsif h.subs >= 500 and prev.subs < 500 %}{% assign milestone = "Reached 500 subscribers!" %}
+      {% elsif h.subs >= 1000 and prev.subs < 1000 %}{% assign milestone = "Reached 1,000 subscribers!" %}
+      {% elsif h.subs >= 5000 and prev.subs < 5000 %}{% assign milestone = "Reached 5,000 subscribers!" %}
+      {% elsif h.subs >= 10000 and prev.subs < 10000 %}{% assign milestone = "Reached 10,000 subscribers!" %}
+      {% elsif h.views >= 1000 and prev.views < 1000 %}{% assign milestone = "Reached 1,000 views!" %}
+      {% elsif h.views >= 10000 and prev.views < 10000 %}{% assign milestone = "Reached 10,000 views!" %}
+      {% elsif h.views >= 50000 and prev.views < 50000 %}{% assign milestone = "Reached 50,000 views!" %}
+      {% elsif h.views >= 100000 and prev.views < 100000 %}{% assign milestone = "Reached 100,000 views!" %}
+      {% elsif h.videos >= 10 and prev.videos < 10 %}{% assign milestone = "Uploaded 10 videos!" %}
+      {% elsif h.videos >= 25 and prev.videos < 25 %}{% assign milestone = "Uploaded 25 videos!" %}
+      {% elsif h.videos >= 50 and prev.videos < 50 %}{% assign milestone = "Uploaded 50 videos!" %}
+      {% elsif h.videos >= 100 and prev.videos < 100 %}{% assign milestone = "Uploaded 100 videos!" %}
+      {% endif %}
+      {% if milestone %}
       <div class="timeline-item milestone">
         <span class="tl-date">{{ h.date }}</span>
         <span class="tl-icon">&#11088;</span>
         <span class="tl-text">{{ milestone }} ({{ h.subs }} subs, {{ h.views }} views)</span>
       </div>
+      {% else %}
+      <div class="timeline-item">
+        <span class="tl-date">{{ h.date }}</span>
+        <span class="tl-dot"></span>
+        <span class="tl-text">{{ h.subs }} subs &middot; {{ h.views }} views &middot; {{ h.videos }} videos</span>
+      </div>
+      {% endif %}
     {% else %}
       <div class="timeline-item">
         <span class="tl-date">{{ h.date }}</span>
@@ -113,5 +131,8 @@ function toggleMetric(metric) {
 </div>
 
 {% else %}
-  <p>No historical data yet. Data will appear once the tracking pipeline runs a few times.</p>
+  <div class="timeline-empty">
+    <p>No historical data yet. The chart and timeline will populate as the daily tracking pipeline collects data over the coming days.</p>
+    <p>Milestones like subscriber and view thresholds will automatically appear when crossed.</p>
+  </div>
 {% endif %}

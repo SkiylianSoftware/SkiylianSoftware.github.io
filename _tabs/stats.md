@@ -14,27 +14,33 @@ group: stats
 {% assign gh = site.data.github %}
 {% assign store = site.data.fourthwall %}
 
-{% assign first_video_date = nil %}
-{% if videos.size > 0 %}
-  {% assign sorted = videos | sort: "published" %}
-  {% assign first_video = sorted[0] %}
-  {% assign first_video_date = first_video.published %}
-{% endif %}
-
 {% assign has_vods = false %}
 {% if vods_list.size > 0 or meta.vods_subscriber_count %}{% assign has_vods = true %}{% endif %}
 
-{% if first_video_date %}
-  {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-  {% assign first_epoch = first_video_date | date: "%s" | plus: 0 %}
-  {% assign content_age_seconds = now_epoch | minus: first_epoch %}
-  {% assign content_age_days = content_age_seconds | divided_by: 86400 %}
-  {% assign content_age_years = content_age_days | divided_by: 365 %}
+{% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+
+{% assign yt_start = nil %}
+{% if videos.size > 0 %}
+  {% assign sorted = videos | sort: "published" %}
+  {% assign yt_start = sorted[0].published %}
+{% endif %}
+{% unless yt_start %}{% assign yt_start = meta.published_at %}{% endunless %}
+
+{% assign vods_start = nil %}
+{% if vods_list.size > 0 %}
+  {% assign vods_sorted = vods_list | sort: "published" %}
+  {% assign vods_start = vods_sorted[0].published %}
+{% endif %}
+{% unless vods_start %}{% assign vods_start = meta.vods_published_at %}{% endunless %}
+
+{% if yt_start %}
+  {% assign yt_age_days = now_epoch | minus: (yt_start | date: "%s" | plus: 0) | divided_by: 86400 %}
+  {% assign yt_age_years = yt_age_days | divided_by: 365 %}
 {% endif %}
 
-{% if twitch.created_at %}
-  {% assign twitch_epoch = twitch.created_at | date: "%s" | plus: 0 %}
-  {% assign twitch_age_days = now_epoch | minus: twitch_epoch | divided_by: 86400 %}
+{% if twitch.created_at or vods_start %}
+  {% assign twitch_start = vods_start | default: twitch.created_at %}
+  {% assign twitch_age_days = now_epoch | minus: (twitch_start | date: "%s" | plus: 0) | divided_by: 86400 %}
   {% assign twitch_age_years = twitch_age_days | divided_by: 365 %}
 {% endif %}
 
@@ -118,18 +124,18 @@ group: stats
       <span class="stat-label">Avg Views/Video</span>
     </div>
     <div class="stat-card">
-      <span class="stat-value">{{ content_age_years }}y</span>
+      <span class="stat-value">{{ yt_age_years }}y</span>
       <span class="stat-label">Content Age</span>
     </div>
-    {% if content_age_days > 0 %}
-    {% assign vpm = meta.video_count | times: 30.0 | divided_by: content_age_days | round: 1 %}
+    {% if yt_age_days and yt_age_days > 0 %}
+    {% assign vpm = meta.video_count | times: 30.0 | divided_by: yt_age_days | round: 1 %}
     <div class="stat-card accent-purple">
       <span class="stat-value">{{ vpm }}</span>
       <span class="stat-label">Videos/Month</span>
     </div>
     {% endif %}
     <div class="stat-card">
-      <span class="stat-value">{{ first_video_date | date: "%Y" }}</span>
+      <span class="stat-value">{{ yt_start | date: "%Y" }}</span>
       <span class="stat-label">First Video</span>
     </div>
   </div>
@@ -192,8 +198,8 @@ group: stats
   {% endif %}
   {% if twitch.broadcaster_type %}
   <div class="stat-card">
-    <span class="stat-value">{{ twitch.broadcaster_type }}</span>
-    <span class="stat-label">Type</span>
+    <span class="stat-value">{{ twitch.broadcaster_type | capitalize }}</span>
+    <span class="stat-label">Status</span>
   </div>
   {% endif %}
   {% if twitch.created_at %}
@@ -210,8 +216,14 @@ group: stats
   <div class="stats-grid">
     <div class="stat-card">
       <span class="stat-value">{{ store.total_orders | default: 0 }}</span>
-      <span class="stat-label">Orders</span>
+      <span class="stat-label">Total Orders</span>
     </div>
+    {% if store.shop and store.shop.domain %}
+    <div class="stat-card wide accent-purple">
+      <span class="stat-label">Shop</span>
+      <a href="https://{{ store.shop.domain }}" target="_blank" rel="noopener" class="stat-value-sm" style="color: inherit; text-decoration: none;">{{ store.shop.name | default: store.shop.domain }}</a>
+    </div>
+    {% endif %}
   </div>
   {% if store.products and store.products.size > 0 %}
   <div class="stats-grid-two">

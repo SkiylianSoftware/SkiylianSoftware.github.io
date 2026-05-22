@@ -41,8 +41,8 @@ permalink: /support/
     </div>
   </a>
 
-  {% assign subs = site.data.site_meta.subscriber_count | default: 0 %}
-  {% if subs >= 500 %}
+  {% assign yt_memberships = site.data.site_meta.memberships_available | default: false %}
+  {% if yt_memberships %}
   <a href="https://www.youtube.com/@skiylia/join" target="_blank" rel="noopener" class="support-card card-yt">
     <div class="card-icon"><i class="fab fa-youtube"></i></div>
     <div class="card-body">

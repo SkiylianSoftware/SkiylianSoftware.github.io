@@ -196,6 +196,17 @@ def fetch_livestream():
     }
 
 
+def check_youtube_memberships():
+    """Probe whether the channel has YouTube memberships available."""
+    try:
+        url = f"https://www.youtube.com/channel/{CHANNEL_ID}/join"
+        resp = requests.head(url, timeout=10, allow_redirects=True)
+        return resp.status_code == 200
+    except requests.RequestException:
+        pass
+    return False
+
+
 def fetch_channel_info(channel_id=None):
     if not YOUTUBE_API_KEY:
         return None
@@ -218,6 +229,7 @@ def fetch_channel_info(channel_id=None):
     avatar = (
         thumbnails.get("high", {}) or thumbnails.get("medium", {}) or thumbnails.get("default", {})
     ).get("url", "")
+    memberships_available = check_youtube_memberships()
     return {
         "title": snippet.get("title", ""),
         "description": snippet.get("description", ""),
@@ -229,6 +241,7 @@ def fetch_channel_info(channel_id=None):
         "view_count": int(stats.get("viewCount", 0)),
         "published_at": snippet.get("publishedAt", ""),
         "country": snippet.get("country", ""),
+        "memberships_available": memberships_available,
         "fetched_at": datetime.now(timezone.utc).isoformat(),
     }
 

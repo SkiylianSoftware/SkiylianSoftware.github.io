@@ -11,6 +11,7 @@ group: media
   <button class="sort-btn active" data-sort="date" onclick="sortPlaylists(this, 'date')">Newest</button>
   <button class="sort-btn" data-sort="views" onclick="sortPlaylists(this, 'views')">Most viewed</button>
   <button class="sort-btn" data-sort="duration" onclick="sortPlaylists(this, 'duration')">Longest</button>
+  <button class="sort-btn" data-sort="last-updated" onclick="sortPlaylists(this, 'last-updated')">Last video</button>
 </div>
 
 {% assign playlists = site.data.playlists.playlists %}
@@ -46,7 +47,8 @@ group: media
   <a href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}"
      data-published="{{ pl.published | default: '' }}"
      data-views="{{ pl.total_views | default: 0 }}"
-     data-duration="{{ pl.total_duration_seconds | default: 0 }}">
+     data-duration="{{ pl.total_duration_seconds | default: 0 }}"
+     data-last-updated="{{ pl.last_updated | default: '' }}">
     {% if pl.thumbnail %}
       <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
     {% endif %}
@@ -72,6 +74,10 @@ group: media
           <span class="meta-date"><span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
           <span class="reltime" datetime="{{ pl.published }}"></span></span>
         {% endif %}
+        {% if pl.last_updated and pl.last_updated != pl.published %}
+          <span class="meta-date"><span class="playlist-row-date">&#9655; {{ pl.last_updated | date: "%b %Y" }}</span>
+          <span class="reltime" datetime="{{ pl.last_updated }}"></span></span>
+        {% endif %}
       </div>
     </div>
   </a>
@@ -89,9 +95,10 @@ function sortPlaylists(btn, mode) {
   if (!container) return;
   var rows = Array.from(container.querySelectorAll('.playlist-row'));
   rows.sort(function(a, b) {
-    if (mode === 'date') {
-      var da = a.getAttribute('data-published') || '';
-      var db = b.getAttribute('data-published') || '';
+    if (mode === 'date' || mode === 'last-updated') {
+      var attr = mode === 'date' ? 'data-published' : 'data-last-updated';
+      var da = a.getAttribute(attr) || '';
+      var db = b.getAttribute(attr) || '';
       return db.localeCompare(da);
     }
     var va = parseInt(a.getAttribute('data-' + mode)) || 0;

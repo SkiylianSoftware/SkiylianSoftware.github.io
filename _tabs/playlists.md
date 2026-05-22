@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-list"
 title: Playlists
-order: 3
+order: 4
 permalink: /playlists/
 ---
 

@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-timeline"
 title: Timeline
-order: 8
+order: 6
 permalink: /timeline/
 ---
 

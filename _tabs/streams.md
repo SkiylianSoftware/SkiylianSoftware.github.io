@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-brands fa-twitch"
 title: Streams
-order: 2
+order: 3
 permalink: /streams/
 ---
 

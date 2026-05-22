@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-handshake"
 title: Partners
-order: 6
+order: 8
 permalink: /partners/
 ---
 
@@ -104,4 +104,3 @@ permalink: /partners/
     <i class="fas fa-envelope"></i> skiyliansoftware@gmail.com
   </a>
 </div>
-

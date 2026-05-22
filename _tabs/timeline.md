@@ -29,7 +29,9 @@ var history = {{ history | jsonify }};
 var dates = history.map(function(h) { return h.date; });
 
 function pluck(entry, platform, field) {
-  return (entry[platform] && entry[platform][field]) || 0;
+  if (entry[platform]) return entry[platform][field] || 0;
+  if (platform === 'youtube_main') return entry[field] || 0;
+  return 0;
 }
 
 var audienceDatasets = [
@@ -145,14 +147,14 @@ function toggleMetric(metric) {
       {% assign prev = history[prev_index] %}
       {% assign crossed = nil %}
 
-      {% assign yt_subs = h.youtube_main.subs | default: 0 %}
-      {% assign prev_yt_subs = prev.youtube_main.subs | default: 0 %}
+      {% assign yt_subs = h.youtube_main.subs | default: h.subs | default: 0 %}
+      {% assign prev_yt_subs = prev.youtube_main.subs | default: prev.subs | default: 0 %}
       {% assign twitch_followers = h.twitch.followers | default: 0 %}
       {% assign prev_twitch_followers = prev.twitch.followers | default: 0 %}
-      {% assign yt_views = h.youtube_main.views | default: 0 %}
-      {% assign prev_yt_views = prev.youtube_main.views | default: 0 %}
-      {% assign yt_videos = h.youtube_main.videos | default: 0 %}
-      {% assign prev_yt_videos = prev.youtube_main.videos | default: 0 %}
+      {% assign yt_views = h.youtube_main.views | default: h.views | default: 0 %}
+      {% assign prev_yt_views = prev.youtube_main.views | default: prev.views | default: 0 %}
+      {% assign yt_videos = h.youtube_main.videos | default: h.videos | default: 0 %}
+      {% assign prev_yt_videos = prev.youtube_main.videos | default: prev.videos | default: 0 %}
       {% assign orders = h.fourthwall.orders | default: 0 %}
       {% assign prev_orders = prev.fourthwall.orders | default: 0 %}
 
@@ -200,7 +202,7 @@ function toggleMetric(metric) {
       <div class="timeline-item">
         <span class="tl-date">{{ h.date }}</span>
         <span class="tl-dot"></span>
-        <span class="tl-text">{{ h.youtube_main.subs | default: 0 }} subs &middot; {{ h.youtube_main.views | default: 0 }} views &middot; {{ h.youtube_main.videos | default: 0 }} videos</span>
+        <span class="tl-text">{{ h.youtube_main.subs | default: h.subs | default: 0 }} subs &middot; {{ h.youtube_main.views | default: h.views | default: 0 }} views &middot; {{ h.youtube_main.videos | default: h.videos | default: 0 }} videos</span>
       </div>
     {% endif %}
   {% endfor %}

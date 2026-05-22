@@ -80,6 +80,19 @@ def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     history = load_history()
 
+    # Migrate old flat-format entries to per-platform format
+    migrated = 0
+    for entry in history:
+        if "subs" in entry and "youtube_main" not in entry:
+            entry["youtube_main"] = {
+                "subs": entry.pop("subs", 0),
+                "views": entry.pop("views", 0),
+                "videos": entry.pop("videos", 0),
+            }
+            migrated += 1
+    if migrated:
+        print(f"Migrated {migrated} history entries to new format")
+
     if not history:
         history = seed_initial()
         print("Seeded initial history from current data")

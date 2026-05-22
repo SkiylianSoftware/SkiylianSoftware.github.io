@@ -286,10 +286,43 @@ def detect_milestones(subs, views, videos_count):
     return {"current": current, "milestones": None}
 
 
+def compute_series_recency(videos):
+    now = datetime.now(timezone.utc)
+    series_dates = {}
+    for v in videos:
+        s = v.get("series")
+        if not s:
+            continue
+        name = s.get("series_name")
+        if not name:
+            continue
+        published = v.get("published")
+        if not published:
+            continue
+        try:
+            dt = datetime.fromisoformat(published.replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            continue
+        if name not in series_dates or dt > series_dates[name]:
+            series_dates[name] = dt
+
+    recency = {}
+    for name, dt in series_dates.items():
+        days = (now - dt).days
+        if days < 183:       # < 6 months
+            recency[name] = "current"
+        elif days < 366:     # < 1 year
+            recency[name] = "recent"
+        else:
+            recency[name] = "historical"
+    return recency
+
+
 def main():
     print("Fetching YouTube uploads...")
     videos = fetch_uploads(UPLOADS_PLAYLIST_ID, "main channel uploads")
-    save("youtube_main.json", {"videos": videos})
+    series_recency = compute_series_recency(videos)
+    save("youtube_main.json", {"videos": videos, "series_recency": series_recency})
 
     print("Fetching YouTube VODs...")
     vods = fetch_uploads(VODS_PLAYLIST_ID, "VODs channel uploads")

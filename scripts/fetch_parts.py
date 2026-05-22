@@ -50,8 +50,8 @@ def extract_tag_content(text, tag, attrs=None):
 
 
 CORE_COMPONENTS = [
-    "CPU", "CPU Cooler", "Motherboard", "Memory",
-    "Storage", "Video Card", "Case", "Power Supply",
+    "CPU", "Video Card", "Memory", "Motherboard",
+    "CPU Cooler", "Storage", "Power Supply", "Case",
     "External Storage", "UPS",
 ]
 
@@ -98,10 +98,7 @@ def build_display(parts):
     merged = {}
     for p in filtered:
         comp = p["component"]
-        if comp == "Memory":
-            if comp not in merged:
-                merged[comp] = {"component": comp, "name": "32 GB DDR4", "url": None}
-        elif comp == "Storage":
+        if comp in ("Memory", "Storage"):
             if comp not in merged:
                 merged[comp] = []
             merged[comp].append(p)
@@ -113,9 +110,21 @@ def build_display(parts):
         if comp not in merged:
             continue
         if comp == "Memory":
-            result.append(merged[comp])
+            total_gb = 0
+            for mp in merged[comp]:
+                cap_match = re.search(r"(\d+)\s*GB", mp["name"])
+                if cap_match:
+                    total_gb += int(cap_match.group(1))
+            result.append({"component": "Memory", "name": f"{total_gb} GB DDR4", "url": None})
         elif comp == "Storage":
-            result.extend(merged[comp])
+            parts_list = []
+            for sp in merged[comp]:
+                cap_match = re.search(r"(\d+)\s*(?:GB|TB)", sp["name"])
+                type_match = re.search(r"(SATA|NVMe|SSD|HDD)", sp["name"], re.IGNORECASE)
+                cap = cap_match.group(0) if cap_match else "?"
+                stype = type_match.group(1).upper() if type_match else "SSD"
+                parts_list.append(f"{cap} {stype}")
+            result.append({"component": "Storage", "name": " + ".join(parts_list), "url": None})
         else:
             result.append(merged[comp])
 

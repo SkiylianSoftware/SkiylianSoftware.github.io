@@ -226,7 +226,7 @@ def fetch_playlists():
                 "url": f"https://www.youtube.com/playlist?list={item['id']}",
                 "playlist_id": item["id"],
                 "item_count": item.get("contentDetails", {}).get("itemCount", 0),
-                "thumbnail": (thumb.get("high", {}) or thumb.get("medium", {}) or thumb.get("default", {})).get("url", ""),
+                "thumbnail": (thumb.get("maxres", {}) or thumb.get("medium", {}) or thumb.get("high", {}) or thumb.get("default", {})).get("url", ""),
                 "description": snippet.get("description", ""),
                 "published": snippet.get("publishedAt", ""),
                 "channel_title": snippet.get("channelTitle", ""),

@@ -199,10 +199,9 @@ body::after {
 #sidebar, #topbar-wrapper { backdrop-filter: blur(8px); }
 
 /* Remove shimmer preview boxes from our cards */
-.video-card .preview-img, .playlist-card .preview-img { background: transparent !important; }
-.video-card .preview-img::before, .playlist-card .preview-img::before { display: none !important; }
-.video-card .preview-img img, .playlist-card .preview-img img { opacity: 1 !important; }
-.video-card .shimmer, .playlist-card .shimmer { background: none !important; animation: none !important; }
+.preview-img, .shimmer { background: transparent !important; animation: none !important; }
+.preview-img::before, .preview-img::after { display: none !important; }
+.preview-img img { opacity: 1 !important; }
 
 .video-card, .playlist-card {
   border: 1px solid rgba(45, 212, 191, 0.08) !important;

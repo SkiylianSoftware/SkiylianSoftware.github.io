@@ -13,6 +13,17 @@ def load_history():
     return []
 
 
+def seed_initial(meta):
+    published = meta.get("published_at", "")
+    if published and len(published) >= 10:
+        start_date = published[:10]
+    else:
+        start_date = "2024-04-07"
+    return [
+        {"date": start_date, "subs": 0, "views": 0, "videos": 0},
+    ]
+
+
 def main():
     meta_path = os.path.join(DATA_DIR, "site_meta.json")
     if not os.path.exists(meta_path):
@@ -24,6 +35,10 @@ def main():
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     history = load_history()
+
+    if not history:
+        history = seed_initial(meta)
+        print("Seeded initial history from channel start date")
 
     if history and history[-1].get("date") == today:
         history[-1].update({

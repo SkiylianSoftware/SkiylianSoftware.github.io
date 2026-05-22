@@ -135,4 +135,9 @@ document.addEventListener('DOMContentLoaded', function() {
     else rel = years + 'y ago';
     el.textContent = '\u00b7 ' + rel;
   });
+  /* Collapse consecutive <br> tags in descriptions */
+  var descs = document.querySelectorAll('.playlist-row-desc');
+  descs.forEach(function(el) {
+    el.innerHTML = el.innerHTML.replace(/(<br\s*\/?>\s*){2,}/gi, '<br>');
+  });
 });

@@ -52,7 +52,7 @@ layout: default
           <div class="schedule-item">
             <span class="schedule-day">{{ start }}</span>
             <span class="schedule-time">{{ s.start_time | date: "%H:%M" }}</span>
-            <span class="schedule-type">{{ s.category | default: s.title | truncate: 20 }}</span>
+            <span class="schedule-type">{{ s.category | default: s.title | truncate: 40 }}</span>
           </div>
         {% endfor %}
       </div>

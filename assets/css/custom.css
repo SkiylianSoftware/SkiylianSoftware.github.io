@@ -79,10 +79,13 @@ a { color: #2dd4bf; }
 a:hover { color: #5eead4; }
 
 /* Override Chirpy's orange link-hover (#d2603a from %link-hover placeholder) */
-#topbar a:hover, #panel-wrapper a:hover, footer a:hover,
-.search-result-item a:hover, .category-tag a:hover, .post-meta a:hover,
+#topbar #breadcrumb a:hover, #panel-wrapper a:hover, footer a:hover,
+#page-category a:hover, #page-tag a:hover, #search-results a:hover,
+.post-tail-wrapper .license-wrapper>a:hover,
+.post-meta a:not([class]):hover,
+.content a:not(.img-link):hover,
 .post-content a:not([class]):hover, .archives a:hover, .categories a:hover,
-a:not([class]):hover { color: #5eead4 !important; border-bottom-color: rgba(45, 212, 191, 0.3) !important; }
+a:not([class]):hover { color: #5eead4 !important; border-bottom-color: rgba(45, 212, 191, 0.3) !important; text-decoration: none; }
 
 .btn { --btn-bg: rgba(45, 212, 191, 0.08) !important; --btn-hover-bg: rgba(45, 212, 191, 0.15) !important; }
 .btn:hover { background: var(--btn-hover-bg) !important; }

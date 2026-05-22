@@ -26,7 +26,7 @@ permalink: /support/
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>
     <div class="card-body">
       <h3>Merch Store</h3>
-      <p>T-shirts, hoodies, stickers, and more — powered by Fourthwall. Look good while supporting the channel.</p>
+      <p>T-shirts, hoodies, stickers, and more; powered by Fourthwall. Look good while supporting the channel.</p>
       <span class="card-cta">Browse the store &rarr;</span>
     </div>
   </a>
@@ -44,7 +44,7 @@ permalink: /support/
     <div class="card-icon"><i class="fas fa-mug-hot"></i></div>
     <div class="card-body">
       <h3>Ko-fi</h3>
-      <p>Buy me a tea! One-off donations with no subscription — perfect if you just want to say thanks after a video.</p>
+      <p>Buy me a tea! One-off donations with no subscription; perfect if you just want to say thanks after a video.</p>
       <span class="card-cta">Buy me a tea &rarr;</span>
     </div>
   </a>
@@ -61,7 +61,7 @@ permalink: /support/
     <div class="why-item">
       <i class="fas fa-gamepad"></i>
       <h3>More games</h3>
-      <p>More games to explore means more variety in content — more trains, more automation, more chaos.</p>
+      <p>More games to explore means more variety in content; more trains, more automation, more chaos.</p>
     </div>
     <div class="why-item">
       <i class="fas fa-clock"></i>
@@ -73,6 +73,6 @@ permalink: /support/
 
 <div class="support-note">
   <i class="fas fa-heart" style="color: #c084fc;"></i>
-  <p>No matter how you choose to support — whether it's a membership, a Ko-fi, or just watching and sharing — I genuinely appreciate it. This little corner of the internet exists because of you.</p>
-  <p class="support-signoff">&mdash; Skye</p>
+  <p>No matter how you choose to support; whether it's a membership, a Ko-fi, or just watching and sharing; I genuinely appreciate it. This little corner of the internet exists because of you.</p>
+  <p class="support-signoff">- Skye</p>
 </div>

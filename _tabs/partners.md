@@ -94,7 +94,7 @@ permalink: /partners/
 </div>
 
 <div class="mk-link-box">
-  <p>For a full overview, view the <a href="/partners/media-kit/">media kit</a> &mdash; auto-updating stats, content pillars, partnership details, and print-friendly.</p>
+   <p>For a full overview, view the <a href="/partners/media-kit/">media kit</a>; auto-updating stats, content pillars, partnership details, and print-friendly.</p>
 </div>
 
 <div class="partner-section contact-section">

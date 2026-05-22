@@ -20,7 +20,7 @@ permalink: /partners/media-kit/
   <div class="mk-header">
     <div class="mk-header-text">
       <h1>Media Kit</h1>
-      <p class="mk-tagline">Skye / @skiylia &mdash; Trains, automation, and far too many tangents</p>
+      <p class="mk-tagline">Skye / @skiylia; Trains, automation, and far too many tangents</p>
     </div>
     <p class="mk-updated">Last updated: {{ meta.fetched_at | date: "%d %B %Y" }}</p>
   </div>
@@ -75,10 +75,10 @@ permalink: /partners/media-kit/
   <div class="mk-section">
     <h2>Available Partnerships</h2>
     <ul class="mk-list">
-      <li>Dedicated video segments &mdash; in-context demonstrations within regular uploads</li>
-      <li>Stream integrations &mdash; on-stream mentions, overlays, sponsored segments during Twitch broadcasts</li>
-      <li>Description & end screen placements &mdash; links, logos, and call-to-actions</li>
-      <li>Cross-promotion &mdash; mutual membership or content collaborations</li>
+      <li>Dedicated video segments; in-context demonstrations within regular uploads</li>
+      <li>Stream integrations; on-stream mentions, overlays, sponsored segments during Twitch broadcasts</li>
+      <li>Description & end screen placements; links, logos, and call-to-actions</li>
+      <li>Cross-promotion; mutual membership or content collaborations</li>
     </ul>
   </div>
 

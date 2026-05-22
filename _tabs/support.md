@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-heart"
 title: Support
-order: 5
+order: 7
 permalink: /support/
 ---
 

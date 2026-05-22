@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-chart-simple"
 title: Dashboard
-order: 7
+order: 6
 permalink: /dashboard/
 group: stats
 ---

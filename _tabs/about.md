@@ -30,53 +30,23 @@ permalink: /about/
   </div>
 </div>
 
-<style>
-.about-intro {
-  font-size: 1.05rem;
-  line-height: 1.7;
-  margin: 1.5rem 0;
-  opacity: 0.9;
-  max-width: 600px;
-}
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin: 1.5rem 0;
-}
-@media (max-width: 640px) {
-  .about-grid { grid-template-columns: 1fr; }
-}
-.about-section h2 {
-  font-size: 1rem;
-  margin: 0 0 0.75rem;
-  border-bottom: 1px solid rgba(45, 212, 191, 0.1);
-  padding-bottom: 0.3rem;
-}
-.about-section p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  opacity: 0.85;
-  margin: 0 0 0.5rem;
-}
-.quick-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.ql-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  background: rgba(13, 13, 30, 0.8);
-  border: 1px solid rgba(45, 212, 191, 0.06);
-  text-decoration: none;
-  color: inherit;
-  font-size: 0.85rem;
-  transition: border-color 0.15s, color 0.15s;
-}
-.ql-item:hover { border-color: rgba(45, 212, 191, 0.3); color: #2dd4bf; }
-.ql-item i { color: #c084fc; width: 1.2rem; text-align: center; }
-</style>
+{% if site.data.pc_parts %}
+<div class="about-section">
+  <h2>PC Setup</h2>
+  <div class="pc-parts">
+    {% for part in site.data.pc_parts.parts %}
+    <div class="part-row">
+      <span class="part-component">{{ part.component }}</span>
+      <span class="part-name">{% if part.url %}<a href="{{ part.url }}" target="_blank" rel="noopener">{{ part.name }}</a>{% else %}{{ part.name }}{% endif %}</span>
+      <span class="part-price">{% if part.price %}{{ part.price }}{% endif %}</span>
+    </div>
+    {% endfor %}
+    <div class="part-row part-total">
+      <span class="part-component">Total</span>
+      <span></span>
+      <span class="part-price">{{ site.data.pc_parts.total_grand }}</span>
+    </div>
+  </div>
+  <p class="parts-attribution">Auto-updated from <a href="{{ site.data.pc_parts.list_url }}" target="_blank" rel="noopener">PCPartPicker</a></p>
+</div>
+{% endif %}

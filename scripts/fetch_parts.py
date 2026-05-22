@@ -1,0 +1,191 @@
+import json
+import os
+import re
+import sys
+from datetime import datetime, timezone
+
+import requests
+
+PCPARTPICKER_BASE = "https://uk.pcpartpicker.com"
+DATA_DIR = "_data"
+
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
+
+
+def extract_between(text, start, end):
+    idx = text.find(start)
+    if idx == -1:
+        return ""
+    idx += len(start)
+    end_idx = text.find(end, idx)
+    if end_idx == -1:
+        return text[idx:]
+    return text[idx:end_idx]
+
+
+def extract_tag_content(text, tag, attrs=None):
+    """Extract content of first matching HTML tag."""
+    tag_start = f"<{tag}"
+    if attrs:
+        for key, val in attrs.items():
+            tag_start += f' {key}="{val}"'
+    tag_start += ">"
+
+    idx = text.find(tag_start)
+    if idx == -1:
+        return ""
+    idx += len(tag_start)
+    end_tag = f"</{tag}>"
+    end_idx = text.find(end_tag, idx)
+    if end_idx == -1:
+        return text[idx:]
+    return text[idx:end_idx]
+
+
+def save(filename, data):
+    path = os.path.join(DATA_DIR, filename)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(f"Written {path}")
+
+
+def main():
+    list_id = os.environ.get("PCPARTPICKER_LIST_ID", "4WRVw3")
+    print(f"Fetching PCPartPicker list {list_id}...")
+
+    url = f"{PCPARTPICKER_BASE}/list/{list_id}"
+    resp = requests.get(url, headers=BROWSER_HEADERS, timeout=30)
+    if resp.status_code != 200:
+        print(f"Failed to fetch list: HTTP {resp.status_code}", file=sys.stderr)
+        sys.exit(1)
+
+    html = resp.text
+
+    parts = []
+
+    # Split the page into product rows
+    product_rows = []
+    search_from = 0
+    while True:
+        row_start = html.find('<tr class="tr__product">', search_from)
+        if row_start == -1:
+            break
+        row_end = html.find("</tr>", row_start)
+        if row_end == -1:
+            break
+        row_html = html[row_start : row_end + 6]
+        product_rows.append(row_html)
+        search_from = row_end + 6
+
+    for row in product_rows:
+        # Component category
+        comp = ""
+        comp_match_start = row.find('<td class="td__component')
+        if comp_match_start != -1:
+            comp_cell_end = row.find("</td>", comp_match_start)
+            comp_cell = row[comp_match_start : comp_cell_end + 5]
+            a_start = comp_cell.find('">', comp_cell.find("<a "))
+            if a_start != -1:
+                a_start += 2
+                a_end = comp_cell.find("</a>", a_start)
+                if a_end != -1:
+                    comp = comp_cell[a_start:a_end].strip()
+
+        # Part name and URL
+        name = ""
+        part_url = ""
+        name_td = extract_between(row, '<td class="td__name td__name-2025">', "</td>")
+        if name_td:
+            a_tag_start = name_td.find('<a href="')
+            if a_tag_start != -1:
+                href_start = a_tag_start + 9
+                href_end = name_td.find('"', href_start)
+                href = name_td[href_start:href_end] if href_end != -1 else ""
+
+                content_start = name_td.find(">", href_end) + 1 if href_end != -1 else -1
+                content_end = name_td.find("</a>") if content_start != -1 else -1
+
+                if content_start != -1 and content_end != -1:
+                    name = name_td[content_start:content_end].strip()
+                if href:
+                    part_url = PCPARTPICKER_BASE + href
+
+        # Price
+        price = None
+        price = None
+        if 'td__price--none"' not in row[: row.find("</tr>")]:
+            price_cell = extract_between(
+                row, '<td class="td__price td__price-2025">', "</td>"
+            )
+            if price_cell:
+                price_match = re.search(r"£[\d,]+\.?\d*", price_cell)
+                if price_match:
+                    price = price_match.group(0)
+
+        if comp or name:
+            parts.append({
+                "component": comp,
+                "name": name,
+                "url": part_url,
+                "price": price,
+            })
+
+    # Extract totals from tr.tr__total rows
+    total_base = None
+    total_shipping = None
+    total_grand = None
+
+    total_rows = []
+    search_from = 0
+    while True:
+        row_start = html.find('<tr class="tr__total ', search_from)
+        if row_start == -1:
+            break
+        row_end = html.find("</tr>", row_start)
+        if row_end == -1:
+            break
+        total_rows.append(html[row_start : row_end + 6])
+        search_from = row_end + 6
+
+    for row in total_rows:
+        label = extract_between(row, '<td class="td__label"', "</td>")
+        label = extract_between(label, ">", "<").strip().rstrip(":")
+
+        price_td = extract_between(row, '<td class="td__price td__price-2025">', "</td>")
+        price_val = price_td.strip() if price_td else None
+
+        if label == "Base Total":
+            total_base = price_val
+        elif label == "Shipping":
+            total_shipping = price_val
+        elif label == "Total":
+            total_grand = price_val
+
+    data = {
+        "list_id": list_id,
+        "list_url": url,
+        "parts": parts,
+        "total_base": total_base,
+        "total_shipping": total_shipping,
+        "total_grand": total_grand,
+        "part_count": len(parts),
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+    }
+    save("pc_parts.json", data)
+
+    for part in parts:
+        price_str = part["price"] if part["price"] else "N/A"
+        print(f"  {part['component']}: {part['name']} ({price_str})")
+    print(f"  Base: {total_base} | Shipping: {total_shipping} | Grand: {total_grand}")
+    print(f"  ({len(parts)} parts total)")
+
+
+if __name__ == "__main__":
+    main()

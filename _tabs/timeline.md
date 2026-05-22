@@ -86,7 +86,7 @@ function toggleMetric(metric) {
 }
 </script>
 
-<h2 style="margin-top:2rem;font-size:1rem;">Milestones</h2>
+<h2 class="milestones-heading">Milestones</h2>
 <div class="timeline">
   {% for h in history %}
     {% assign milestone = nil %}
@@ -115,70 +115,3 @@ function toggleMetric(metric) {
 {% else %}
   <p>No historical data yet. Data will appear once the tracking pipeline runs a few times.</p>
 {% endif %}
-
-<style>
-.chart-container {
-  width: 100%;
-  height: 300px;
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background: var(--card-bg, #1e1e1e);
-  border: 1px solid rgba(45,212,191,0.1);
-  border-radius: 10px;
-}
-.chart-controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.chart-btn {
-  padding: 0.3rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid rgba(45,212,191,0.2);
-  background: transparent;
-  color: #8888aa;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.chart-btn:hover { border-color: rgba(45,212,191,0.5); color: #c8c8d4; }
-.chart-btn.active { background: rgba(45,212,191,0.15); border-color: #2dd4bf; color: #2dd4bf; }
-
-.timeline {
-  position: relative;
-  margin: 1rem 0;
-  padding-left: 2rem;
-}
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 0.7rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgba(45,212,191,0.15);
-}
-.timeline-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  font-size: 0.85rem;
-}
-.timeline-item.milestone {
-  background: rgba(45,212,191,0.06);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  margin: 0.25rem 0;
-}
-.tl-date { min-width: 6em; opacity: 0.6; font-size: 0.8rem; }
-.tl-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(45,212,191,0.3);
-  flex-shrink: 0;
-}
-.tl-icon { flex-shrink: 0; }
-.tl-text { opacity: 0.85; }
-.milestone .tl-text { color: #2dd4bf; font-weight: 500; }
-</style>

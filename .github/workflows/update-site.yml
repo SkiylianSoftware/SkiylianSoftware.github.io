@@ -2,7 +2,7 @@ name: Update site data
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "0 */4 * * *"
   workflow_dispatch:
 
 permissions:
@@ -42,10 +42,16 @@ jobs:
       - name: Fetch GitHub stats
         run: python scripts/fetch_github.py
 
+      - name: Fetch PC parts list
+        env:
+          PCPARTPICKER_LIST_ID: 4WRVw3
+        run: python scripts/fetch_parts.py
+
       - name: Track history
         run: python scripts/track_history.py
 
       - name: Commit and push changes
+        id: commit
         run: |
           git config --local user.name "SkiylianSoftware"
           git config --local user.email "skiyliansoftware@gmail.com"
@@ -53,13 +59,15 @@ jobs:
           git add _config.yml
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "updated=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "Auto-update site data"
             git push
+            echo "updated=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Trigger site deploy
-        if: success()
+        if: steps.commit.outputs.updated == 'true'
         run: |
           gh workflow run "Build and Deploy" --repo ${{ github.repository }}
         env:

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Media Kit
-permalink: /media-kit/
+permalink: /partners/media-kit/
 ---
 
 {% assign meta = site.data.site_meta %}

@@ -43,6 +43,24 @@ permalink: /about/
         {% capture past_html %}{{ past_html }}<li>{{ item }}</li>{% endcapture %}
       {% endif %}
     {% endfor %}
+    {% comment %}Check playlists not matched to any parsed series{% endcomment %}
+    {% assign matched_names = "" %}
+    {% for pair in site.data.youtube_main.series_recency %}
+      {% if matched_names != "" %}{% assign matched_names = matched_names | append: "||" %}{% endif %}
+      {% assign matched_names = matched_names | append: pair[0] %}
+    {% endfor %}
+    {% for pl in site.data.playlists.playlists %}
+      {% assign found = false %}
+      {% for sname in matched_names | split: "||" %}
+        {% if pl.title contains sname or sname contains pl.title %}
+          {% assign found = true %}{% break %}
+        {% endif %}
+      {% endfor %}
+      {% unless found %}
+        {% capture item %}<span class="series-dot historical"></span> <a href="{{ pl.url }}" class="btn series-btn"><strong>{{ pl.title }}</strong></a>{% if pl.item_count > 0 %} <span class="ep-count">{{ pl.item_count }} episodes</span>{% endif %}{% endcapture %}
+        {% capture past_html %}{{ past_html }}<li>{{ item }}</li>{% endcapture %}
+      {% endunless %}
+    {% endfor %}
     {% if current_html != "" or recent_html != "" or past_html != "" %}
     <div class="series-section">
       {% if current_html != "" %}

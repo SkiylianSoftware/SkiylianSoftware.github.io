@@ -6,7 +6,7 @@ order: 6
 permalink: /partners/
 ---
 
-<p class="partner-intro">I make videos about trains, automation, space, and programming -- but the channel's really about cosy vibes, good coffee, and genuine enthusiasm. If your product or organisation fits that world, I'd like to hear from you.</p>
+<p class="partner-intro">I make videos about trains, automation, space, and programming -- but the channel's really about cosy vibes, genuine enthusiasm, and the occasional coffee break amidst the shenanigans. If your product or organisation fits that world, I'd love to hear from you.</p>
 
 <div class="partner-section">
   <h2>What I Offer</h2>
@@ -39,7 +39,7 @@ permalink: /partners/
   <div class="look-grid">
     <div class="look-item">
       <i class="fas fa-gamepad"></i>
-      <span>Games & sims -- trains, space, automation, engineering</span>
+      <span>Games & sims -- trains, space, automation, factory building, engineering, or cosy</span>
     </div>
     <div class="look-item">
       <i class="fas fa-cube"></i>
@@ -51,22 +51,18 @@ permalink: /partners/
     </div>
     <div class="look-item">
       <i class="fas fa-train"></i>
-      <span>Transport & rail organisations, museums, exhibitions</span>
-    </div>
-    <div class="look-item">
-      <i class="fas fa-mug-hot"></i>
-      <span>Coffee, tea, cosy lifestyle products that match the channel's energy</span>
+      <span>Physical places like Transport & rail organisations, museums, exhibitions</span>
     </div>
     <div class="look-item">
       <i class="fas fa-cat"></i>
-      <span>Pet, hobby, or relaxation brands -- anything that fits the winding-down-with-a-cat vibe</span>
+      <span>Coffee, tea, Hobby, and relaxation brands -- anything that fits the channel vibe</span>
     </div>
   </div>
 </div>
 
 <div class="partner-section">
   <h2>The Channel Vibe</h2>
-  <p class="vibe-text">I make videos about ambitious engineering projects in games, but I spend just as much time talking about my coffee, visiting rail exhibitions, and getting distracted by my cat. My audience sticks around for the tangents as much as the content. If your product fits into a relaxed Saturday afternoon with a mocha in hand and a train sim running in the background, you're in the right place.</p>
+  <p class="vibe-text">I make videos about engineering projects in games, but I spend just as much time talking about my coffee, visiting rail exhibitions, and getting distracted by wildlife. My audience sticks around for the tangents as much as the content. If your product fits into a relaxed Saturday afternoon with a mocha in hand and a train sim running in the background, you're in the right place.</p>
 </div>
 
 <div class="partner-section">

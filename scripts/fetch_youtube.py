@@ -189,13 +189,14 @@ def fetch_livestream():
     }
 
 
-def fetch_channel_info():
+def fetch_channel_info(channel_id=None):
     if not YOUTUBE_API_KEY:
         return None
+    cid = channel_id or CHANNEL_ID
     url = (
         f"https://www.googleapis.com/youtube/v3/channels"
         f"?part=snippet,brandingSettings,statistics"
-        f"&id={CHANNEL_ID}"
+        f"&id={cid}"
         f"&key={YOUTUBE_API_KEY}"
     )
     data = api_get(url)
@@ -304,16 +305,25 @@ def main():
 
     print("Fetching channel info...")
     info = fetch_channel_info()
-    if info:
-        save("site_meta.json", info)
-        update_config_avatar(info.get("avatar_url", ""))
+    if not info:
+        return
 
-        milestones = detect_milestones(
-            info.get("subscriber_count", 0),
-            info.get("view_count", 0),
-            info.get("video_count", 0),
-        )
-        save("milestones.json", milestones)
+    vods_info = fetch_channel_info(VODS_CHANNEL_ID)
+    if vods_info:
+        info["vods_subscriber_count"] = vods_info.get("subscriber_count", 0)
+        info["vods_video_count"] = vods_info.get("video_count", 0)
+        info["vods_view_count"] = vods_info.get("view_count", 0)
+        info["vods_published_at"] = vods_info.get("published_at", "")
+
+    save("site_meta.json", info)
+    update_config_avatar(info.get("avatar_url", ""))
+
+    milestones = detect_milestones(
+        info.get("subscriber_count", 0),
+        info.get("view_count", 0),
+        info.get("video_count", 0),
+    )
+    save("milestones.json", milestones)
 
 
 if __name__ == "__main__":

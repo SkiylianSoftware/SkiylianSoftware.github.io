@@ -192,7 +192,7 @@ body::after {
 #panel-wrapper { background: transparent !important; }
 #tail-wrapper { background: transparent !important; }
 
-.video-card, .playlist-card, .widget-card, .stat-card, .insight-box, .support-card, .live-embed, .offline-panel {
+.video-card, .widget-card, .stat-card, .insight-box, .support-card, .live-embed, .offline-panel {
   backdrop-filter: blur(4px);
 }
 #sidebar, #topbar-wrapper { backdrop-filter: blur(8px); }
@@ -201,10 +201,10 @@ body::after {
 .preview-img::before, .preview-img::after { display: none !important; }
 .preview-img img { opacity: 1 !important; }
 
-.video-card, .playlist-card {
+.video-card {
   border: 1px solid rgba(45, 212, 191, 0.08) !important;
 }
-.video-card:hover, .playlist-card:hover {
+.video-card:hover {
   border-color: rgba(45, 212, 191, 0.25) !important;
   transform: translateY(-3px);
   box-shadow: 0 0 20px rgba(45, 212, 191, 0.1);
@@ -220,12 +220,12 @@ body::after {
   padding: 1.25rem;
   transition: border-color 0.2s;
 }
-.offer-card:hover, .support-card:hover, .video-card:hover, .playlist-card:hover {
+.offer-card:hover, .support-card:hover, .video-card:hover {
   border-color: var(--clr-border-hover) !important;
 }
 
 /* === SHARED GRID COMPONENTS === */
-.video-grid, .playlist-grid {
+.video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
@@ -234,7 +234,7 @@ body::after {
 
 /* === SHARED OVERLAY / BADGE / PLAY BUTTON === */
 .thumb-wrap { position: relative; }
-.video-card img, .playlist-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
 .play-overlay {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -257,9 +257,6 @@ body::after {
 .meta-row { display: flex; justify-content: space-between; font-size: 0.78rem; opacity: 0.7; margin-bottom: 0.2rem; }
 .series-badge { font-size: 0.75rem; opacity: 0.6; margin-bottom: 0.2rem; }
 .video-desc { font-size: 0.8rem; opacity: 0.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.playlist-desc { font-size: 0.8rem; margin: 0 0 0.3rem; opacity: 0.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.playlist-count { font-size: 0.8rem; opacity: 0.65; }
-.playlist-info { padding: 0.75rem; }
 .video-card {
   background: var(--clr-card-bg);
   border: 1px solid rgba(45, 212, 191, 0.08);
@@ -267,16 +264,6 @@ body::after {
   overflow: hidden;
   transition: border-color 0.2s, transform 0.15s;
   cursor: pointer;
-}
-.playlist-card {
-  display: block;
-  background: var(--clr-card-bg);
-  border: 1px solid rgba(45, 212, 191, 0.08);
-  border-radius: 10px;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s, transform 0.15s;
 }
 
 /* === SHARED BUTTON PATTERNS === */
@@ -788,7 +775,32 @@ body::after {
 .playlist-page-intro { margin: 1.5rem 0; }
 .playlist-page-intro p { font-size: 0.9rem; opacity: 0.85; margin: 0 0 0.5rem; line-height: 1.6; }
 .playlist-cta { margin-top: 0.75rem !important; }
-.playlist-meta { margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+
+.playlist-rows { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.25rem 0; }
+.playlist-row {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1rem; border-radius: 10px;
+  background: var(--clr-card-bg);
+  border: 1px solid rgba(45,212,191,0.08);
+  text-decoration: none; color: inherit;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.playlist-row:hover {
+  transform: translateY(-2px);
+}
+.playlist-row-thumb {
+  width: 160px; flex-shrink: 0;
+  aspect-ratio: 16/9; object-fit: cover;
+  border-radius: 6px;
+}
+.playlist-row-info { flex: 1; min-width: 0; }
+.playlist-row-info h3 { font-size: 0.95rem; margin: 0 0 0.35rem; line-height: 1.3; }
+.playlist-row-desc { font-size: 0.85rem; margin: 0 0 0.4rem; opacity: 0.7; line-height: 1.5; }
+.playlist-row-count { font-size: 0.8rem; opacity: 0.55; }
+@media (max-width: 500px) {
+  .playlist-row { flex-direction: column; align-items: stretch; }
+  .playlist-row-thumb { width: 100%; }
+}
 
 /* === UNIVERSAL PLATFORM HOVER COLORS === */
 [href*="youtube.com"] i,

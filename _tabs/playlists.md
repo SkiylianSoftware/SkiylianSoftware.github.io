@@ -12,20 +12,18 @@ permalink: /playlists/
   <p>Curated collections of videos organised by game, topic, or series. Each playlist is a chapter in the story of this channel.</p>
   <p class="playlist-cta"><a href="/videos" class="btn"><i class="fa-solid fa-filter"></i> Browse all videos by series</a></p>
 </div>
-<div class="playlist-grid">
+<div class="playlist-rows">
 {% for playlist in playlists %}
-  <a href="{{ playlist.url }}" target="_blank" class="playlist-card">
+  <a href="{{ playlist.url }}" target="_blank" class="playlist-row">
     {% if playlist.thumbnail %}
-      <img src="{{ playlist.thumbnail }}" alt="" loading="lazy" class="playlist-thumb">
+      <img src="{{ playlist.thumbnail }}" alt="" loading="lazy" class="playlist-row-thumb">
     {% endif %}
-    <div class="playlist-info">
+    <div class="playlist-row-info">
       <h3>{{ playlist.title }}</h3>
       {% if playlist.description %}
-        <p class="playlist-desc">{{ playlist.description | truncate: 120 }}</p>
+        <p class="playlist-row-desc">{{ playlist.description }}</p>
       {% endif %}
-      <div class="playlist-meta">
-        <span class="playlist-count">{{ playlist.item_count }} video{% if playlist.item_count > 1 %}s{% endif %}</span>
-      </div>
+      <span class="playlist-row-count">{{ playlist.item_count }} video{% if playlist.item_count > 1 %}s{% endif %}</span>
     </div>
   </a>
 {% endfor %}

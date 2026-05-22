@@ -21,10 +21,12 @@ permalink: /about/
       {% assign info = pair[1] %}
       {% assign ep_count = info.episodes | default: 0 %}
       {% if info.status == "current" %}
-        {% capture item %}<span class="series-dot current"></span> <strong>{{ name }}</strong>{% if ep_count > 0 %} ({{ ep_count }} episodes){% endif %}{% endcapture %}
+        {% capture url %}/videos#{{ name | url_encode }}{% endcapture %}
+        {% capture item %}<span class="series-dot current"></span> <a href="{{ url }}" class="series-link"><strong>{{ name }}</strong></a>{% if ep_count > 0 %} ({{ ep_count }} episodes){% endif %}{% endcapture %}
         {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
       {% elsif info.status == "recent" %}
-        {% capture item %}<span class="series-dot recent"></span> <strong>{{ name }}</strong>{% if ep_count > 0 %} ({{ ep_count }} episodes){% endif %}{% endcapture %}
+        {% capture url %}/videos#{{ name | url_encode }}{% endcapture %}
+        {% capture item %}<span class="series-dot recent"></span> <a href="{{ url }}" class="series-link"><strong>{{ name }}</strong></a>{% if ep_count > 0 %} ({{ ep_count }} episodes){% endif %}{% endcapture %}
         {% capture recent_html %}{{ recent_html }}<li>{{ item }}</li>{% endcapture %}
       {% endif %}
     {% endfor %}
@@ -38,7 +40,7 @@ permalink: /about/
       {% endif %}
       {% if recent_html != "" %}
       <div class="series-group">
-        <h3 class="series-heading recent-heading"><span class="series-dot recent"></span> Recent Sips</h3>
+        <h3 class="series-heading recent-heading"><span class="series-dot recent"></span> Recently Played</h3>
         <ul class="series-list">{{ recent_html }}</ul>
       </div>
       {% endif %}

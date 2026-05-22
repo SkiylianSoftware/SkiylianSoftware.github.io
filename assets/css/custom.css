@@ -797,29 +797,57 @@ body::after {
 }
 .kb-hint { margin-top: 1rem; font-size: 0.8rem; opacity: 0.6; }
 
+/* Series links on about page */
+.series-link { color: inherit; text-decoration: none; transition: color 0.2s; }
+.series-link:hover { color: var(--clr-teal); }
+
 /* === UNIVERSAL PLATFORM HOVER COLORS === */
+.platform-btn i,
+.ql-item i { font-size: 1.1em; margin-right: 0.3rem; }
+
+[href*="youtube.com"] i,
+[href*="youtu.be"] i,
+[href*="watch.skiylia.dev"] i,
+[href*="vods.skiylia.dev"] i { color: #ff4444; }
 [href*="youtube.com"]:hover,
 [href*="youtu.be"]:hover,
-[href*="watch.skiylia.dev"]:hover {
+[href*="watch.skiylia.dev"]:hover,
+[href*="vods.skiylia.dev"]:hover {
   color: #ff4444 !important;
   border-color: rgba(255,68,68,0.4) !important;
+  background: rgba(255,68,68,0.1) !important;
 }
+
+[href*="twitch.tv"] i,
+[href*="live.skiylia.dev"] i { color: #a970ff; }
 [href*="twitch.tv"]:hover,
 [href*="live.skiylia.dev"]:hover {
   color: #a970ff !important;
   border-color: rgba(169,112,255,0.4) !important;
+  background: rgba(169,112,255,0.1) !important;
 }
+
+[href*="github.com"] i,
+[href*="code.skiylia.dev"] i { color: #888; }
 [href*="github.com"]:hover,
 [href*="code.skiylia.dev"]:hover {
   color: #888 !important;
   border-color: rgba(136,136,136,0.4) !important;
+  background: rgba(136,136,136,0.1) !important;
 }
+
+[href*="store.skiylia.dev"] i { color: #c084fc; }
 [href*="store.skiylia.dev"]:hover {
   color: #c084fc !important;
   border-color: rgba(192,132,252,0.4) !important;
+  background: rgba(192,132,252,0.1) !important;
 }
+
+[href*="ko-fi.com"] i,
+[href*="support.skiylia.dev"] i { color: #2dd4bf; }
 [href*="ko-fi.com"]:hover,
 [href*="support.skiylia.dev"]:hover {
   color: #2dd4bf !important;
   border-color: rgba(45,212,191,0.4) !important;
+  background: rgba(45,212,191,0.1) !important;
 }

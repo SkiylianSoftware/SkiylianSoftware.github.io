@@ -118,4 +118,18 @@ function sortGrid(btn, mode) {
   cards.forEach(function(c) { grid.appendChild(c); });
 }
 document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closePlayer(); });
+document.addEventListener('DOMContentLoaded', function() {
+  var hash = window.location.hash;
+  if (hash && hash.length > 1) {
+    var name = decodeURIComponent(hash.slice(1)).replace(/\+/g, ' ');
+    var btns = document.querySelectorAll('.filter-btn');
+    for (var i = 0; i < btns.length; i++) {
+      if (btns[i].textContent.trim() === name) {
+        filterSeries(btns[i], name);
+        btns[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        break;
+      }
+    }
+  }
+});
 </script>

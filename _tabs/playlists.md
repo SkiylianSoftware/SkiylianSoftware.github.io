@@ -10,7 +10,7 @@ permalink: /playlists/
 {% if playlists.size > 0 %}
 <div class="playlist-rows">
 {% for pl in playlists %}
-  <a href="{{ pl.url }}" target="_blank" class="playlist-row">
+  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn">
     {% if pl.thumbnail %}
       <img src="{{ pl.thumbnail }}" alt="" loading="lazy" class="playlist-row-thumb">
     {% endif %}

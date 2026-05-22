@@ -32,7 +32,7 @@ permalink: /support/
 {% endif %}
 
 <div class="support-grid">
-  <a href="https://store.skiylia.dev" target="_blank" rel="noopener" class="support-card card-merch">
+  <a href="https://store.skiylia.dev" target="_blank" rel="noopener" class="support-card card-merch btn">
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>
     <div class="card-body">
       <h3>Merch Store</h3>
@@ -41,7 +41,7 @@ permalink: /support/
     </div>
   </a>
 
-  <a href="https://support.skiylia.dev" target="_blank" rel="noopener" class="support-card card-kofi">
+  <a href="https://support.skiylia.dev" target="_blank" rel="noopener" class="support-card card-kofi btn">
     <div class="card-icon"><i class="fas fa-mug-hot"></i></div>
     <div class="card-body">
       <h3>Ko-fi</h3>
@@ -52,7 +52,7 @@ permalink: /support/
 
   {% assign yt_memberships = site.data.site_meta.memberships_available | default: false %}
   {% if yt_memberships %}
-  <a href="https://www.youtube.com/@skiylia/join" target="_blank" rel="noopener" class="support-card card-yt">
+  <a href="https://www.youtube.com/@skiylia/join" target="_blank" rel="noopener" class="support-card card-yt btn">
     <div class="card-icon"><i class="fab fa-youtube"></i></div>
     <div class="card-body">
       <h3>YouTube Membership</h3>
@@ -64,7 +64,7 @@ permalink: /support/
 
   {% assign bt = site.data.twitch_stats.broadcaster_type | default: "" %}
   {% if bt == "affiliate" or bt == "partner" %}
-  <a href="https://www.twitch.tv/subs/skiylia" target="_blank" rel="noopener" class="support-card card-twitch">
+  <a href="https://www.twitch.tv/subs/skiylia" target="_blank" rel="noopener" class="support-card card-twitch btn">
     <div class="card-icon"><i class="fab fa-twitch"></i></div>
     <div class="card-body">
       <h3>Twitch Subscription</h3>
@@ -78,14 +78,14 @@ permalink: /support/
 <div class="support-free">
   <h2>Free ways to support</h2>
   <div class="free-grid">
-    <a href="https://www.youtube.com/@skiylia?sub_confirmation=1" target="_blank" rel="noopener" class="free-card">
+    <a href="https://www.youtube.com/@skiylia?sub_confirmation=1" target="_blank" rel="noopener" class="free-card btn">
       <i class="fab fa-youtube" style="color: #ff4444;"></i>
       <div>
         <strong>Subscribe on YouTube</strong>
         <span>Hit subscribe and ring the bell; it helps more than you'd think.</span>
       </div>
     </a>
-    <a href="https://live.skiylia.dev" target="_blank" rel="noopener" class="free-card">
+    <a href="https://live.skiylia.dev" target="_blank" rel="noopener" class="free-card btn">
       <i class="fab fa-twitch" style="color: #a970ff;"></i>
       <div>
         <strong>Follow on Twitch</strong>

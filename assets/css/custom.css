@@ -767,8 +767,16 @@ body::after {
 .series-list li { padding: 0.25rem 0; display: flex; align-items: center; gap: 0.4rem; }
 .ep-count { font-size: 0.78rem; opacity: 0.6; white-space: nowrap; }
 
-/* Sidebar social icon hover */
-.sidebar-bottom a { transition: transform 0.15s; }
+/* Sidebar social buttons */
+.sidebar-bottom a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem;
+  border-radius: 6px;
+  background: var(--clr-card-bg);
+  border: 1px solid rgba(45,212,191,0.08);
+  text-decoration: none; color: inherit;
+  transition: border-color 0.2s, transform 0.15s;
+}
 .sidebar-bottom a:hover { transform: translateY(-2px); }
 
 /* Playlists page */

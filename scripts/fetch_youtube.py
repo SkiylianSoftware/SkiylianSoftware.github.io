@@ -78,7 +78,7 @@ def parse_series(title):
 def fetch_uploads(playlist_id, label="uploads"):
     if not YOUTUBE_API_KEY:
         print(f"No YOUTUBE_API_KEY set, skipping {label}", file=sys.stderr)
-        return []
+        return None
     videos = []
     video_ids = []
     page_token = None
@@ -131,7 +131,7 @@ def fetch_uploads(playlist_id, label="uploads"):
 
 def fetch_playlists():
     if not YOUTUBE_API_KEY:
-        return []
+        return None
     all_playlists = []
     page_token = None
     while True:
@@ -321,16 +321,19 @@ def compute_series_recency(videos):
 def main():
     print("Fetching YouTube uploads...")
     videos = fetch_uploads(UPLOADS_PLAYLIST_ID, "main channel uploads")
-    series_recency = compute_series_recency(videos)
-    save("youtube_main.json", {"videos": videos, "series_recency": series_recency})
+    if videos is not None:
+        series_recency = compute_series_recency(videos)
+        save("youtube_main.json", {"videos": videos, "series_recency": series_recency})
 
     print("Fetching YouTube VODs...")
     vods = fetch_uploads(VODS_PLAYLIST_ID, "VODs channel uploads")
-    save("youtube_vods.json", {"videos": vods})
+    if vods is not None:
+        save("youtube_vods.json", {"videos": vods})
 
     print("Fetching YouTube playlists...")
     playlists = fetch_playlists()
-    save("playlists.json", {"playlists": playlists})
+    if playlists is not None:
+        save("playlists.json", {"playlists": playlists})
 
     print("Fetching livestream status...")
     live = fetch_livestream()

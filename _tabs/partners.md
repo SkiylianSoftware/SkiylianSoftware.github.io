@@ -90,7 +90,11 @@ permalink: /partners/
 </div>
 
 <div class="partner-empty" id="future-partners">
-  <p class="empty-hint">When there are partners to show, this is where they'll go -- logos, testimonials, case studies, and a downloadable media kit.</p>
+  <p class="empty-hint">When there are partners to show, this is where they'll go -- logos, testimonials, case studies.</p>
+</div>
+
+<div class="mk-link-box">
+  <p>For a full overview, view the <a href="/media-kit/">media kit</a> &mdash; auto-updating stats, content pillars, partnership details, and print-friendly.</p>
 </div>
 
 <div class="partner-section contact-section">
@@ -120,7 +124,7 @@ permalink: /partners/
 
 .offer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 .offer-card {
@@ -181,6 +185,16 @@ permalink: /partners/
   margin: 0;
   font-style: italic;
 }
+
+.mk-link-box {
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid rgba(45, 212, 191, 0.1);
+  border-radius: 10px;
+  text-align: center;
+}
+.mk-link-box p { margin: 0 0 0.5rem; font-size: 0.9rem; opacity: 0.8; }
+.mk-link-box a { color: #2dd4bf; font-weight: 500; }
 
 .contact-section {
   padding: 1.5rem;

@@ -82,6 +82,7 @@ def fetch_uploads(playlist_id, label="uploads"):
     videos = []
     video_ids = []
     page_token = None
+    page_num = 0
     while True:
         url = (
             f"https://www.googleapis.com/youtube/v3/playlistItems"
@@ -94,9 +95,14 @@ def fetch_uploads(playlist_id, label="uploads"):
         if resp.status_code == 404:
             print(f"Playlist {playlist_id} not found, skipping {label}", file=sys.stderr)
             return []
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            print(f"YouTube API error {resp.status_code} for {label}: {resp.text[:200]}", file=sys.stderr)
+            return []
         data = resp.json()
-        for item in data.get("items", []):
+        items = data.get("items", [])
+        page_num += 1
+        print(f"  Page {page_num}: {len(items)} items (total so far: {len(videos)})")
+        for item in items:
             snippet = item.get("snippet", {})
             resource = snippet.get("resourceId", {})
             video_id = resource.get("videoId")
@@ -126,6 +132,7 @@ def fetch_uploads(playlist_id, label="uploads"):
         if vid in details:
             v.update(details[vid])
 
+    print(f"  Total: {len(videos)} videos fetched for {label}")
     return videos
 
 
@@ -288,7 +295,7 @@ def detect_milestones(subs, views, videos_count):
 
 def compute_series_recency(videos):
     now = datetime.now(timezone.utc)
-    series_dates = {}
+    series_data = {}
     for v in videos:
         s = v.get("series")
         if not s:
@@ -296,6 +303,9 @@ def compute_series_recency(videos):
         name = s.get("series_name")
         if not name:
             continue
+        if name not in series_data:
+            series_data[name] = {"episode_count": 0, "latest": None}
+        series_data[name]["episode_count"] += 1
         published = v.get("published")
         if not published:
             continue
@@ -303,18 +313,23 @@ def compute_series_recency(videos):
             dt = datetime.fromisoformat(published.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
             continue
-        if name not in series_dates or dt > series_dates[name]:
-            series_dates[name] = dt
+        if series_data[name]["latest"] is None or dt > series_data[name]["latest"]:
+            series_data[name]["latest"] = dt
 
     recency = {}
-    for name, dt in series_dates.items():
+    for name, data in series_data.items():
+        dt = data["latest"]
+        if not dt:
+            recency[name] = {"status": "historical", "episodes": data["episode_count"]}
+            continue
         days = (now - dt).days
-        if days < 183:       # < 6 months
-            recency[name] = "current"
-        elif days < 366:     # < 1 year
-            recency[name] = "recent"
+        if days < 183:
+            status = "current"
+        elif days < 366:
+            status = "recent"
         else:
-            recency[name] = "historical"
+            status = "historical"
+        recency[name] = {"status": status, "episodes": data["episode_count"]}
     return recency
 
 

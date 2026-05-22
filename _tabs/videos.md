@@ -22,7 +22,8 @@ permalink: /videos/
   <button class="filter-btn active" onclick="filterSeries(this, '')">All</button>
   {% for name in series_set %}
   {% if recency_map and recency_map != "" %}
-    {% assign recency = recency_map[name] | default: 'historical' %}
+    {% assign r = recency_map[name] %}
+    {% assign recency = r.status | default: 'historical' %}
   {% else %}
     {% assign recency = 'historical' %}
   {% endif %}

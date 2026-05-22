@@ -372,6 +372,18 @@ body::after {
 .ql-item:hover { border-color: rgba(45, 212, 191, 0.3); color: #2dd4bf; }
 .ql-item i { color: #c084fc; width: 1.2rem; text-align: center; }
 .series-overview { color: #8888aa; font-size: 0.9rem; }
+.series-section { margin: 0.75rem 0; }
+.series-group { margin-bottom: 0.75rem; }
+.series-heading { font-size: 0.85rem; margin: 0 0 0.4rem; display: flex; align-items: center; gap: 0.35rem; }
+.current-heading { color: #2dd4bf; }
+.recent-heading { color: #c084fc; }
+.series-list { list-style: none; margin: 0; padding: 0; }
+.series-list li { font-size: 0.85rem; padding: 0.15rem 0; opacity: 0.85; }
+.series-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; vertical-align: middle; }
+.series-dot.current { background: #2dd4bf; }
+.series-dot.recent { background: #c084fc; }
+.series-dot.historical { background: #555577; }
+
 .pc-parts {
   display: flex;
   flex-direction: column;

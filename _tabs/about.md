@@ -14,24 +14,35 @@ permalink: /about/
   <div class="about-section">
     <h2>Content</h2>
     <p>I play games that let me build, automate, and optimise things -- transport networks, space programs, factories, code. The channel is where engineering ambition meets cosy chaos.</p>
-    {% assign current_series = "" %}
-    {% assign sep = "" %}
-    {% assign recent_series = "" %}
-    {% assign rsep = "" %}
+    {% assign current_html = "" %}
+    {% assign recent_html = "" %}
     {% for pair in site.data.youtube_main.series_recency %}
-      {% if pair[1] == "current" %}
-        {% capture current_series %}{{ current_series }}{{ sep }}{{ pair[0] }}{% endcapture %}
-        {% assign sep = ", " %}
-      {% elsif pair[1] == "recent" %}
-        {% capture recent_series %}{{ recent_series }}{{ rsep }}{{ pair[0] }}{% endcapture %}
-        {% assign rsep = ", " %}
+      {% assign name = pair[0] %}
+      {% assign info = pair[1] %}
+      {% assign ep_count = info.episodes | default: 0 %}
+      {% if info.status == "current" %}
+        {% capture item %}<span class="series-dot current"></span> <strong>{{ name }}</strong>{% if ep_count > 0 %} ({{ ep_count }} episodes){% endif %}{% endcapture %}
+        {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
+      {% elsif info.status == "recent" %}
+        {% capture item %}<span class="series-dot recent"></span> <strong>{{ name }}</strong>{% if ep_count > 0 %} ({{ ep_count }} episodes){% endif %}{% endcapture %}
+        {% capture recent_html %}{{ recent_html }}<li>{{ item }}</li>{% endcapture %}
       {% endif %}
     {% endfor %}
-    {% if current_series != "" or recent_series != "" %}
-    <p class="series-overview">
-      {% if current_series != "" %}Current: {{ current_series }}.{% endif %}
-      {% if recent_series != "" %} Recent: {{ recent_series }}.{% endif %}
-    </p>
+    {% if current_html != "" or recent_html != "" %}
+    <div class="series-section">
+      {% if current_html != "" %}
+      <div class="series-group">
+        <h3 class="series-heading current-heading"><span class="series-dot current"></span> Currently Playing</h3>
+        <ul class="series-list">{{ current_html }}</ul>
+      </div>
+      {% endif %}
+      {% if recent_html != "" %}
+      <div class="series-group">
+        <h3 class="series-heading recent-heading"><span class="series-dot recent"></span> Recent Sips</h3>
+        <ul class="series-list">{{ recent_html }}</ul>
+      </div>
+      {% endif %}
+    </div>
     {% endif %}
   </div>
 

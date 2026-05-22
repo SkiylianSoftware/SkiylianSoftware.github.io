@@ -6,14 +6,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  update-data:
+  update-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,25 +55,26 @@ jobs:
       - name: Track history
         run: python scripts/track_history.py
 
-      - name: Commit and push changes
-        id: commit
-        run: |
-          git config --local user.name "SkiylianSoftware"
-          git config --local user.email "skiyliansoftware@gmail.com"
-          git add --force _data/
-          git add _config.yml
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            echo "updated=false" >> "$GITHUB_OUTPUT"
-          else
-            git commit -m "Auto-update site data"
-            git push
-            echo "updated=true" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
 
-      - name: Trigger site deploy
-        if: steps.commit.outputs.updated == 'true'
-        run: |
-          gh workflow run "Build and Deploy" --repo ${{ github.repository }}
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Build site
+        run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JEKYLL_ENV: "production"
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: "_site${{ steps.pages.outputs.base_path }}"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

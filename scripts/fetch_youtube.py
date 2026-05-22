@@ -227,7 +227,7 @@ def fetch_playlists():
                 "playlist_id": item["id"],
                 "item_count": item.get("contentDetails", {}).get("itemCount", 0),
                 "thumbnail": (thumb.get("maxres", {}) or thumb.get("medium", {}) or thumb.get("high", {}) or thumb.get("default", {})).get("url", ""),
-                "description": snippet.get("description", ""),
+"description": snippet.get("description", "").replace("\n", "<br>"),
                 "published": snippet.get("publishedAt", ""),
                 "channel_title": snippet.get("channelTitle", ""),
             })

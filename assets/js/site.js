@@ -133,11 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
     else if (weeks < 5) rel = weeks + 'w ago';
     else if (months < 12) rel = months + 'mo ago';
     else rel = years + 'y ago';
-    el.textContent = '\u00b7 ' + rel;
+el.textContent = '\u00b7 ' + rel;
   });
-  /* Collapse consecutive newlines in descriptions */
-  var descs = document.querySelectorAll('.playlist-row-desc');
-  descs.forEach(function(el) {
-    el.textContent = el.textContent.replace(/\n{3,}/g, '\n\n');
-  });
+});
 });

@@ -32,7 +32,7 @@ group: media
   {% endif %}
   {% if recency == "historical" %}
     {% if pl.last_updated %}
-      {% assign lu_epoch = pl.last_updated | date: "%s" | plus: 0 %}
+      {% assign lu_epoch = pl.last_updated | truncate: 10, "" | date: "%s" | plus: 0 %}
       {% if lu_epoch == 0 %}{% assign lu_epoch = pl.last_updated | plus: 0 %}{% endif %}
       {% if lu_epoch > 0 %}
         {% assign now_epoch = site.time | date: "%s" | plus: 0 %}

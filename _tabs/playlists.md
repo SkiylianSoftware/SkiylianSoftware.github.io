@@ -40,8 +40,8 @@ permalink: /playlists/
           <span class="playlist-row-views">{{ pl.total_views }} views</span>
         {% endif %}
         {% if pl.published %}
-          <span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
-          <span class="reltime" datetime="{{ pl.published }}"></span>
+          <span class="meta-date"><span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
+          <span class="reltime" datetime="{{ pl.published }}"></span></span>
         {% endif %}
       </div>
     </div>

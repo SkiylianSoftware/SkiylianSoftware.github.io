@@ -41,6 +41,6 @@ permalink: /about/
     </div>
     {% endfor %}
   </div>
-  <p class="parts-attribution">Auto-updated from <a href="{{ site.data.pc_parts.list_url }}" target="_blank" rel="noopener">PCPartPicker</a></p>
+  <p class="parts-attribution">Auto-updated from <a href="{{ site.data.pc_parts.list_url }}" target="_blank" rel="noopener">PCPartPicker</a> &middot; Runs Ubuntu</p>
 </div>
 {% endif %}

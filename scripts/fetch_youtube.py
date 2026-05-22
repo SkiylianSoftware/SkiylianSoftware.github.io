@@ -137,6 +137,73 @@ def fetch_uploads(playlist_id, label="uploads"):
     return videos
 
 
+def enrich_playlist_stats(playlists):
+    if not YOUTUBE_API_KEY or not playlists:
+        return playlists
+    playlist_video_ids = {}
+    for pl in playlists:
+        pid = pl["playlist_id"]
+        video_ids = []
+        page_token = None
+        while True:
+            url = (
+                f"https://www.googleapis.com/youtube/v3/playlistItems"
+                f"?part=contentDetails"
+                f"&playlistId={pid}&maxResults=50&key={YOUTUBE_API_KEY}"
+            )
+            if page_token:
+                url += f"&pageToken={page_token}"
+            try:
+                data = api_get(url)
+            except Exception:
+                break
+            for item in data.get("items", []):
+                vid = item.get("contentDetails", {}).get("videoId", "")
+                if vid:
+                    video_ids.append(vid)
+            page_token = data.get("nextPageToken")
+            if not page_token:
+                break
+        playlist_video_ids[pid] = video_ids
+    all_vids = list(set(vid for ids in playlist_video_ids.values() for vid in ids))
+    video_details = {}
+    for i in range(0, len(all_vids), 50):
+        batch = all_vids[i:i+50]
+        ids = ",".join(batch)
+        url = (
+            f"https://www.googleapis.com/youtube/v3/videos"
+            f"?part=contentDetails,statistics"
+            f"&id={ids}&key={YOUTUBE_API_KEY}"
+        )
+        try:
+            data = api_get(url)
+        except Exception:
+            continue
+        for item in data.get("items", []):
+            vid = item["id"]
+            cd = item.get("contentDetails", {})
+            dur = parse_duration(cd.get("duration", ""))
+            stats = item.get("statistics", {})
+            video_details[vid] = {
+                "duration_seconds": dur,
+                "view_count": int(stats.get("viewCount", 0)),
+                "like_count": int(stats.get("likeCount", 0)),
+            }
+    for pl in playlists:
+        pid = pl["playlist_id"]
+        vids = playlist_video_ids.get(pid, [])
+        pl["total_duration_seconds"] = sum(
+            video_details.get(v, {}).get("duration_seconds", 0) for v in vids
+        )
+        pl["total_views"] = sum(
+            video_details.get(v, {}).get("view_count", 0) for v in vids
+        )
+        pl["total_likes"] = sum(
+            video_details.get(v, {}).get("like_count", 0) for v in vids
+        )
+    return playlists
+
+
 def fetch_playlists():
     if not YOUTUBE_API_KEY:
         return None
@@ -415,6 +482,8 @@ def main():
     print("Fetching YouTube playlists...")
     playlists = fetch_playlists()
     if playlists is not None:
+        print("Enriching playlist stats...")
+        playlists = enrich_playlist_stats(playlists)
         save("playlists.json", {"playlists": playlists})
 
     print("Fetching livestream status...")

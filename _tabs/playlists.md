@@ -9,17 +9,31 @@ permalink: /playlists/
 {% assign playlists = site.data.playlists.playlists %}
 {% if playlists.size > 0 %}
 <div class="playlist-rows">
-{% for playlist in playlists %}
-  <a href="{{ playlist.url }}" target="_blank" class="playlist-row">
-    {% if playlist.thumbnail %}
-      <img src="{{ playlist.thumbnail }}" alt="" loading="lazy" class="playlist-row-thumb">
+{% for pl in playlists %}
+  <a href="{{ pl.url }}" target="_blank" class="playlist-row">
+    {% if pl.thumbnail %}
+      <img src="{{ pl.thumbnail }}" alt="" loading="lazy" class="playlist-row-thumb">
     {% endif %}
     <div class="playlist-row-info">
-      <h3>{{ playlist.title }}</h3>
-      {% if playlist.description %}
-        <p class="playlist-row-desc">{{ playlist.description }}</p>
+      <h3>{{ pl.title }}</h3>
+      {% if pl.description %}
+        <p class="playlist-row-desc">{{ pl.description }}</p>
       {% endif %}
-      <span class="playlist-row-count">{{ playlist.item_count }} video{% if playlist.item_count > 1 %}s{% endif %}</span>
+      <div class="playlist-row-meta">
+        <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>
+        {% if pl.total_duration_seconds and pl.total_duration_seconds > 0 %}
+          {% assign hours = pl.total_duration_seconds | divided_by: 3600 %}
+          {% assign rem = pl.total_duration_seconds | modulo: 3600 %}
+          {% assign mins = rem | divided_by: 60 %}
+          <span class="playlist-row-duration">{{ hours }}h {{ mins }}m</span>
+        {% endif %}
+        {% if pl.total_views and pl.total_views > 0 %}
+          <span class="playlist-row-views">{{ pl.total_views }} views</span>
+        {% endif %}
+        {% if pl.published %}
+          <span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
+        {% endif %}
+      </div>
     </div>
   </a>
 {% endfor %}

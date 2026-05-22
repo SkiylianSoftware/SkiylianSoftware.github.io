@@ -30,22 +30,16 @@ permalink: /about/
   </div>
 </div>
 
-{% if site.data.pc_parts %}
+{% if site.data.pc_parts.display.size > 0 %}
 <div class="about-section">
   <h2>PC Setup</h2>
   <div class="pc-parts">
-    {% for part in site.data.pc_parts.parts %}
+    {% for part in site.data.pc_parts.display %}
     <div class="part-row">
       <span class="part-component">{{ part.component }}</span>
       <span class="part-name">{% if part.url %}<a href="{{ part.url }}" target="_blank" rel="noopener">{{ part.name }}</a>{% else %}{{ part.name }}{% endif %}</span>
-      <span class="part-price">{% if part.price %}{{ part.price }}{% endif %}</span>
     </div>
     {% endfor %}
-    <div class="part-row part-total">
-      <span class="part-component">Total</span>
-      <span></span>
-      <span class="part-price">{{ site.data.pc_parts.total_grand }}</span>
-    </div>
   </div>
   <p class="parts-attribution">Auto-updated from <a href="{{ site.data.pc_parts.list_url }}" target="_blank" rel="noopener">PCPartPicker</a></p>
 </div>

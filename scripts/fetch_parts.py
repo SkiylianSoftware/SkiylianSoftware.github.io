@@ -49,6 +49,79 @@ def extract_tag_content(text, tag, attrs=None):
     return text[idx:end_idx]
 
 
+CORE_COMPONENTS = [
+    "CPU", "CPU Cooler", "Motherboard", "Memory",
+    "Storage", "Video Card", "Case", "Power Supply",
+    "External Storage", "UPS",
+]
+
+
+def shorten_name(part):
+    name = part["name"]
+    match part["component"]:
+        case "CPU":
+            return re.sub(r"\s+\d[\d.]*\s*GHz.*", "", name).strip()
+        case "CPU Cooler":
+            m = re.match(r"^([^0-9]+(?:\s+\d+)??(?:mm)?)", name)
+            return m.group(1).strip() if m else name
+        case "Motherboard":
+            m = re.match(r"^([^(]+?)\s*(?:ATX|Micro ATX|Mini ITX)", name)
+            return m.group(1).strip() if m else name
+        case "Memory":
+            cap_match = re.search(r"(\d+)\s*GB", name)
+            speed_match = re.search(r"DDR4-\d+", name)
+            speed = speed_match.group(0) if speed_match else "DDR4"
+            return f"{cap_match.group(1)} GB {speed}" if cap_match else name
+        case "Storage":
+            return re.sub(r"\s*\([^)]*\)", "", name).strip()
+        case "Video Card":
+            return re.sub(r"\s+\d+\s*GB.*", "", name).strip()
+        case "Case":
+            name = re.sub(r"\s*ATX\s+(Mid|Full)\s+Tower\s*", " ", name).strip()
+            return re.sub(r"\s+Case$", "", name).strip()
+        case "Power Supply":
+            brand = re.match(r"^([A-Za-z][A-Za-z\s-]+)", name)
+            wattage = re.search(r"(\d+)\s*W", name)
+            brand_name = brand.group(1).strip() if brand else ""
+            watt = wattage.group(1) if wattage else "?"
+            return f"{brand_name} {watt}W" if brand_name else f"{watt}W PSU"
+        case "External Storage":
+            return re.sub(r"\s*\([^)]*\)", "", name).strip()
+        case "UPS":
+            return name
+    return name
+
+
+def build_display(parts):
+    filtered = [p for p in parts if p["component"] in CORE_COMPONENTS]
+
+    merged = {}
+    for p in filtered:
+        comp = p["component"]
+        if comp == "Memory":
+            if comp not in merged:
+                merged[comp] = {"component": comp, "name": "32 GB DDR4", "url": None}
+        elif comp == "Storage":
+            if comp not in merged:
+                merged[comp] = []
+            merged[comp].append(p)
+        else:
+            merged[comp] = {"component": comp, "name": shorten_name(p), "url": p["url"]}
+
+    result = []
+    for comp in CORE_COMPONENTS:
+        if comp not in merged:
+            continue
+        if comp == "Memory":
+            result.append(merged[comp])
+        elif comp == "Storage":
+            result.extend(merged[comp])
+        else:
+            result.append(merged[comp])
+
+    return result
+
+
 def save(filename, data):
     path = os.path.join(DATA_DIR, filename)
     with open(path, "w") as f:
@@ -168,10 +241,13 @@ def main():
         elif label == "Total":
             total_grand = price_val
 
+    display = build_display(parts)
+
     data = {
         "list_id": list_id,
         "list_url": url,
         "parts": parts,
+        "display": display,
         "total_base": total_base,
         "total_shipping": total_shipping,
         "total_grand": total_grand,
@@ -185,6 +261,7 @@ def main():
         print(f"  {part['component']}: {part['name']} ({price_str})")
     print(f"  Base: {total_base} | Shipping: {total_shipping} | Grand: {total_grand}")
     print(f"  ({len(parts)} parts total)")
+    print(f"  Display: {len(display)} items")
 
 
 if __name__ == "__main__":

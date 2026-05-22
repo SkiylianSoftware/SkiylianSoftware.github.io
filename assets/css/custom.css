@@ -366,7 +366,7 @@ body::after {
 }
 .part-row {
   display: grid;
-  grid-template-columns: 140px 1fr 80px;
+  grid-template-columns: 140px 1fr;
   gap: 0.75rem;
   align-items: baseline;
   padding: 0.35rem 0.5rem;
@@ -386,17 +386,6 @@ body::after {
   opacity: 0.9;
 }
 .part-name a:hover { color: #2dd4bf; opacity: 1; }
-.part-price {
-  text-align: right;
-  color: #2dd4bf;
-  font-variant-numeric: tabular-nums;
-}
-.part-total {
-  border-top: 1px solid rgba(45, 212, 191, 0.15);
-  margin-top: 0.25rem;
-  padding-top: 0.5rem;
-  font-weight: 600;
-}
 .parts-attribution {
   font-size: 0.75rem;
   opacity: 0.5;

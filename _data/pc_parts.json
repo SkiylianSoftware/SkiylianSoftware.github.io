@@ -135,9 +135,68 @@
       "price": null
     }
   ],
+  "display": [
+    {
+      "component": "CPU",
+      "name": "Intel Core i9-9900KS",
+      "url": "https://uk.pcpartpicker.com/product/9mCFf7/intel-core-i9-9900ks-4-ghz-8-core-processor-bx80684i99900ks"
+    },
+    {
+      "component": "CPU Cooler",
+      "name": "be quiet! Pure Loop",
+      "url": "https://uk.pcpartpicker.com/product/YVhmP6/be-quiet-pure-loop-240-liquid-cpu-cooler-bw006"
+    },
+    {
+      "component": "Motherboard",
+      "name": "Asus PRIME Z390-A",
+      "url": "https://uk.pcpartpicker.com/product/2k3H99/asus-prime-z390-a-atx-lga1151-motherboard-prime-z390-a"
+    },
+    {
+      "component": "Memory",
+      "name": "32 GB DDR4",
+      "url": null
+    },
+    {
+      "component": "Storage",
+      "name": "Western Digital Blue 500 GB M.2-2280 SATA Solid State Drive",
+      "url": "https://uk.pcpartpicker.com/product/c4jWGX/western-digital-blue-500gb-m2-2280-solid-state-drive-wds500g1b0b",
+      "price": null
+    },
+    {
+      "component": "Storage",
+      "name": "Crucial P3 Plus 2 TB M.2-2280 PCIe 4.0 X4 NVME Solid State Drive",
+      "url": "https://uk.pcpartpicker.com/product/yGZ9TW/crucial-p3-plus-2-tb-m2-2280-nvme-solid-state-drive-ct2000p3pssd8",
+      "price": "£122.99"
+    },
+    {
+      "component": "Video Card",
+      "name": "Gigabyte GAMING OC Radeon RX 7900 XTX",
+      "url": "https://uk.pcpartpicker.com/product/cNJgXL/gigabyte-gaming-oc-radeon-rx-7900-xtx-24-gb-video-card-gv-r79xtxgaming-oc-24gd"
+    },
+    {
+      "component": "Case",
+      "name": "Aerocool P7-C1",
+      "url": "https://uk.pcpartpicker.com/product/28H48d/aerocool-p7-c1-black-atx-mid-tower-case-p7-c1-black"
+    },
+    {
+      "component": "Power Supply",
+      "name": "Corsair RM 850W",
+      "url": "https://uk.pcpartpicker.com/product/jtm323/corsair-rm850-2019-850-w-80-gold-certified-fully-modular-atx-power-supply-cp-9020196-na"
+    },
+    {
+      "component": "External Storage",
+      "name": "SanDisk Extreme Portable V2 4 TB External SSD",
+      "url": "https://uk.pcpartpicker.com/product/JwC48d/sandisk-extreme-portable-v2-4-tb-external-ssd-sdssde61-4t00-g25"
+    },
+    {
+      "component": "UPS",
+      "name": "APC SMT1500X448 UPS",
+      "url": "https://uk.pcpartpicker.com/product/YCyxFT/apc-ups-smt1500x448"
+    }
+  ],
   "total_base": "£2147.01",
   "total_shipping": "£3.50",
   "total_grand": "£2150.51",
   "part_count": 22,
-  "fetched_at": "2026-05-22T09:12:17.516496+00:00"
+  "fetched_at": "2026-05-22T09:59:04.364959+00:00"
 }

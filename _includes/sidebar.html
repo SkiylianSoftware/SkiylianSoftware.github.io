@@ -23,26 +23,18 @@
           <span>{{ site.data.locales[include.lang].tabs.home | upcase }}</span>
         </a>
       </li>
-      {% assign media_shown = false %}
-      {% assign stats_shown = false %}
+      {% assign groups_shown = "" %}
       {% for tab in site.tabs %}
-        {% if tab.group == "media" and media_shown == false %}
-          {% assign media_shown = true %}
+        {% if tab.group %}
+          {% unless groups_shown contains tab.group %}
+          {% assign groups_shown = groups_shown | append: "|" | append: tab.group %}
           <li class="nav-item nav-group-label">
             <span class="nav-group-link">
-              <i class="fa-fw fa-solid fa-photo-film"></i>
-              <span>MEDIA</span>
+              <i class="fa-fw {% if tab.group == 'media' %}fa-solid fa-photo-film{% elsif tab.group == 'stats' %}fa-solid fa-chart-simple{% endif %}"></i>
+              <span>{{ tab.group | upcase }}</span>
             </span>
           </li>
-        {% endif %}
-        {% if tab.group == "stats" and stats_shown == false %}
-          {% assign stats_shown = true %}
-          <li class="nav-item nav-group-label">
-            <span class="nav-group-link">
-              <i class="fa-fw fa-solid fa-chart-simple"></i>
-              <span>STATS</span>
-            </span>
-          </li>
+          {% endunless %}
         {% endif %}
         <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}{% if tab.group %} nav-group-child{% endif %}">
           <a href="{{ tab.url | relative_url }}" class="nav-link">

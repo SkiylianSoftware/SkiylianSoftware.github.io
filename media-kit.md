@@ -41,7 +41,7 @@ permalink: /partners/media-kit/
     <div class="mk-stat"><span class="mk-num">{{ meta.subscriber_count | round }}</span><span class="mk-lbl">Subscribers</span></div>
     <div class="mk-stat accent"><span class="mk-num">{{ meta.view_count }}</span><span class="mk-lbl">Total Views</span></div>
     <div class="mk-stat"><span class="mk-num">{{ meta.video_count }}</span><span class="mk-lbl">Videos</span></div>
-    <div class="mk-stat accent"><span class="mk-num">{{ total_views | divided_by: videos.size | default: 0 }}</span><span class="mk-lbl">Avg Views / Video</span></div>
+    <div class="mk-stat accent"><span class="mk-num">{% if videos.size > 0 %}{{ total_views | divided_by: videos.size }}{% else %}0{% endif %}</span><span class="mk-lbl">Avg Views / Video</span></div>
     <div class="mk-stat"><span class="mk-num">{{ total_hours }}h</span><span class="mk-lbl">Content Published</span></div>
     <div class="mk-stat accent"><span class="mk-num">{{ total_likes }}</span><span class="mk-lbl">Total Likes</span></div>
   </div>

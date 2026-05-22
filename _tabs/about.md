@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-user"
 title: About
-order: 4
+order: 1
 permalink: /about/
 ---
 
@@ -14,7 +14,25 @@ permalink: /about/
   <div class="about-section">
     <h2>Content</h2>
     <p>I play games that let me build, automate, and optimise things -- transport networks, space programs, factories, code. The channel is where engineering ambition meets cosy chaos.</p>
-    <p>Current series span Transport Fever 2, modded Minecraft, Mars First Logistics, Kerbal Space Program, and various programming infrastructure projects.</p>
+    {% assign current_series = "" %}
+    {% assign sep = "" %}
+    {% assign recent_series = "" %}
+    {% assign rsep = "" %}
+    {% for pair in site.data.youtube_main.series_recency %}
+      {% if pair[1] == "current" %}
+        {% capture current_series %}{{ current_series }}{{ sep }}{{ pair[0] }}{% endcapture %}
+        {% assign sep = ", " %}
+      {% elsif pair[1] == "recent" %}
+        {% capture recent_series %}{{ recent_series }}{{ rsep }}{{ pair[0] }}{% endcapture %}
+        {% assign rsep = ", " %}
+      {% endif %}
+    {% endfor %}
+    {% if current_series != "" or recent_series != "" %}
+    <p class="series-overview">
+      {% if current_series != "" %}Current: {{ current_series }}.{% endif %}
+      {% if recent_series != "" %} Recent: {{ recent_series }}.{% endif %}
+    </p>
+    {% endif %}
   </div>
 
   <div class="about-section">

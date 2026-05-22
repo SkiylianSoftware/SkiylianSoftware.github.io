@@ -368,6 +368,7 @@ body::after {
 }
 .ql-item:hover { border-color: rgba(45, 212, 191, 0.3); color: #2dd4bf; }
 .ql-item i { color: #c084fc; width: 1.2rem; text-align: center; }
+.series-overview { color: #8888aa; font-size: 0.9rem; }
 .pc-parts {
   display: flex;
   flex-direction: column;

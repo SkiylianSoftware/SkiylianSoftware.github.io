@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-video"
 title: Videos
-order: 1
+order: 2
 permalink: /videos/
 ---
 
@@ -16,12 +16,16 @@ permalink: /videos/
 {% assign all_videos = site.data.youtube_main.videos %}
 {% if all_videos and all_videos.size > 0 %}
 {% assign series_set = all_videos | map: "series" | compact | map: "series_name" | uniq %}
-{% assign recency_map = site.data.youtube_main.series_recency | default: {} %}
+{% assign recency_map = site.data.youtube_main.series_recency %}
 {% if series_set.size > 1 %}
 <div class="filter-bar">
   <button class="filter-btn active" onclick="filterSeries(this, '')">All</button>
   {% for name in series_set %}
-  {% assign recency = recency_map[name] | default: 'historical' %}
+  {% if recency_map and recency_map != "" %}
+    {% assign recency = recency_map[name] | default: 'historical' %}
+  {% else %}
+    {% assign recency = 'historical' %}
+  {% endif %}
   <button class="filter-btn recency-{{ recency }}" onclick="filterSeries(this, '{{ name | escape }}')"><span class="recency-dot"></span> {{ name }}</button>
   {% endfor %}
 </div>

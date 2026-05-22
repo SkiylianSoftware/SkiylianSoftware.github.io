@@ -56,14 +56,12 @@ jobs:
         run: python scripts/track_history.py
 
       - name: Fetch Ko-fi data
-        env:
-          KOFI_API_KEY: ${{ secrets.KOFI_API_KEY }}
         run: python scripts/fetch_kofi.py
 
       - name: Fetch Fourthwall data
         env:
-          FW_CLIENT_ID: ${{ secrets.FW_CLIENT_ID }}
-          FW_CLIENT_SECRET: ${{ secrets.FW_CLIENT_SECRET }}
+          FW_USERNAME: ${{ secrets.FW_USERNAME }}
+          FW_PASSWORD: ${{ secrets.FW_PASSWORD }}
         run: python scripts/fetch_fourthwall.py
 
       - name: Setup Pages

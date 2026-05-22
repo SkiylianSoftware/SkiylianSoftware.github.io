@@ -43,20 +43,7 @@ layout: default
 
 <div class="sidebar-widgets">
   {% assign twitch_sched = site.data.twitch_schedule.segments %}
-  {% if site.data.schedule.streams.size > 0 %}
-    <div class="widget-card">
-      <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Stream Schedule</h3>
-      <div class="widget-body">
-        {% for s in site.data.schedule.streams limit: 2 %}
-          <div class="schedule-item">
-            <span class="schedule-day">{{ s.day }}</span>
-            <span class="schedule-time">{{ s.time }}</span>
-            <span class="schedule-type">{{ s.type }}</span>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  {% elsif twitch_sched and twitch_sched.size > 0 %}
+  {% if twitch_sched and twitch_sched.size > 0 %}
     <div class="widget-card">
       <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Upcoming Streams</h3>
       <div class="widget-body">

@@ -78,7 +78,7 @@
 a { color: #2dd4bf; }
 a:hover { color: #5eead4; }
 
-.btn { --btn-bg: rgba(45, 212, 191, 0.08) !important; --btn-hover-bg: rgba(45, 212, 191, 0.15) !important; color: #c8c8d4 !important; }
+.btn { --btn-bg: rgba(45, 212, 191, 0.08) !important; --btn-hover-bg: rgba(45, 212, 191, 0.15) !important; }
 .btn:hover { background: var(--btn-hover-bg) !important; }
 .tag, .tag:hover, .tag:active { color: #c084fc !important; background: rgba(192, 132, 252, 0.08) !important; }
 .categories a, .tags a { color: #c084fc !important; }

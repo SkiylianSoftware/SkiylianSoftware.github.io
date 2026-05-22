@@ -41,7 +41,7 @@ permalink: /support/
     </div>
   </a>
 
-  <a href="https://ko-fi.com/skiylia" target="_blank" rel="noopener" class="support-card card-kofi">
+  <a href="https://support.skiylia.dev" target="_blank" rel="noopener" class="support-card card-kofi">
     <div class="card-icon"><i class="fas fa-mug-hot"></i></div>
     <div class="card-body">
       <h3>Ko-fi</h3>
@@ -85,7 +85,7 @@ permalink: /support/
         <span>Hit subscribe and ring the bell; it helps more than you'd think.</span>
       </div>
     </a>
-    <a href="https://www.twitch.tv/skiylia" target="_blank" rel="noopener" class="free-card">
+    <a href="https://live.skiylia.dev" target="_blank" rel="noopener" class="free-card">
       <i class="fab fa-twitch" style="color: #a970ff;"></i>
       <div>
         <strong>Follow on Twitch</strong>

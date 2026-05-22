@@ -13,7 +13,7 @@ BROWSER_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (X11; Linux x86_64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/125.0.0.0 Safari/537.36"
+        "Chrome/134.0.0.0 Safari/537.36"
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "en-GB,en;q=0.9",
@@ -166,8 +166,15 @@ def main():
     list_id = read_list_id()
     print(f"Fetching PCPartPicker list {list_id}...")
 
+    session = requests.Session()
+    session.headers.update(BROWSER_HEADERS)
+    # Warm up with the base domain to get cookies
+    try:
+        session.get(PCPARTPICKER_BASE, timeout=15)
+    except Exception:
+        pass
     url = f"{PCPARTPICKER_BASE}/list/{list_id}"
-    resp = requests.get(url, headers=BROWSER_HEADERS, timeout=30)
+    resp = session.get(url, timeout=30)
     if resp.status_code != 200:
         print(f"Failed to fetch list: HTTP {resp.status_code} - keeping existing data", file=sys.stderr)
         return

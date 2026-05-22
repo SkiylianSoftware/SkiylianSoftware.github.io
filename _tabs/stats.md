@@ -1,32 +1,92 @@
 ---
 layout: page
 icon: "fa-solid fa-chart-simple"
-title: Stats
+title: Dashboard
 order: 7
-permalink: /stats/
+permalink: /dashboard/
+group: stats
 ---
 
 {% assign meta = site.data.site_meta %}
 {% assign videos = site.data.youtube_main.videos %}
 {% assign vods_list = site.data.youtube_vods.videos %}
+{% assign twitch = site.data.twitch_stats %}
+{% assign gh = site.data.github %}
+{% assign store = site.data.fourthwall %}
+
+{% assign has_vods = false %}
+{% if vods_list.size > 0 or meta.vods_subscriber_count %}{% assign has_vods = true %}{% endif %}
 
 <div class="stats-grid">
   <div class="stat-card accent-turquoise">
     <span class="stat-value">{{ meta.subscriber_count }}</span>
-    <span class="stat-label">YouTube Subscribers</span>
+    <span class="stat-label">YouTube Subs</span>
   </div>
   <div class="stat-card accent-purple">
     <span class="stat-value">{{ meta.view_count }}</span>
-    <span class="stat-label">Total Views</span>
+    <span class="stat-label">YouTube Views</span>
   </div>
   <div class="stat-card accent-turquoise">
     <span class="stat-value">{{ meta.video_count }}</span>
-    <span class="stat-label">Videos Uploaded</span>
+    <span class="stat-label">Videos</span>
   </div>
   <div class="stat-card accent-purple">
-    <span class="stat-value">{{ meta.published_at | truncate: 4, "" }}</span>
-    <span class="stat-label">Channel Since</span>
+    <span class="stat-value">{{ twitch.follower_count | default: "?" }}</span>
+    <span class="stat-label">Twitch Followers</span>
   </div>
+</div>
+
+<div class="stats-grid-two">
+  {% if twitch.view_count %}
+  <div class="stat-card accent-turquoise">
+    <span class="stat-value">{{ twitch.view_count }}</span>
+    <span class="stat-label">Twitch Views</span>
+  </div>
+  {% endif %}
+  {% if twitch.broadcaster_type %}
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ twitch.broadcaster_type }}</span>
+    <span class="stat-label">Twitch Status</span>
+  </div>
+  {% endif %}
+  {% if store.total_orders %}
+  <div class="stat-card accent-turquoise">
+    <span class="stat-value">{{ store.total_orders }}</span>
+    <span class="stat-label">Store Orders</span>
+  </div>
+  {% endif %}
+  {% if has_vods %}
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ meta.vods_subscriber_count | default: "?" }}</span>
+    <span class="stat-label">VODs Subs</span>
+  </div>
+  <div class="stat-card accent-turquoise">
+    <span class="stat-value">{{ meta.vods_view_count | default: "?" }}</span>
+    <span class="stat-label">VODs Views</span>
+  </div>
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ vods_list.size }}</span>
+    <span class="stat-label">Stream Archives</span>
+  </div>
+  {% endif %}
+  {% if gh %}
+  <div class="stat-card accent-turquoise">
+    <span class="stat-value">{{ gh.public_repos }}</span>
+    <span class="stat-label">Public Repos</span>
+  </div>
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ gh.total_stars }}</span>
+    <span class="stat-label">GitHub Stars</span>
+  </div>
+  <div class="stat-card accent-turquoise">
+    <span class="stat-value">{{ gh.total_forks }}</span>
+    <span class="stat-label">Forks</span>
+  </div>
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ gh.followers }}</span>
+    <span class="stat-label">GitHub Followers</span>
+  </div>
+  {% endif %}
 </div>
 
 {% if meta.published_at %}
@@ -36,37 +96,37 @@ permalink: /stats/
   {% assign channel_age_days = channel_age_seconds | divided_by: 86400 %}
   {% assign channel_age_years = channel_age_days | divided_by: 365 %}
   <div class="insight-box">
-    <p>Channel has been going for <strong>{{ channel_age_years }} years</strong> ({{ channel_age_days }} days).</p>
+    <p>Channel running for <strong>{{ channel_age_years }} years</strong> ({{ channel_age_days }} days).</p>
     {% if meta.video_count and channel_age_days > 0 %}
       {% assign vpm = meta.video_count | times: 30.0 | divided_by: channel_age_days | round: 1 %}
-      <p>That's roughly <strong>{{ vpm }} videos per month</strong>.</p>
+      <p><strong>{{ vpm }}</strong> videos per month average.</p>
     {% endif %}
   </div>
 {% endif %}
 
 {% if videos.size > 0 %}
   {% assign total_watch_seconds = 0 %}
-  {% assign total_views_all = 0 %}
+  {% assign total_video_views = 0 %}
   {% assign total_likes = 0 %}
   {% for v in videos %}
     {% assign total_watch_seconds = total_watch_seconds | plus: v.duration_seconds %}
-    {% assign total_views_all = total_views_all | plus: v.view_count %}
+    {% assign total_video_views = total_video_views | plus: v.view_count %}
     {% assign total_likes = total_likes | plus: v.like_count %}
   {% endfor %}
   {% assign total_watch_hours = total_watch_seconds | divided_by: 3600 %}
   {% assign most_viewed = videos | sort: "view_count" | last %}
   {% assign most_liked = videos | sort: "like_count" | last %}
-  {% assign avg_views = total_views_all | divided_by: videos.size %}
+  {% assign avg_views = total_video_views | divided_by: videos.size %}
 
   <h2 class="stats-subtitle">Content Breakdown</h2>
   <div class="stats-grid-two">
     <div class="stat-card accent-turquoise">
       <span class="stat-value">{{ total_watch_hours }}h</span>
-      <span class="stat-label">Total Content Published</span>
+      <span class="stat-label">Total Runtime</span>
     </div>
     <div class="stat-card accent-purple">
-      <span class="stat-value">{{ total_views_all }}</span>
-      <span class="stat-label">All-time Video Views</span>
+      <span class="stat-value">{{ total_video_views }}</span>
+      <span class="stat-label">Video Views</span>
     </div>
     <div class="stat-card accent-turquoise">
       <span class="stat-value">{{ total_likes }}</span>
@@ -74,7 +134,7 @@ permalink: /stats/
     </div>
     <div class="stat-card accent-purple">
       <span class="stat-value">{{ avg_views }}</span>
-      <span class="stat-label">Avg Views Per Video</span>
+      <span class="stat-label">Avg Views/Video</span>
     </div>
     {% if most_viewed %}
     <div class="stat-card wide">
@@ -93,65 +153,64 @@ permalink: /stats/
   </div>
 {% endif %}
 
-{% if vods_list.size > 0 or meta.vods_subscriber_count %}
-  <h2 class="stats-subtitle">VODs Channel (Skye Live)</h2>
+{% if has_vods or twitch or store or gh %}
+  <h2 class="stats-subtitle">Across All Platforms</h2>
   <div class="stats-grid-two">
-    {% if meta.vods_subscriber_count %}
-    <div class="stat-card accent-purple">
-      <span class="stat-value">{{ meta.vods_subscriber_count }}</span>
-      <span class="stat-label">Subscribers</span>
-    </div>
-    {% endif %}
-    {% if meta.vods_view_count %}
-    <div class="stat-card accent-turquoise">
-      <span class="stat-value">{{ meta.vods_view_count }}</span>
-      <span class="stat-label">Views</span>
-    </div>
-    {% endif %}
-    <div class="stat-card accent-turquoise">
-      <span class="stat-value">{{ vods_list.size }}</span>
-      <span class="stat-label">Stream Archives</span>
-    </div>
-    {% if meta.vods_published_at %}
-    <div class="stat-card accent-purple">
-      <span class="stat-value">{{ meta.vods_published_at | truncate: 4, "" }}</span>
-      <span class="stat-label">VODs Channel Since</span>
-    </div>
-    {% endif %}
-  </div>
+    {% assign yt_subs = meta.subscriber_count | default: 0 %}
+    {% assign vods_subs = meta.vods_subscriber_count | default: 0 %}
+    {% assign twitch_followers = twitch.follower_count | default: 0 %}
+    {% assign yt_views = meta.view_count | default: 0 %}
+    {% assign vods_views = meta.vods_view_count | default: 0 %}
+    {% assign twitch_views = twitch.view_count | default: 0 %}
+    {% assign yt_vids = meta.video_count | default: 0 %}
+    {% assign vods_vids = vods_list.size %}
+    {% assign total_subs = yt_subs | plus: vods_subs | plus: twitch_followers %}
+    {% assign total_views_all = yt_views | plus: vods_views | plus: twitch_views %}
+    {% assign total_vids = yt_vids | plus: vods_vids %}
 
-  {% assign total_subs = meta.subscriber_count | default: 0 | plus: meta.vods_subscriber_count | default: 0 %}
-  {% assign total_views_all = meta.view_count | default: 0 | plus: meta.vods_view_count | default: 0 %}
-  {% assign total_vids = meta.video_count | default: 0 | plus: vods_list.size %}
-  <div class="insight-box">
-    <p><strong>Combined across both channels:</strong> {{ total_subs }} subscribers, {{ total_views_all }} views, {{ total_vids }} videos.</p>
+    <div class="stat-card accent-turquoise">
+      <span class="stat-value">{{ total_subs }}</span>
+      <span class="stat-label">Total Audience</span>
+    </div>
+    <div class="stat-card accent-purple">
+      <span class="stat-value">{{ total_views_all }}</span>
+      <span class="stat-label">Total Views</span>
+    </div>
+    <div class="stat-card accent-turquoise">
+      <span class="stat-value">{{ total_vids }}</span>
+      <span class="stat-label">Total Content Items</span>
+    </div>
+    {% if store.total_orders %}
+    <div class="stat-card accent-purple">
+      <span class="stat-value">{{ store.total_orders }}</span>
+      <span class="stat-label">Store Orders</span>
+    </div>
+    {% endif %}
   </div>
 {% endif %}
 
-<div class="insight-box">
-  <h3>Twitch</h3>
-  {% if site.data.twitch_stats %}
-    <p>Followers: <strong>{{ site.data.twitch_stats.follower_count | default: "?" }}</strong></p>
-  {% else %}
-    <p>Twitch stats not available yet. Follow at <a href="https://live.skiylia.dev">live.skiylia.dev</a>.</p>
-  {% endif %}
-</div>
-
-{% assign gh = site.data.github %}
-{% if gh %}
-  <h2 class="stats-subtitle">GitHub</h2>
+{% if store.products and store.products.size > 0 %}
+  <h2 class="stats-subtitle">Store Products</h2>
   <div class="stats-grid-two">
-    <div class="stat-card accent-turquoise">
-      <span class="stat-value">{{ gh.public_repos }}</span>
-      <span class="stat-label">Public Repos</span>
+    {% for p in store.products %}
+    <div class="stat-card wide">
+      <span class="stat-label">{{ p.name }}</span>
+      {% if p.price %}
+      <span class="stat-value-sm">{{ p.price }} {{ p.currency }}</span>
+      {% endif %}
     </div>
-    <div class="stat-card accent-purple">
-      <span class="stat-value">{{ gh.total_stars }}</span>
-      <span class="stat-label">Total Stars</span>
-    </div>
-    <div class="stat-card accent-turquoise">
-      <span class="stat-value">{{ gh.total_forks }}</span>
-      <span class="stat-label">Forks</span>
-    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if gh.top_repos and gh.top_repos.size > 0 %}
+  <h2 class="stats-subtitle">Top Repositories</h2>
+  <div class="stats-grid-two">
+    {% for r in gh.top_repos limit: 5 %}
+    <a href="{{ r.url }}" target="_blank" rel="noopener" class="stat-card wide btn" style="text-align: left;">
+      <span class="stat-label">{{ r.name }}</span>
+      <span class="stat-value-sm">{{ r.stars }} stars &middot; {{ r.forks }} forks</span>
+    </a>
+    {% endfor %}
   </div>
 {% endif %}

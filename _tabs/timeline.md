@@ -1,9 +1,10 @@
 ---
 layout: page
 icon: "fa-solid fa-timeline"
-title: Timeline
+title: History
 order: 6
-permalink: /timeline/
+permalink: /history/
+group: stats
 ---
 
 {% assign history = site.data.history %}

@@ -41,6 +41,15 @@ permalink: /support/
     </div>
   </a>
 
+  <a href="https://ko-fi.com/skiylia" target="_blank" rel="noopener" class="support-card card-kofi">
+    <div class="card-icon"><i class="fas fa-mug-hot"></i></div>
+    <div class="card-body">
+      <h3>Ko-fi</h3>
+      <p>Buy me a tea! One-off donations with no subscription; perfect if you just want to say thanks after a video.</p>
+      <span class="card-cta">Buy me a tea &rarr;</span>
+    </div>
+  </a>
+
   {% assign yt_memberships = site.data.site_meta.memberships_available | default: false %}
   {% if yt_memberships %}
   <a href="https://www.youtube.com/@skiylia/join" target="_blank" rel="noopener" class="support-card card-yt">
@@ -64,15 +73,26 @@ permalink: /support/
     </div>
   </a>
   {% endif %}
+</div>
 
-  <a href="https://ko-fi.com/skiylia" target="_blank" rel="noopener" class="support-card card-kofi">
-    <div class="card-icon"><i class="fas fa-mug-hot"></i></div>
-    <div class="card-body">
-      <h3>Ko-fi</h3>
-      <p>Buy me a tea! One-off donations with no subscription; perfect if you just want to say thanks after a video.</p>
-      <span class="card-cta">Buy me a tea &rarr;</span>
-    </div>
-  </a>
+<div class="support-free">
+  <h2>Free ways to support</h2>
+  <div class="free-grid">
+    <a href="https://www.youtube.com/@skiylia?sub_confirmation=1" target="_blank" rel="noopener" class="free-card">
+      <i class="fab fa-youtube" style="color: #ff4444;"></i>
+      <div>
+        <strong>Subscribe on YouTube</strong>
+        <span>Hit subscribe and ring the bell; it helps more than you'd think.</span>
+      </div>
+    </a>
+    <a href="https://www.twitch.tv/skiylia" target="_blank" rel="noopener" class="free-card">
+      <i class="fab fa-twitch" style="color: #a970ff;"></i>
+      <div>
+        <strong>Follow on Twitch</strong>
+        <span>Follow for free and get notified when I go live.</span>
+      </div>
+    </a>
+  </div>
 </div>
 
 <div class="support-why">

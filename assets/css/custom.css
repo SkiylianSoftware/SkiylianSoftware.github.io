@@ -87,7 +87,7 @@ a:hover { color: #5eead4; }
 .post-content a:not([class]):hover, .archives a:hover, .categories a:hover,
 a:not([class]):hover { color: #5eead4 !important; border-bottom-color: rgba(45, 212, 191, 0.3) !important; text-decoration: none; }
 
-.btn { --btn-bg: rgba(45, 212, 191, 0.08) !important; --btn-hover-bg: rgba(45, 212, 191, 0.15) !important; }
+.btn { --btn-bg: var(--clr-card-bg) !important; --btn-hover-bg: rgba(45, 212, 191, 0.12) !important; }
 .btn:hover { background: var(--btn-hover-bg) !important; }
 .tag, .tag:hover, .tag:active { color: #c084fc !important; background: rgba(192, 132, 252, 0.08) !important; }
 .categories a, .tags a { color: #c084fc !important; }

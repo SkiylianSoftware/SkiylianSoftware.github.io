@@ -1,4 +1,5 @@
 import json
+import re
 import os
 import sys
 from datetime import datetime, timezone
@@ -221,7 +222,23 @@ def check_youtube_memberships():
         resp = requests.get(url, timeout=10, allow_redirects=True)
         if resp.status_code != 200:
             return False
-        text = resp.text.lower()
+        text = resp.text
+        # Look for a Membership tab in the channel page data
+        m = re.search(r'ytInitialData\s*=\s*({.*?});', text, re.DOTALL)
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                tabs = data.get("contents", {}).get(
+                    "twoColumnBrowseResultsRenderer", {}
+                ).get("tabs", [])
+                for tab in tabs:
+                    title = tab.get("tabRenderer", {}).get("title", "")
+                    if title and "membership" in title.lower():
+                        return True
+            except (json.JSONDecodeError, KeyError, TypeError):
+                pass
+        # Fallback: text search for specific join UI (not generic config strings)
+        text_lower = text.lower()
         negatives = [
             "memberships aren't available",
             "memberships are not available",
@@ -231,13 +248,12 @@ def check_youtube_memberships():
         positives = [
             "join this channel",
             "become a member",
-            "membership",  # generic, but only triggers if no negatives match
         ]
         for n in negatives:
-            if n in text:
+            if n in text_lower:
                 return False
         for p in positives:
-            if p in text:
+            if p in text_lower:
                 return True
         return False
     except requests.RequestException:

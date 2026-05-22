@@ -6,7 +6,7 @@
   icon: "fab fa-twitch"
   url: "https://live.skiylia.dev"
 
-- type: github
+- type: custom
   icon: "fab fa-github"
   url: "https://code.skiylia.dev"
 

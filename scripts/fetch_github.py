@@ -6,7 +6,9 @@ from datetime import datetime, timezone
 import requests
 
 GITHUB_USERNAME = "SkiylianSoftware"
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 DATA_DIR = "_data"
+HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
 
 
 def save(filename, data):
@@ -19,14 +21,14 @@ def save(filename, data):
 def main():
     print("Fetching GitHub stats...")
     user_url = f"https://api.github.com/users/{GITHUB_USERNAME}"
-    resp = requests.get(user_url, timeout=30)
+    resp = requests.get(user_url, headers=HEADERS, timeout=30)
     if resp.status_code != 200:
         print(f"GitHub user fetch failed: {resp.status_code}", file=sys.stderr)
         return
     user = resp.json()
 
     repos_url = f"https://api.github.com/users/{GITHUB_USERNAME}/repos?per_page=100&sort=updated&direction=desc"
-    resp = requests.get(repos_url, timeout=30)
+    resp = requests.get(repos_url, headers=HEADERS, timeout=30)
     repos = resp.json() if resp.status_code == 200 else []
     if isinstance(repos, dict):
         print(f"GitHub repos fetch failed: {repos.get('message', '')}", file=sys.stderr)

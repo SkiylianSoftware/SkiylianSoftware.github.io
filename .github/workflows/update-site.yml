@@ -47,6 +47,8 @@ jobs:
         run: python scripts/merge_content.py
 
       - name: Fetch GitHub stats
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/fetch_github.py
 
       - name: Fetch PC parts list
@@ -63,6 +65,13 @@ jobs:
           FW_USERNAME: ${{ secrets.FW_USERNAME }}
           FW_PASSWORD: ${{ secrets.FW_PASSWORD }}
         run: python scripts/fetch_fourthwall.py
+
+      - name: Fetch YouTube Analytics (historical daily data)
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python scripts/fetch_youtube_analytics.py
 
       - name: Setup Pages
         id: pages

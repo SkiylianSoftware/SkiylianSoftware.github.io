@@ -4,10 +4,9 @@ games:
   - title: "Transport Fever 2"
     url: "https://store.steampowered.com/app/1066780/Transport_Fever_2/"
     reason: "Building Skiylian Transport"
-music:
-  - title: "Chill synthwave / lofi"
-    reason: "Stream background vibes"
-media:
   - title: "Mars First Logistics"
     url: "https://store.steampowered.com/app/1532200/Mars_First_Logistics/"
     reason: "Physics-based delivery mayhem"
+music:
+  - title: "Chill synthwave / lofi"
+    reason: "Stream background vibes"

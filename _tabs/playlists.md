@@ -29,15 +29,10 @@ group: media
       {% endif %}
     {% endfor %}
   {% endif %}
-  {% if recency == "historical" and pl.published %}
-    {% assign pub_epoch = pl.published | date: "%s" | plus: 0 %}
-    {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-    {% assign pub_days = now_epoch | minus: pub_epoch | divided_by: 86400 %}
-    {% if pub_days < 90 %}{% assign recency = "current" %}
-    {% elsif pub_days < 365 %}{% assign recency = "recent" %}
-    {% endif %}
+  {% if recency == "historical" %}
+    {% assign recency = nil %}
   {% endif %}
-  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn recency-{{ recency }}"
+  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}"
      data-published="{{ pl.published | default: '' }}"
      data-views="{{ pl.total_views | default: 0 }}"
      data-duration="{{ pl.total_duration_seconds | default: 0 }}">

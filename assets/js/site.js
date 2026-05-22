@@ -136,4 +136,3 @@ document.addEventListener('DOMContentLoaded', function() {
 el.textContent = '\u00b7 ' + rel;
   });
 });
-});

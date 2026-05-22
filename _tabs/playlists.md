@@ -17,16 +17,25 @@ group: media
 {% if playlists.size > 0 %}
 <div class="playlist-rows" id="playlist-rows">
 {% for pl in playlists %}
-  {% if pl.published %}
+  {% assign recency = "historical" %}
+  {% assign sr = site.data.youtube_main.series_recency %}
+  {% if sr %}
+    {% for pair in sr %}
+      {% assign sname = pair[0] %}
+      {% assign sinfo = pair[1] %}
+      {% if pl.title contains sname or sname contains pl.title %}
+        {% assign recency = sinfo.status | default: "historical" %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  {% if recency == "historical" and pl.published %}
     {% assign pub_epoch = pl.published | date: "%s" | plus: 0 %}
     {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
     {% assign pub_days = now_epoch | minus: pub_epoch | divided_by: 86400 %}
     {% if pub_days < 90 %}{% assign recency = "current" %}
     {% elsif pub_days < 365 %}{% assign recency = "recent" %}
-    {% else %}{% assign recency = "historical" %}
     {% endif %}
-  {% else %}
-    {% assign recency = "historical" %}
   {% endif %}
   <a href="{{ pl.url }}" target="_blank" class="playlist-row btn recency-{{ recency }}"
      data-published="{{ pl.published | default: '' }}"

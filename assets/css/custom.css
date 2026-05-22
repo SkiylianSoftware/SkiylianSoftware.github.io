@@ -796,3 +796,30 @@ body::after {
   font-family: inherit; font-size: 0.8rem;
 }
 .kb-hint { margin-top: 1rem; font-size: 0.8rem; opacity: 0.6; }
+
+/* === UNIVERSAL PLATFORM HOVER COLORS === */
+[href*="youtube.com"]:hover,
+[href*="youtu.be"]:hover,
+[href*="watch.skiylia.dev"]:hover {
+  color: #ff4444 !important;
+  border-color: rgba(255,68,68,0.4) !important;
+}
+[href*="twitch.tv"]:hover,
+[href*="live.skiylia.dev"]:hover {
+  color: #a970ff !important;
+  border-color: rgba(169,112,255,0.4) !important;
+}
+[href*="github.com"]:hover,
+[href*="code.skiylia.dev"]:hover {
+  color: #888 !important;
+  border-color: rgba(136,136,136,0.4) !important;
+}
+[href*="store.skiylia.dev"]:hover {
+  color: #c084fc !important;
+  border-color: rgba(192,132,252,0.4) !important;
+}
+[href*="ko-fi.com"]:hover,
+[href*="support.skiylia.dev"]:hover {
+  color: #2dd4bf !important;
+  border-color: rgba(45,212,191,0.4) !important;
+}

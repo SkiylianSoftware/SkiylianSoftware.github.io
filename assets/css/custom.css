@@ -870,3 +870,5 @@ body::after {
   padding: 0.5rem 0.5rem 0.25rem 0.5rem !important;
   opacity: 0.4;
 }
+.nav-group-child .nav-link { padding-left: 1.25rem !important; }
+.nav-group-child .nav-link i { width: 1rem; text-align: center; font-size: 0.8rem; }

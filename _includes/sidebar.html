@@ -44,7 +44,7 @@
             </span>
           </li>
         {% endif %}
-        <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
+        <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}{% if tab.group %} nav-group-child{% endif %}">
           <a href="{{ tab.url | relative_url }}" class="nav-link">
             <i class="fa-fw {{ tab.icon }}"></i>
             {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}

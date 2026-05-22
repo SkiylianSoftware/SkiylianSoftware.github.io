@@ -196,12 +196,50 @@ def fetch_livestream():
     }
 
 
+def read_config_flag(key, default="auto"):
+    try:
+        with open("_config.yml") as f:
+            for line in f:
+                if line.startswith(f"{key}:"):
+                    val = line.split(":", 1)[1].strip()
+                    if val.lower() == "true":
+                        return True
+                    if val.lower() == "false":
+                        return False
+                    return "auto"
+    except FileNotFoundError:
+        pass
+    return default
+
+
 def check_youtube_memberships():
-    """Probe whether the channel has YouTube memberships available."""
+    override = read_config_flag("youtube_memberships")
+    if override != "auto":
+        return override
     try:
         url = f"https://www.youtube.com/channel/{CHANNEL_ID}/join"
-        resp = requests.head(url, timeout=10, allow_redirects=True)
-        return resp.status_code == 200
+        resp = requests.get(url, timeout=10, allow_redirects=True)
+        if resp.status_code != 200:
+            return False
+        text = resp.text.lower()
+        negatives = [
+            "memberships aren't available",
+            "memberships are not available",
+            "no memberships",
+            "not eligible",
+        ]
+        positives = [
+            "join this channel",
+            "become a member",
+            "membership",  # generic, but only triggers if no negatives match
+        ]
+        for n in negatives:
+            if n in text:
+                return False
+        for p in positives:
+            if p in text:
+                return True
+        return False
     except requests.RequestException:
         pass
     return False

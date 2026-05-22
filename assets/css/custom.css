@@ -370,7 +370,19 @@ body::after {
   transition: border-color 0.15s, color 0.15s;
 }
 .ql-item:hover { border-color: rgba(45, 212, 191, 0.3); color: #2dd4bf; }
-.ql-item i { color: #c084fc; width: 1.2rem; text-align: center; }
+.ql-item[href*="watch.skiylia.dev"]:hover,
+.ql-item[href*="vods.skiylia.dev"]:hover { color: #ff4444; border-color: rgba(255,68,68,0.3); }
+.ql-item[href*="live.skiylia.dev"]:hover { color: #a970ff; border-color: rgba(169,112,255,0.3); }
+.ql-item[href*="code.skiylia.dev"]:hover { color: #888; border-color: rgba(136,136,136,0.3); }
+.ql-item[href*="store.skiylia.dev"]:hover { color: #c084fc; border-color: rgba(192,132,252,0.3); }
+.ql-item[href*="support.skiylia.dev"]:hover { color: #2dd4bf; border-color: rgba(45,212,191,0.3); }
+.ql-item i { width: 1.2rem; text-align: center; }
+.ql-item[href*="watch.skiylia.dev"] i,
+.ql-item[href*="vods.skiylia.dev"] i { color: #ff4444; }
+.ql-item[href*="live.skiylia.dev"] i { color: #a970ff; }
+.ql-item[href*="code.skiylia.dev"] i { color: #888; }
+.ql-item[href*="store.skiylia.dev"] i { color: #c084fc; }
+.ql-item[href*="support.skiylia.dev"] i { color: #2dd4bf; }
 .series-overview { color: #8888aa; font-size: 0.9rem; }
 .series-section { margin: 0.75rem 0; }
 .series-group { margin-bottom: 0.75rem; }

@@ -10,14 +10,24 @@ permalink: /support/
   <p>This whole operation runs on tea, chaos, and the kindness of folks like you. If my content brings you joy, there are a few ways to keep the trains running on time (and the tangents flowing).</p>
 </div>
 
-{% if site.data.fourthwall.total_orders %}
+{% if site.data.fourthwall.total_orders or site.data.twitch_stats.follower_count %}
 <div class="support-metrics">
   {% assign fw = site.data.fourthwall %}
+  {% if fw.total_orders %}
   <div class="metric-card">
     <i class="fas fa-box"></i>
     <span class="metric-value">{{ fw.total_orders }}</span>
     <span class="metric-label">Merch orders</span>
   </div>
+  {% endif %}
+  {% assign twitch = site.data.twitch_stats %}
+  {% if twitch.follower_count and twitch.follower_count > 0 %}
+  <div class="metric-card">
+    <i class="fab fa-twitch"></i>
+    <span class="metric-value">{{ twitch.follower_count }}</span>
+    <span class="metric-label">Twitch followers</span>
+  </div>
+  {% endif %}
 </div>
 {% endif %}
 
@@ -26,11 +36,13 @@ permalink: /support/
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>
     <div class="card-body">
       <h3>Merch Store</h3>
-      <p>T-shirts, hoodies, stickers, and more; powered by Fourthwall. Look good while supporting the channel.</p>
+      <p>{% if site.data.fourthwall.products.size > 0 %}Featuring {% for p in site.data.fourthwall.products limit:3 %}{{ p.name }}{% unless forloop.last %}, {% endunless %}{% endfor %} and more;{% else %}T-shirts, hoodies, stickers, and more;{% endif %} powered by Fourthwall.</p>
       <span class="card-cta">Browse the store &rarr;</span>
     </div>
   </a>
 
+  {% assign subs = site.data.site_meta.subscriber_count | default: 0 %}
+  {% if subs >= 500 %}
   <a href="https://www.youtube.com/@skiylia/join" target="_blank" rel="noopener" class="support-card card-yt">
     <div class="card-icon"><i class="fab fa-youtube"></i></div>
     <div class="card-body">
@@ -39,6 +51,19 @@ permalink: /support/
       <span class="card-cta">Become a member &rarr;</span>
     </div>
   </a>
+  {% endif %}
+
+  {% assign bt = site.data.twitch_stats.broadcaster_type | default: "" %}
+  {% if bt == "affiliate" or bt == "partner" %}
+  <a href="https://www.twitch.tv/subs/skiylia" target="_blank" rel="noopener" class="support-card card-twitch">
+    <div class="card-icon"><i class="fab fa-twitch"></i></div>
+    <div class="card-body">
+      <h3>Twitch Subscription</h3>
+      <p>Subscribe on Twitch for ad-free viewing, custom emotes, and badge perks during live streams.</p>
+      <span class="card-cta">Subscribe &rarr;</span>
+    </div>
+  </a>
+  {% endif %}
 
   <a href="https://ko-fi.com/skiylia" target="_blank" rel="noopener" class="support-card card-kofi">
     <div class="card-icon"><i class="fas fa-mug-hot"></i></div>

@@ -35,6 +35,7 @@ def main():
         return
     headers = basic_auth_header(FW_USERNAME, FW_PASSWORD)
     data = {"fetched_at": datetime.now(timezone.utc).isoformat()}
+
     shop = api_get("shops/current", headers)
     if shop:
         data["shop"] = {
@@ -42,6 +43,7 @@ def main():
             "domain": shop.get("publicDomain", ""),
         }
         print(f"  Shop: {data['shop']['name']} ({data['shop']['domain']})")
+
     orders = api_get("orders?limit=1", headers)
     if orders:
         items = orders.get("data", orders.get("items", []))
@@ -50,6 +52,29 @@ def main():
         print(f"  Total orders: {total}")
     else:
         print("  No orders endpoint available")
+
+    products = api_get("products?limit=5", headers)
+    if products:
+        raw = products.get("data", products.get("items", []))
+        top = []
+        for p in raw[:5]:
+            name = p.get("name", "")
+            price = p.get("price", p.get("amount", None))
+            currency = p.get("currency", p.get("defaultCurrency", ""))
+            url = p.get("url", p.get("publicUrl", ""))
+            if name:
+                entry = {"name": name}
+                if price:
+                    entry["price"] = float(price)
+                    entry["currency"] = currency
+                if url:
+                    entry["url"] = url
+                top.append(entry)
+        data["products"] = top
+        print(f"  Products: {len(top)}")
+    else:
+        print("  No products endpoint available, will fall back to generic text")
+
     os.makedirs(DATA_DIR, exist_ok=True)
     path = os.path.join(DATA_DIR, "fourthwall.json")
     with open(path, "w") as f:

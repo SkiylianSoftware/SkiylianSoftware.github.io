@@ -714,10 +714,12 @@ body::after {
 .support-card:hover { transform: translateY(-3px); }
 .card-merch:hover { border-color: #c084fc; }
 .card-yt:hover { border-color: #ff4444; }
+.card-twitch:hover { border-color: #a970ff; }
 .card-kofi:hover { border-color: #2dd4bf; }
 .card-icon { flex-shrink: 0; font-size: 1.5rem; width: 2rem; text-align: center; padding-top: 0.1rem; }
 .card-merch .card-icon { color: #c084fc; }
 .card-yt .card-icon { color: #ff4444; }
+.card-twitch .card-icon { color: #a970ff; }
 .card-kofi .card-icon { color: #2dd4bf; }
 .card-body { flex: 1; min-width: 0; }
 .card-body h3 { font-size: 0.95rem; margin: 0 0 0.3rem; }

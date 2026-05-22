@@ -16,37 +16,34 @@ permalink: /about/
     <p>I play games that let me build, automate, and optimise things -- transport networks, space programs, factories, code. The channel is where engineering ambition meets cosy chaos.</p>
     {% assign current_html = "" %}
     {% assign recent_html = "" %}
+    {% assign past_html = "" %}
     {% for pair in site.data.youtube_main.series_recency %}
       {% assign name = pair[0] %}
       {% assign info = pair[1] %}
       {% assign ep_count = info.episodes | default: 0 %}
+      {% assign playlist_url = nil %}
+      {% for pl in site.data.playlists.playlists %}
+        {% if pl.title contains name %}{% assign playlist_url = pl.url %}{% break %}{% endif %}
+      {% endfor %}
+      {% if playlist_url %}
+        {% assign url = playlist_url %}
+      {% else %}
+        {% assign url = "/videos#" | append: name | url_encode %}
+      {% endif %}
+      {% assign dot = "historical" %}
+      {% if info.status == "current" %}{% assign dot = "current" %}
+      {% elsif info.status == "recent" %}{% assign dot = "recent" %}
+      {% endif %}
+      {% capture item %}<span class="series-dot {{ dot }}"></span> <a href="{{ url }}" class="btn series-btn"><strong>{{ name }}</strong></a>{% if ep_count > 0 %} <span class="ep-count">{{ ep_count }} episodes</span>{% endif %}{% endcapture %}
       {% if info.status == "current" %}
-        {% assign playlist_url = nil %}
-        {% for pl in site.data.playlists.playlists %}
-          {% if pl.title contains name %}{% assign playlist_url = pl.url %}{% break %}{% endif %}
-        {% endfor %}
-        {% if playlist_url %}
-          {% assign url = playlist_url %}
-        {% else %}
-          {% assign url = "/videos#" | append: name | url_encode %}
-        {% endif %}
-        {% capture item %}<span class="series-dot current"></span> <a href="{{ url }}" class="btn series-btn"><strong>{{ name }}</strong></a>{% if ep_count > 0 %} <span class="ep-count">{{ ep_count }} episodes</span>{% endif %}{% endcapture %}
         {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
       {% elsif info.status == "recent" %}
-        {% assign playlist_url = nil %}
-        {% for pl in site.data.playlists.playlists %}
-          {% if pl.title contains name %}{% assign playlist_url = pl.url %}{% break %}{% endif %}
-        {% endfor %}
-        {% if playlist_url %}
-          {% assign url = playlist_url %}
-        {% else %}
-          {% assign url = "/videos#" | append: name | url_encode %}
-        {% endif %}
-        {% capture item %}<span class="series-dot recent"></span> <a href="{{ url }}" class="btn series-btn"><strong>{{ name }}</strong></a>{% if ep_count > 0 %} <span class="ep-count">{{ ep_count }} episodes</span>{% endif %}{% endcapture %}
         {% capture recent_html %}{{ recent_html }}<li>{{ item }}</li>{% endcapture %}
+      {% else %}
+        {% capture past_html %}{{ past_html }}<li>{{ item }}</li>{% endcapture %}
       {% endif %}
     {% endfor %}
-    {% if current_html != "" or recent_html != "" %}
+    {% if current_html != "" or recent_html != "" or past_html != "" %}
     <div class="series-section">
       {% if current_html != "" %}
       <div class="series-group">
@@ -58,6 +55,12 @@ permalink: /about/
       <div class="series-group">
         <h3 class="series-heading recent-heading"><span class="series-dot recent"></span> Recently Played</h3>
         <ul class="series-list">{{ recent_html }}</ul>
+      </div>
+      {% endif %}
+      {% if past_html != "" %}
+      <div class="series-group">
+        <h3 class="series-heading"><span class="series-dot historical"></span> Past Series</h3>
+        <ul class="series-list">{{ past_html }}</ul>
       </div>
       {% endif %}
     </div>

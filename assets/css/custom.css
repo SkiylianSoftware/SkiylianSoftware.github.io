@@ -254,7 +254,7 @@ body::after {
 /* === SHARED CARD BODY === */
 .card-body { padding: 0.6rem; }
 .video-card h3, .playlist-info h3 { font-size: 0.9rem; margin: 0 0 0.2rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.meta-row { display: flex; justify-content: space-between; font-size: 0.78rem; opacity: 0.7; margin-bottom: 0.2rem; }
+.meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; opacity: 0.7; margin-bottom: 0.2rem; }
 .series-badge { font-size: 0.75rem; opacity: 0.6; margin-bottom: 0.2rem; }
 .video-desc { font-size: 0.8rem; opacity: 0.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .video-card {
@@ -802,7 +802,7 @@ body::after {
 .playlist-row-info { flex: 1; min-width: 0; margin-left: 1rem; text-align: left; }
 .playlist-row-info h3 { font-size: 0.95rem; margin: 0 0 0.35rem; line-height: 1.3; }
 .playlist-row-desc { font-size: 0.85rem; margin: 0 0 0.4rem; opacity: 0.7; line-height: 1.5; }
-.playlist-row-meta { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; font-size: 0.8rem; opacity: 0.55; }
+.playlist-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; font-size: 0.8rem; opacity: 0.55; }
 .reltime { opacity: 0.65; white-space: nowrap; }
 .meta-date { white-space: nowrap; }
 @media (max-width: 500px) {

@@ -10,6 +10,36 @@ permalink: /support/
   <p>This whole operation runs on tea, chaos, and the kindness of folks like you. If my content brings you joy, there are a few ways to keep the trains running on time (and the tangents flowing).</p>
 </div>
 
+{% if site.data.kofi.patrons or site.data.fourthwall.stats %}
+<div class="support-metrics">
+  {% if site.data.kofi.patrons %}
+  {% assign kofi = site.data.kofi %}
+  <div class="metric-card">
+    <i class="fas fa-users"></i>
+    <span class="metric-value">{{ kofi.patrons.count }}</span>
+    <span class="metric-label">Ko-fi supporters</span>
+  </div>
+  {% endif %}
+  {% if site.data.kofi.goal and site.data.kofi.goal.active %}
+  {% assign goal = site.data.kofi.goal %}
+  {% assign pct = goal.current | divided_by: goal.target | times: 100 | round %}
+  <div class="metric-card">
+    <i class="fas fa-bullseye"></i>
+    <span class="metric-value">{{ pct }}%</span>
+    <span class="metric-label">{{ goal.title }} ({{ goal.current | round }}/{{ goal.target | round }})</span>
+  </div>
+  {% endif %}
+  {% if site.data.fourthwall.stats %}
+  {% assign fw = site.data.fourthwall.stats %}
+  <div class="metric-card">
+    <i class="fas fa-box"></i>
+    <span class="metric-value">{{ fw.total_orders }}</span>
+    <span class="metric-label">Merch orders</span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
 <div class="support-grid">
   <a href="https://store.skiylia.dev" target="_blank" rel="noopener" class="support-card card-merch">
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>

@@ -8,10 +8,6 @@ permalink: /playlists/
 
 {% assign playlists = site.data.playlists.playlists %}
 {% if playlists.size > 0 %}
-<div class="playlist-page-intro">
-  <p>Curated collections of videos organised by game, topic, or series. Each playlist is a chapter in the story of this channel.</p>
-  <p class="playlist-cta"><a href="/videos" class="btn"><i class="fa-solid fa-filter"></i> Browse all videos by series</a></p>
-</div>
 <div class="playlist-rows">
 {% for playlist in playlists %}
   <a href="{{ playlist.url }}" target="_blank" class="playlist-row">

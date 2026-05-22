@@ -118,6 +118,8 @@ permalink: /support/
 
 <div class="support-note">
   <i class="fas fa-heart" style="color: #c084fc;"></i>
-  <p>No matter how you choose to support; whether it's a membership, a Ko-fi, or just watching and sharing; I genuinely appreciate it. This little corner of the internet exists because of you.</p>
-  <p class="support-signoff">- Skye</p>
+  <div>
+    <p>No matter how you choose to support; whether it's a membership, a Ko-fi, or just watching and sharing; I genuinely appreciate it. This little corner of the internet exists because of you.</p>
+    <p class="support-signoff">- Skye</p>
+  </div>
 </div>

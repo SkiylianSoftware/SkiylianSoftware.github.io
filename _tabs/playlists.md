@@ -21,7 +21,7 @@ permalink: /playlists/
      data-views="{{ pl.total_views | default: 0 }}"
      data-duration="{{ pl.total_duration_seconds | default: 0 }}">
     {% if pl.thumbnail %}
-      <img src="{{ pl.thumbnail }}" alt="" loading="lazy" class="playlist-row-thumb">
+      <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
     {% endif %}
     <div class="playlist-row-info">
       <h3>{{ pl.title }}</h3>

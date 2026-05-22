@@ -258,7 +258,7 @@ body::after {
 .series-badge { font-size: 0.75rem; opacity: 0.6; margin-bottom: 0.2rem; }
 .video-desc { font-size: 0.8rem; opacity: 0.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .playlist-desc { font-size: 0.8rem; margin: 0 0 0.3rem; opacity: 0.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.playlist-count { font-size: 0.78rem; opacity: 0.5; }
+.playlist-count { font-size: 0.8rem; opacity: 0.65; }
 .playlist-info { padding: 0.75rem; }
 .video-card {
   background: var(--clr-card-bg);
@@ -356,33 +356,11 @@ body::after {
   flex-direction: column;
   gap: 0.5rem;
 }
-.ql-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.quick-links .btn {
+  justify-content: flex-start;
   padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  background: rgba(13, 13, 30, 0.8);
-  border: 1px solid rgba(45, 212, 191, 0.06);
-  text-decoration: none;
-  color: inherit;
   font-size: 0.85rem;
-  transition: border-color 0.15s, color 0.15s;
 }
-.ql-item:hover { border-color: rgba(45, 212, 191, 0.3); color: #2dd4bf; }
-.ql-item[href*="watch.skiylia.dev"]:hover,
-.ql-item[href*="vods.skiylia.dev"]:hover { color: #ff4444; border-color: rgba(255,68,68,0.3); }
-.ql-item[href*="live.skiylia.dev"]:hover { color: #a970ff; border-color: rgba(169,112,255,0.3); }
-.ql-item[href*="code.skiylia.dev"]:hover { color: #888; border-color: rgba(136,136,136,0.3); }
-.ql-item[href*="store.skiylia.dev"]:hover { color: #c084fc; border-color: rgba(192,132,252,0.3); }
-.ql-item[href*="support.skiylia.dev"]:hover { color: #2dd4bf; border-color: rgba(45,212,191,0.3); }
-.ql-item i { width: 1.2rem; text-align: center; }
-.ql-item[href*="watch.skiylia.dev"] i,
-.ql-item[href*="vods.skiylia.dev"] i { color: #ff4444; }
-.ql-item[href*="live.skiylia.dev"] i { color: #a970ff; }
-.ql-item[href*="code.skiylia.dev"] i { color: #888; }
-.ql-item[href*="store.skiylia.dev"] i { color: #c084fc; }
-.ql-item[href*="support.skiylia.dev"] i { color: #2dd4bf; }
 .series-overview { color: #8888aa; font-size: 0.9rem; }
 .series-section { margin: 0.75rem 0; }
 .series-group { margin-bottom: 0.75rem; }
@@ -797,14 +775,22 @@ body::after {
 }
 .kb-hint { margin-top: 1rem; font-size: 0.8rem; opacity: 0.6; }
 
-/* Series links on about page */
-.series-link { color: inherit; text-decoration: none; transition: color 0.2s; }
-.series-link:hover { color: var(--clr-teal); }
+/* Series buttons on about page */
+.series-btn { padding: 0.2rem 0.5rem; font-size: 0.82rem; }
+.series-list li { padding: 0.25rem 0; display: flex; align-items: center; gap: 0.4rem; }
+.ep-count { font-size: 0.78rem; opacity: 0.6; white-space: nowrap; }
+
+/* Sidebar social icon hover */
+.sidebar-bottom a { transition: transform 0.15s; }
+.sidebar-bottom a:hover { transform: translateY(-2px); }
+
+/* Playlists page */
+.playlist-page-intro { margin: 1.5rem 0; }
+.playlist-page-intro p { font-size: 0.9rem; opacity: 0.85; margin: 0 0 0.5rem; line-height: 1.6; }
+.playlist-cta { margin-top: 0.75rem !important; }
+.playlist-meta { margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
 
 /* === UNIVERSAL PLATFORM HOVER COLORS === */
-.platform-btn i,
-.ql-item i { font-size: 1.1em; margin-right: 0.3rem; }
-
 [href*="youtube.com"] i,
 [href*="youtu.be"] i,
 [href*="watch.skiylia.dev"] i,

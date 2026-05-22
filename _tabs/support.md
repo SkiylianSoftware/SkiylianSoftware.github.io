@@ -36,7 +36,7 @@ permalink: /support/
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>
     <div class="card-body">
       <h3>Merch Store</h3>
-      <p>{% if site.data.fourthwall.products.size > 0 %}Featuring {% for p in site.data.fourthwall.products limit:3 %}{{ p.name }}{% unless forloop.last %}, {% endunless %}{% endfor %} and more;{% else %}T-shirts, hoodies, stickers, and more;{% endif %} powered by Fourthwall.</p>
+      <p>{% if site.data.fourthwall.products.size > 0 %}Featuring {% for p in site.data.fourthwall.products limit:3 %}{{ p.name }}{% unless forloop.last %}, {% endunless %}{% endfor %} and more;{% else %}Cool merch;{% endif %} powered by Fourthwall.</p>
       <span class="card-cta">Browse the store &rarr;</span>
     </div>
   </a>

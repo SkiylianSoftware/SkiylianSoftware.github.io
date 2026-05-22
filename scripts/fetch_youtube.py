@@ -462,9 +462,9 @@ def compute_series_recency(videos):
             recency[name] = {"status": "historical", "episodes": data["episode_count"]}
             continue
         days = (now - dt).days
-        if days < 183:
+        if days < 90:
             status = "current"
-        elif days < 366:
+        elif days < 365:
             status = "recent"
         else:
             status = "historical"

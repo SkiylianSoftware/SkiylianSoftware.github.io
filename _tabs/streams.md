@@ -4,6 +4,7 @@ icon: "fa-brands fa-twitch"
 title: Streams
 order: 3
 permalink: /streams/
+group: media
 ---
 
 <p>Catch me live on <a href="https://live.skiylia.dev">Twitch</a>. Past streams are archived on the <a href="https://vods.skiylia.dev">YouTube VODs channel</a>.</p>

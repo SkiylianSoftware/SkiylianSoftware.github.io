@@ -23,8 +23,18 @@
           <span>{{ site.data.locales[include.lang].tabs.home | upcase }}</span>
         </a>
       </li>
+      {% assign media_shown = false %}
       {% assign stats_shown = false %}
       {% for tab in site.tabs %}
+        {% if tab.group == "media" and media_shown == false %}
+          {% assign media_shown = true %}
+          <li class="nav-item nav-group-label">
+            <span class="nav-link nav-group-link">
+              <i class="fa-fw fa-solid fa-photo-film"></i>
+              <span>MEDIA</span>
+            </span>
+          </li>
+        {% endif %}
         {% if tab.group == "stats" and stats_shown == false %}
           {% assign stats_shown = true %}
           <li class="nav-item nav-group-label">

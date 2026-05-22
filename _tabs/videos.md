@@ -4,6 +4,7 @@ icon: "fa-solid fa-video"
 title: Videos
 order: 2
 permalink: /videos/
+group: media
 ---
 
 <div class="sort-bar">

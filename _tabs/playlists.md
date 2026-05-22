@@ -4,6 +4,7 @@ icon: "fa-solid fa-list"
 title: Playlists
 order: 4
 permalink: /playlists/
+group: media
 ---
 
 <div class="sort-bar">

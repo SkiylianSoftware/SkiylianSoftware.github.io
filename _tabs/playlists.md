@@ -6,11 +6,20 @@ order: 4
 permalink: /playlists/
 ---
 
+<div class="sort-bar">
+  <button class="sort-btn active" data-sort="date" onclick="sortPlaylists(this, 'date')">Newest</button>
+  <button class="sort-btn" data-sort="views" onclick="sortPlaylists(this, 'views')">Most viewed</button>
+  <button class="sort-btn" data-sort="duration" onclick="sortPlaylists(this, 'duration')">Longest</button>
+</div>
+
 {% assign playlists = site.data.playlists.playlists %}
 {% if playlists.size > 0 %}
-<div class="playlist-rows">
+<div class="playlist-rows" id="playlist-rows">
 {% for pl in playlists %}
-  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn">
+  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn"
+     data-published="{{ pl.published | default: '' }}"
+     data-views="{{ pl.total_views | default: 0 }}"
+     data-duration="{{ pl.total_duration_seconds | default: 0 }}">
     {% if pl.thumbnail %}
       <img src="{{ pl.thumbnail }}" alt="" loading="lazy" class="playlist-row-thumb">
     {% endif %}
@@ -41,3 +50,24 @@ permalink: /playlists/
 {% else %}
 <p>No playlists loaded yet.</p>
 {% endif %}
+
+<script>
+function sortPlaylists(btn, mode) {
+  document.querySelectorAll('.sort-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var container = document.getElementById('playlist-rows');
+  if (!container) return;
+  var rows = Array.from(container.querySelectorAll('.playlist-row'));
+  rows.sort(function(a, b) {
+    if (mode === 'date') {
+      var da = a.getAttribute('data-published') || '';
+      var db = b.getAttribute('data-published') || '';
+      return db.localeCompare(da);
+    }
+    var va = parseInt(a.getAttribute('data-' + mode)) || 0;
+    var vb = parseInt(b.getAttribute('data-' + mode)) || 0;
+    return vb - va;
+  });
+  rows.forEach(function(r) { container.appendChild(r); });
+}
+</script>

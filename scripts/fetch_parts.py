@@ -129,8 +129,22 @@ def save(filename, data):
     print(f"Written {path}")
 
 
+def read_list_id():
+    env_id = os.environ.get("PCPARTPICKER_LIST_ID")
+    if env_id:
+        return env_id
+    try:
+        with open("_config.yml") as f:
+            for line in f:
+                if line.startswith("pcpartpicker_list_id:"):
+                    return line.split(":", 1)[1].strip()
+    except FileNotFoundError:
+        pass
+    return "phfd9K"
+
+
 def main():
-    list_id = os.environ.get("PCPARTPICKER_LIST_ID", "4WRVw3")
+    list_id = read_list_id()
     print(f"Fetching PCPartPicker list {list_id}...")
 
     url = f"{PCPARTPICKER_BASE}/list/{list_id}"

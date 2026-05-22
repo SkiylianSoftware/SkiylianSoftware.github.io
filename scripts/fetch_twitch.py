@@ -78,6 +78,27 @@ def fetch_followers(user_id, token):
     return data.get("total", 0)
 
 
+def fetch_schedule(user_id, token):
+    resp = requests.get(
+        f"{API_URL}/schedule?broadcaster_id={user_id}",
+        headers={"Client-ID": TWITCH_CLIENT_ID, "Authorization": f"Bearer {token}"},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    data = resp.json().get("data", {})
+    segments = data.get("segments", [])
+    schedule = []
+    for s in segments:
+        schedule.append({
+            "start_time": s.get("start_time", ""),
+            "end_time": s.get("end_time", ""),
+            "title": s.get("title", ""),
+            "category": s.get("category", {}).get("name", "") if s.get("category") else "",
+            "is_recurring": s.get("is_recurring", False),
+        })
+    return schedule
+
+
 def main():
     token = get_app_token()
     if not token:
@@ -99,6 +120,14 @@ def main():
         print(f"Twitch followers: {followers}")
     except Exception as e:
         print(f"Could not fetch Twitch followers: {e}", file=sys.stderr)
+
+    print("Fetching Twitch schedule...")
+    try:
+        schedule = fetch_schedule(user_id, token)
+        save("twitch_schedule.json", {"segments": schedule, "fetched_at": datetime.now(timezone.utc).isoformat()})
+        print(f"Twitch schedule: {len(schedule)} upcoming segments")
+    except Exception as e:
+        print(f"Could not fetch Twitch schedule: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,3 @@
-# Stream schedule - edit this to match your current schedule
-# Times in your local timezone (Europe/London)
-streams:
-  - day: Saturday
-    time: "7:00 PM"
-    type: Gaming / Dev stream
-    notes: "Main weekly stream"
-  - day: Wednesday
-    time: "7:00 PM"
-    type: Casual / Dev stream
-    notes: "Mid-week casual stream"
+# Stream schedule - fill in your actual schedule here
+# When empty, the schedule widget won't show on the homepage
+streams: []

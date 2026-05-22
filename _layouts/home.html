@@ -42,7 +42,8 @@ layout: default
 {% endif %}
 
 <div class="sidebar-widgets">
-  {% if site.data.schedule.streams %}
+  {% assign twitch_sched = site.data.twitch_schedule.segments %}
+  {% if site.data.schedule.streams.size > 0 %}
     <div class="widget-card">
       <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Stream Schedule</h3>
       <div class="widget-body">
@@ -53,7 +54,20 @@ layout: default
             <span class="schedule-type">{{ s.type }}</span>
           </div>
         {% endfor %}
-        <p class="schedule-footnote">All times in UK time</p>
+      </div>
+    </div>
+  {% elsif twitch_sched and twitch_sched.size > 0 %}
+    <div class="widget-card">
+      <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Upcoming Streams</h3>
+      <div class="widget-body">
+        {% for s in twitch_sched limit: 2 %}
+          {% assign start = s.start_time | date: "%A" %}
+          <div class="schedule-item">
+            <span class="schedule-day">{{ start }}</span>
+            <span class="schedule-time">{{ s.start_time | date: "%H:%M" }}</span>
+            <span class="schedule-type">{{ s.category | default: s.title | truncate: 20 }}</span>
+          </div>
+        {% endfor %}
       </div>
     </div>
   {% endif %}

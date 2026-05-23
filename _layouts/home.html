@@ -17,7 +17,7 @@ layout: default
 
 {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.type %}
 <div class="milestone-marquee">
-  <div class="milestone-track">
+  <div class="milestone-track" id="milestone-track">
     <span class="milestone-item">
       {% if site.data.milestones.current.count >= 1000 %}
         &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }} -- {{ site.data.milestones.current.message }}
@@ -25,7 +25,7 @@ layout: default
         &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }}! {{ site.data.milestones.current.message }}
       {% endif %}
     </span>
-    <span class="milestone-item">
+    <span class="milestone-item" aria-hidden="true">
       {% if site.data.milestones.current.count >= 1000 %}
         &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }} -- {{ site.data.milestones.current.message }}
       {% elsif site.data.milestones.current.count > 0 %}
@@ -284,6 +284,19 @@ function closePlayer() {
   document.getElementById('video-modal').classList.remove('open');
 }
 document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closePlayer(); });
+
+var mt = document.getElementById('milestone-track');
+if (mt) {
+  mt.style.transform = 'translateX(100vw)';
+  requestAnimationFrame(function() {
+    mt.style.transition = 'transform 0.6s ease-out';
+    mt.style.transform = 'translateX(0)';
+    mt.addEventListener('transitionend', function() {
+      mt.style.transition = 'none';
+      mt.style.animation = 'marquee 30s linear infinite';
+    }, { once: true });
+  });
+}
 </script>
 
 <style>
@@ -327,11 +340,11 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 
 .channel-hero {
   position: relative;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
+  width: 100%;
   min-height: 280px;
-  background-size: cover;
-  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom center;
   background-color: #0a0a14;
   display: flex;
   align-items: flex-end;
@@ -406,7 +419,9 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 }
 .milestone-track {
   display: inline-flex;
-  animation: marquee 20s linear infinite;
+}
+.animating {
+  animation: marquee 30s linear infinite;
 }
 .milestone-item {
   padding: 0 2rem;
@@ -415,9 +430,8 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
   white-space: nowrap;
 }
 @keyframes marquee {
-  0% { transform: translateX(50%); }
-  5% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .sidebar-widgets {

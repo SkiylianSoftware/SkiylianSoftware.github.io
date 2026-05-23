@@ -612,7 +612,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
                     if cat["latest_video"] is None or published > cat["latest_video"]:
                         cat["latest_video"] = published
 
-                content_series = _extract_content_series(video.get("title", ""))
+                content_series = _extract_content_series(v.get("title", ""))
                 if not content_series:
                     content_series = video.get("title", "")
                 if content_series not in cat["series_data"]:

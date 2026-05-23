@@ -340,29 +340,14 @@ if (mt) {
 
 .channel-hero {
   position: relative;
-  width: auto;
-  margin-left: -1.5rem;
-  margin-right: -1.5rem;
-  min-height: 360px;
+  width: 100%;
+  min-height: 240px;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: bottom center;
   background-color: #0a0a14;
   display: flex;
   align-items: flex-end;
-}
-
-@media (min-width: 992px) {
-  .channel-hero {
-    width: calc(100vw - 260px);
-    margin-right: 0;
-  }
-}
-
-@media (min-width: 1650px) {
-  .channel-hero {
-    width: calc(100vw - 300px);
-  }
 }
 
 .channel-hero:not([style*="background-image"]) {

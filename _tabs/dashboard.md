@@ -17,6 +17,42 @@ group: stats
 {% assign has_vods = false %}
 {% if vods_list.size > 0 or meta.vods_subscriber_count %}{% assign has_vods = true %}{% endif %}
 
+{% if videos.size > 0 %}
+  {% assign total_watch_seconds = 0 %}
+  {% assign total_video_views = 0 %}
+  {% assign total_likes = 0 %}
+  {% assign yt_start = nil %}
+  {% for v in videos %}
+    {% assign total_watch_seconds = total_watch_seconds | plus: v.duration_seconds %}
+    {% assign total_video_views = total_video_views | plus: v.view_count %}
+    {% assign total_likes = total_likes | plus: v.like_count %}
+    {% assign vp = v.published | date: "%Y-%m-%d" %}
+    {% if yt_start == nil or vp < yt_start %}{% assign yt_start = vp %}{% endif %}
+  {% endfor %}
+  {% if total_watch_seconds > 0 %}
+    {% assign total_watch_hours = total_watch_seconds | divided_by: 3600 %}
+  {% else %}
+    {% assign total_watch_hours = 0 %}
+  {% endif %}
+  {% assign most_viewed = videos | sort: "view_count" | last %}
+  {% assign most_liked = videos | sort: "like_count" | last %}
+  {% assign avg_views = total_video_views | divided_by: videos.size %}
+  {% if yt_start %}
+    {% assign yt_start_ts = yt_start | date: "%s" %}
+    {% assign now_ts = site.time | date: "%s" %}
+    {% assign yt_age_days = now_ts | minus: yt_start_ts | divided_by: 86400 %}
+    {% assign yt_age_years = yt_age_days | divided_by: 365 %}
+    {% assign vpm = meta.video_count | times: 30 | divided_by: yt_age_days %}
+  {% endif %}
+{% endif %}
+
+{% if twitch.created_at %}
+  {% assign twitch_start_ts = twitch.created_at | date: "%s" %}
+  {% assign now_ts_t = site.time | date: "%s" %}
+  {% assign twitch_age_days = now_ts_t | minus: twitch_start_ts | divided_by: 86400 %}
+  {% assign twitch_age_years = twitch_age_days | divided_by: 365 %}
+{% endif %}
+
 <!-- Combined Overview -->
 <h2 class="stats-subtitle">Overview</h2>
 {% assign yt_subs = meta.subscriber_count | default: 0 %}
@@ -61,19 +97,6 @@ group: stats
 
 <!-- YouTube -->
 {% if videos.size > 0 %}
-  {% assign total_watch_seconds = 0 %}
-  {% assign total_video_views = 0 %}
-  {% assign total_likes = 0 %}
-  {% for v in videos %}
-    {% assign total_watch_seconds = total_watch_seconds | plus: v.duration_seconds %}
-    {% assign total_video_views = total_video_views | plus: v.view_count %}
-    {% assign total_likes = total_likes | plus: v.like_count %}
-  {% endfor %}
-  {% assign total_watch_hours = total_watch_seconds | divided_by: 3600 %}
-  {% assign most_viewed = videos | sort: "view_count" | last %}
-  {% assign most_liked = videos | sort: "like_count" | last %}
-  {% assign avg_views = total_video_views | divided_by: videos.size %}
-
   <h2 class="stats-subtitle">YouTube</h2>
   <div class="stats-grid">
     <div class="stat-card">
@@ -96,19 +119,20 @@ group: stats
       <span class="stat-value">{{ avg_views }}</span>
       <span class="stat-label">Avg Views/Video</span>
     </div>
+    {% if yt_age_years %}
     <div class="stat-card">
       <span class="stat-value">{{ yt_age_years }}y</span>
       <span class="stat-label">Content Age</span>
     </div>
-    {% if yt_age_days and yt_age_days > 0 %}
-    {% assign vpm = meta.video_count | times: 30.0 | divided_by: yt_age_days | round: 1 %}
+    {% endif %}
+    {% if vpm %}
     <div class="stat-card accent-purple">
       <span class="stat-value">{{ vpm }}</span>
       <span class="stat-label">Videos/Month</span>
     </div>
     {% endif %}
     <div class="stat-card">
-      <span class="stat-value">{{ yt_start | date: "%Y" }}</span>
+      <span class="stat-value">{{ yt_start }}</span>
       <span class="stat-label">First Video</span>
     </div>
   </div>
@@ -175,12 +199,13 @@ group: stats
     <span class="stat-label">Status</span>
   </div>
   {% endif %}
-{% if twitch_age_years %}
+  {% if twitch_age_years %}
   <div class="stat-card accent-purple">
     <span class="stat-value">{{ twitch_age_years }}y</span>
     <span class="stat-label">Account Age</span>
   </div>
   {% endif %}
+</div>
 
 <!-- Store -->
 {% if store %}

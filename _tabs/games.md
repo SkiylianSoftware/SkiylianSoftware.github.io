@@ -33,42 +33,43 @@ group: media
     {% assign img_url = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/" | append: steam_appid | append: "/header.jpg" %}
   {% endif %}
   <div class="game-card">
-    <div class="game-card-bg"{% if img_url %} style="background-image: url('{{ img_url }}')"{% endif %}>
-      <div class="game-card-content">
-        <div class="game-card-header">
-          <h3 class="game-name">
-            {% if img_url == nil %}<i class="fas fa-gamepad game-fallback-icon"></i>{% endif %}
-            {{ gname }}
-          </h3>
-          <div class="game-links">
-            {% if link.steam %}
-            <a href="{{ link.steam }}" class="btn game-link-btn" target="_blank" rel="noopener"><i class="fab fa-steam"></i> Steam</a>
-            {% endif %}
-            {% if link.website %}
-            <a href="{{ link.website }}" class="btn game-link-btn" target="_blank" rel="noopener"><i class="fas fa-globe"></i> Website</a>
-            {% endif %}
-          </div>
-        </div>
-        <div class="game-stats">
-          <span class="game-stat"><span class="game-stat-value">{{ g.episode_count }}</span> episode{% if g.episode_count > 1 %}s{% endif %}</span>
-          <span class="game-stat"><span class="game-stat-value">{{ hours }}h {{ mins }}m</span> recorded</span>
-          <span class="game-stat"><span class="game-stat-value">{{ g.total_views }}</span> views</span>
-          <span class="game-stat"><span class="game-stat-value">{{ first_year }}&ndash;{{ latest_year }}</span> active</span>
-        </div>
-        <div class="game-series">
-          {% for sname in g.series %}
-          {% assign pl_url = nil %}
-          {% assign full_name = gname | append: ": " | append: sname %}
-          {% for pl in playlists %}
-            {% if pl.title contains full_name %}{% assign pl_url = pl.url %}{% break %}{% endif %}
-          {% endfor %}
-          {% if pl_url %}
-          <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }}</a>
-          {% else %}
-          <span class="game-series-link no-link">{{ sname }}</span>
+    {% if img_url %}
+    <div class="game-card-img" style="background-image: url('{{ img_url }}')"></div>
+    {% endif %}
+    <div class="game-card-content">
+      <div class="game-card-header">
+        <h3 class="game-name">
+          {% if img_url == nil %}<i class="fas fa-gamepad game-fallback-icon"></i>{% endif %}
+          {{ gname }}
+        </h3>
+        <div class="game-links">
+          {% if link.steam %}
+          <a href="{{ link.steam }}" class="btn game-link-btn" target="_blank" rel="noopener"><i class="fab fa-steam"></i> Steam</a>
           {% endif %}
-          {% endfor %}
+          {% if link.website %}
+          <a href="{{ link.website }}" class="btn game-link-btn" target="_blank" rel="noopener"><i class="fas fa-globe"></i> Website</a>
+          {% endif %}
         </div>
+      </div>
+      <div class="game-stats">
+        <span class="game-stat"><span class="game-stat-value">{{ g.episode_count }}</span> episode{% if g.episode_count > 1 %}s{% endif %}</span>
+        <span class="game-stat"><span class="game-stat-value">{{ hours }}h {{ mins }}m</span> recorded</span>
+        <span class="game-stat"><span class="game-stat-value">{{ g.total_views }}</span> views</span>
+        <span class="game-stat"><span class="game-stat-value">{{ first_year }}&ndash;{{ latest_year }}</span> active</span>
+      </div>
+      <div class="game-series">
+        {% for sname in g.series %}
+        {% assign pl_url = nil %}
+        {% assign full_name = gname | append: ": " | append: sname %}
+        {% for pl in playlists %}
+          {% if pl.title contains full_name %}{% assign pl_url = pl.url %}{% break %}{% endif %}
+        {% endfor %}
+        {% if pl_url %}
+        <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }}</a>
+        {% else %}
+        <span class="game-series-link no-link">{{ sname }}</span>
+        {% endif %}
+        {% endfor %}
       </div>
     </div>
   </div>

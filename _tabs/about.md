@@ -16,7 +16,6 @@ permalink: /about/
     <p>I play games that let me build, automate, and optimise things -- transport networks, space programs, factories, code. The channel is where engineering ambition meets cosy chaos.</p>
     {% assign current_html = "" %}
     {% assign recent_html = "" %}
-    {% assign past_html = "" %}
     {% for pair in site.data.youtube_main.series_recency %}
       {% assign name = pair[0] %}
       {% assign info = pair[1] %}
@@ -39,29 +38,9 @@ permalink: /about/
         {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
       {% elsif info.status == "recent" %}
         {% capture recent_html %}{{ recent_html }}<li>{{ item }}</li>{% endcapture %}
-      {% else %}
-        {% capture past_html %}{{ past_html }}<li>{{ item }}</li>{% endcapture %}
       {% endif %}
     {% endfor %}
-    {% comment %}Check playlists not matched to any parsed series{% endcomment %}
-    {% assign matched_names = "" %}
-    {% for pair in site.data.youtube_main.series_recency %}
-      {% if matched_names != "" %}{% assign matched_names = matched_names | append: "||" %}{% endif %}
-      {% assign matched_names = matched_names | append: pair[0] %}
-    {% endfor %}
-    {% for pl in site.data.playlists.playlists %}
-      {% assign found = false %}
-      {% for sname in matched_names | split: "||" %}
-        {% if pl.title contains sname or sname contains pl.title %}
-          {% assign found = true %}{% break %}
-        {% endif %}
-      {% endfor %}
-      {% unless found %}
-        {% capture item %}<span class="series-dot historical"></span> <a href="{{ pl.url }}" class="btn series-btn"><strong>{{ pl.title }}</strong></a>{% if pl.item_count > 0 %} <span class="ep-count">{{ pl.item_count }} episodes</span>{% endif %}{% endcapture %}
-        {% capture past_html %}{{ past_html }}<li>{{ item }}</li>{% endcapture %}
-      {% endunless %}
-    {% endfor %}
-    {% if current_html != "" or recent_html != "" or past_html != "" %}
+    {% if current_html != "" or recent_html != "" %}
     <div class="series-section">
       {% if current_html != "" %}
       <div class="series-group">
@@ -75,12 +54,7 @@ permalink: /about/
         <ul class="series-list">{{ recent_html }}</ul>
       </div>
       {% endif %}
-      {% if past_html != "" %}
-      <div class="series-group">
-        <h3 class="series-heading"><span class="series-dot historical"></span> Past Series</h3>
-        <ul class="series-list">{{ past_html }}</ul>
-      </div>
-      {% endif %}
+    </div>
     </div>
     {% endif %}
   </div>

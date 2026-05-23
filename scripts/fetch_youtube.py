@@ -471,23 +471,56 @@ MILESTONE_MESSAGES = {
 }
 
 
+def _parse_iso_date(s):
+    try:
+        return datetime.fromisoformat(s)
+    except Exception:
+        return None
+
+
 def detect_milestones(subs, views, videos_count):
+    prev = {}
+    prev_path = os.path.join(DATA_DIR, "milestones.json")
+    if os.path.exists(prev_path):
+        try:
+            with open(prev_path) as f:
+                prev = json.load(f)
+        except Exception:
+            prev = {}
+
+    reached = prev.get("reached", {})
     current = {}
-    for m in sorted(MILESTONE_SUBS, reverse=True):
-        if subs >= m:
-            current = {"type": "subs", "count": m, "message": MILESTONE_MESSAGES.get(m, "Milestone!")}
-            break
-    for m in sorted(MILESTONE_VIEWS, reverse=True):
-        if views >= m:
-            if not current or m > (current.get("count", 0) if current.get("type") == "views" else 0):
-                current = {"type": "views", "count": m, "message": f"{m} views!"}
-            break
-    for m in sorted(MILESTONE_VIDEOS, reverse=True):
-        if videos_count >= m:
-            if not current or m > (current.get("count", 0) if current.get("type") == "videos" else 0):
-                current = {"type": "videos", "count": m, "message": f"{m} videos uploaded!"}
-            break
-    return {"current": current, "milestones": None}
+    now = datetime.now(timezone.utc)
+
+    for _metric, value, milestones_list, label, msg_fn in [
+        ("subs", subs, MILESTONE_SUBS, "subs", lambda m: MILESTONE_MESSAGES.get(m, "Milestone!")),
+        ("views", views, MILESTONE_VIEWS, "views", lambda m: f"{m} views!"),
+        ("videos", videos_count, MILESTONE_VIDEOS, "videos", lambda m: f"{m} videos uploaded!"),
+    ]:
+        for m in sorted(milestones_list, reverse=True):
+            if value >= m:
+                key = f"{label}_{m}"
+                if key not in reached:
+                    reached[key] = now.isoformat()
+                    print(f"New milestone: {m} {label}")
+                if not current or m > current.get("count", 0):
+                    current = {"type": label, "count": m, "message": msg_fn(m)}
+                break
+
+    cutoff = now - timedelta(days=14)
+    expired = [k for k, v in reached.items() if _parse_iso_date(v) and _parse_iso_date(v) < cutoff]
+    for k in expired:
+        del reached[k]
+
+    if current.get("count"):
+        milestone_key = f"{current['type']}_{current['count']}"
+        reached_at = reached.get(milestone_key, "")
+        if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) < cutoff:
+            current = {}
+    elif not current:
+        current = {}
+
+    save("milestones.json", {"current": current, "milestones": None, "reached": reached})
 
 
 def compute_series_recency(videos):
@@ -799,12 +832,11 @@ def main():
     save("site_meta.json", info)
     update_config_avatar(info.get("avatar_url", ""))
 
-    milestones = detect_milestones(
+    detect_milestones(
         info.get("subscriber_count", 0),
         info.get("view_count", 0),
         info.get("video_count", 0),
     )
-    save("milestones.json", milestones)
 
 
 if __name__ == "__main__":

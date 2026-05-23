@@ -5,14 +5,6 @@ layout: default
 {% if site.data.site_meta.banner_url or site.data.site_meta.description %}
 <div class="channel-hero"{% if site.data.site_meta.banner_url %} style="background-image: url('{{ site.data.site_meta.banner_url }}')"{% endif %}>
   <div class="hero-overlay">
-    <div class="hero-top-bar">
-      <nav class="hero-breadcrumb" aria-label="Breadcrumb">
-        <span><a href="{{ '/' | relative_url }}">{{ site.data.locales[include.lang].tabs.home | capitalize }}</a></span>
-      </nav>
-      <div class="hero-search" onclick="document.getElementById('search-trigger').click()">
-        <i class="fas fa-search"></i>
-      </div>
-    </div>
     <div class="hero-links">
       <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
@@ -335,13 +327,12 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 
 .channel-hero {
   position: relative;
-  width: calc(100% + 3rem);
-  margin: -1.5rem -1.5rem 1rem;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   min-height: 280px;
   background-size: cover;
   background-position: center;
   background-color: #0a0a14;
-  border-radius: 0;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -424,8 +415,9 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
   white-space: nowrap;
 }
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { transform: translateX(50%); }
+  5% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
 
 .sidebar-widgets {

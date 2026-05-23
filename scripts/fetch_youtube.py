@@ -391,6 +391,16 @@ def check_youtube_memberships():
     return False
 
 
+def _high_res_banner(url):
+    if not url:
+        return ""
+    url = re.sub(r"(?<=[=/])s\d+", "s2560", url)
+    url = re.sub(r"(?<=[=/])w\d+", "w2560", url)
+    if "s2560" not in url and "w2560" not in url:
+        url += "=w2560"
+    return url
+
+
 def fetch_channel_info(channel_id=None):
     if not YOUTUBE_API_KEY:
         return None
@@ -419,7 +429,7 @@ def fetch_channel_info(channel_id=None):
         "description": snippet.get("description", ""),
         "custom_url": snippet.get("customUrl", ""),
         "avatar_url": avatar,
-        "banner_url": re.sub(r"=w\d+", "=w2560", branding.get("image", {}).get("bannerExternalUrl", "")),
+        "banner_url": _high_res_banner(branding.get("image", {}).get("bannerExternalUrl", "")),
         "subscriber_count": int(stats.get("subscriberCount", 0)),
         "video_count": int(stats.get("videoCount", 0)),
         "view_count": int(stats.get("viewCount", 0)),

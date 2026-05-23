@@ -340,10 +340,11 @@ if (mt) {
 
 .channel-hero {
   position: relative;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  min-height: 280px;
-  background-size: contain;
+  width: auto;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  min-height: 360px;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: bottom center;
   background-color: #0a0a14;
@@ -353,9 +354,7 @@ if (mt) {
 
 .channel-hero:not([style*="background-image"]) {
   min-height: 0;
-  padding: 0;
   margin: 0;
-  width: auto;
 }
 .hero-overlay {
   width: 100%;

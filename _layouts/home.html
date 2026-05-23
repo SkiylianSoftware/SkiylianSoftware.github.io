@@ -30,17 +30,8 @@ layout: default
               &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }}! {{ site.data.milestones.current.message }}
             {% endif %}
           </div>
-  {% else %}
-    <div class="offline-panel">
-      <div class="offline-icon"><i class="fas fa-circle"></i></div>
-      <div class="offline-text">
-        <h2>Currently Offline</h2>
-        <p>Not streaming right now. Browse <a href="/videos" class="btn">videos</a> or check <a href="/streams" class="btn">past VODs</a>.</p>
+        {% endif %}
       </div>
-    </div>
-  {% endif %}
-</div>
-    </div>
     <div class="hero-links">
       <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
@@ -118,6 +109,14 @@ layout: default
       </iframe>
       <p class="live-title">{{ site.data.livestream.title }}</p>
       <a href="https://watch.skiylia.dev" class="btn btn-primary" target="_blank">Watch on YouTube</a>
+    </div>
+  {% else %}
+    <div class="offline-panel">
+      <div class="offline-icon"><i class="fas fa-circle"></i></div>
+      <div class="offline-text">
+        <h2>Currently Offline</h2>
+        <p>Not streaming right now. Browse <a href="/videos" class="btn">videos</a> or check <a href="/streams" class="btn">past VODs</a>.</p>
+      </div>
     </div>
   {% endif %}
 </div>

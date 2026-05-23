@@ -135,6 +135,12 @@ group: stats
       <span class="stat-value">{{ yt_start }}</span>
       <span class="stat-label">First Video</span>
     </div>
+    {% if meta.memberships_available %}
+    <div class="stat-card accent-purple">
+      <span class="stat-value">&#10003;</span>
+      <span class="stat-label">Memberships</span>
+    </div>
+    {% endif %}
   </div>
 
   <div class="stats-grid-two">
@@ -196,6 +202,11 @@ group: stats
   {% if twitch.broadcaster_type %}
   <div class="stat-card">
     <span class="stat-value">{{ twitch.broadcaster_type | capitalize }}</span>
+    <span class="stat-label">Status</span>
+  </div>
+  {% else %}
+  <div class="stat-card">
+    <span class="stat-value">Standard</span>
     <span class="stat-label">Status</span>
   </div>
   {% endif %}

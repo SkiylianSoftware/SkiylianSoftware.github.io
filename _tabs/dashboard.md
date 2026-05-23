@@ -180,6 +180,7 @@ group: stats
     <span class="stat-value">{{ twitch_age_years }}y</span>
     <span class="stat-label">Account Age</span>
   </div>
+  {% endif %}
 
 <!-- Store -->
 {% if store %}

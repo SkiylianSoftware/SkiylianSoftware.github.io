@@ -13,6 +13,34 @@
 
     <a class="site-title d-block" href="{{ '/' | relative_url }}">{{ site.title }}</a>
     <p class="site-subtitle fst-italic mb-0">{{ site.tagline }}</p>
+
+    {% if site.data.site_meta %}
+    <div class="sidebar-stats">
+      {% if site.data.site_meta.description %}
+      <p class="sidebar-description">{{ site.data.site_meta.description }}</p>
+      {% endif %}
+      <div class="sidebar-stats-row">
+        {% if site.data.site_meta.subscriber_count %}
+        <span class="sidebar-stat">
+          <span class="sidebar-stat-value">{{ site.data.site_meta.subscriber_count }}</span>
+          <span class="sidebar-stat-label">subs</span>
+        </span>
+        {% endif %}
+        {% if site.data.site_meta.video_count %}
+        <span class="sidebar-stat">
+          <span class="sidebar-stat-value">{{ site.data.site_meta.video_count }}</span>
+          <span class="sidebar-stat-label">videos</span>
+        </span>
+        {% endif %}
+        {% if site.data.site_meta.view_count %}
+        <span class="sidebar-stat">
+          <span class="sidebar-stat-value">{{ site.data.site_meta.view_count }}</span>
+          <span class="sidebar-stat-label">views</span>
+        </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </header>
 
   <nav class="flex-column flex-grow-1 w-100 ps-0">

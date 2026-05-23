@@ -770,6 +770,42 @@ body::after {
 .series-list li { padding: 0.25rem 0; display: flex; align-items: center; gap: 0.4rem; }
 .ep-count { font-size: 0.78rem; opacity: 0.6; white-space: nowrap; }
 
+/* Sidebar YouTube stats */
+.sidebar-stats {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(45,212,191,0.1);
+}
+.sidebar-description {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  opacity: 0.7;
+  margin: 0 0 0.5rem;
+}
+.sidebar-stats-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.sidebar-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 50px;
+}
+.sidebar-stat-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2dd4bf;
+}
+.sidebar-stat-label {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Sidebar social buttons */
 .sidebar-bottom a {
   display: inline-flex; align-items: center; justify-content: center;

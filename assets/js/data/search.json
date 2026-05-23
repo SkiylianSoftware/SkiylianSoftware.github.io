@@ -25,4 +25,67 @@ swcache: true
     "content": {{ page.content | strip_html | normalize_whitespace | jsonify }}
   }{% unless forloop.last %},{% endunless %}
   {% endfor %}
+  {% if site.data.site_meta.description %}
+  {
+    "title": "Channel Description",
+    "url": "/",
+    "categories": "",
+    "tags": "",
+    "date": "",
+    "content": {{ site.data.site_meta.description | jsonify }}
+  },
+  {% endif %}
+  {% if site.data.youtube_main.videos %}
+    {% for video in site.data.youtube_main.videos %}
+    {
+      "title": {{ video.title | jsonify }},
+      "url": "/videos",
+      "categories": "Video{% if video.series %}, {{ video.series.game }}, {{ video.series.series_name }}{% endif %}",
+      "tags": "video{% if video.series %}, {{ video.series.game }}, {{ video.series.series_name }}{% endif %}",
+      "date": {{ video.published | default: "" | jsonify }},
+      "content": {% if video.description %}{{ video.description | jsonify }}{% else %}""{% endif %}
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  {% endif %}
+  {% if site.data.youtube_vods.videos %}
+    {% for vod in site.data.youtube_vods.videos %}
+    {
+      "title": {{ vod.title | jsonify }},
+      "url": "/streams",
+      "categories": "VOD{% if vod.series %}, {{ vod.series.game }}{% endif %}",
+      "tags": "vod{% if vod.series %}, {{ vod.series.game }}{% endif %}",
+      "date": {{ vod.published | default: "" | jsonify }},
+      "content": {% if vod.description %}{{ vod.description | jsonify }}{% else %}""{% endif %}
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  {% endif %}
+  {% if site.data.playlists.playlists %}
+    {% for pl in site.data.playlists.playlists %}
+    {
+      "title": {{ pl.title | jsonify }},
+      "url": "/playlists",
+      "categories": "Playlist",
+      "tags": "playlist",
+      "date": {{ pl.published | default: "" | jsonify }},
+      "content": {% if pl.description %}{{ pl.description | jsonify }}{% else %}""{% endif %}
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  {% endif %}
+  {% if site.data.games %}
+    {% assign games_data = site.data.games.games %}
+    {% if games_data %}
+      {% for pair in games_data %}
+      {% assign gname = pair[0] %}
+      {% assign g = pair[1] %}
+      {
+        "title": {{ gname | jsonify }},
+        "url": "/games",
+        "categories": "Game",
+        "tags": "game, {{ gname }}",
+        "date": "",
+        "content": "{{ g.episode_count }} episodes, {{ g.total_views }} views{% for s in g.series %}, {{ s }}{% endfor %}"
+      }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
 ]

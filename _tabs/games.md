@@ -73,7 +73,7 @@ group: media
           {% endfor %}
           {% if pl_url %}{% break %}{% endif %}
         {% endfor %}
-        <a href="{% if pl_url %}{{ pl_url }}{% else %}/videos{% endif %}" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
+        <a href="/videos#{{ sname | url_encode }}" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
         {% endfor %}
       </div>
     </div>
@@ -122,7 +122,7 @@ group: media
           {% for pl in playlists %}
             {% if pl.title contains cs_name %}{% assign cs_pl_url = pl.url %}{% break %}{% endif %}
           {% endfor %}
-          <a href="{% if cs_pl_url %}{{ cs_pl_url }}{% else %}/videos{% endif %}" class="btn game-series-link{% if cs_pl_url == nil %} no-playlist{% endif %}">{{ cs_name }} ({{ csd.active_years }})</a>
+          <a href="/videos#{{ cs_name | url_encode }}" class="btn game-series-link{% if cs_pl_url == nil %} no-playlist{% endif %}">{{ cs_name }} ({{ csd.active_years }})</a>
           {% endfor %}
         </div>
         {% endif %}

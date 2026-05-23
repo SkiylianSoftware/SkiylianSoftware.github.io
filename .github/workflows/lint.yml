@@ -52,7 +52,7 @@ jobs:
 
       - name: Install JS lint tools
         if: matrix.tool == 'javascript'
-        run: npm ci
+        run: npm install
 
       - name: Ruff check
         if: matrix.tool == 'python'

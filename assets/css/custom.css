@@ -891,13 +891,22 @@ body::after {
   margin: 1.25rem 0;
 }
 .game-card {
+  position: relative;
   background: var(--clr-card-bg);
   border: 1px solid rgba(45,212,191,0.08);
   border-radius: 10px;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.game-card:hover { border-color: rgba(45,212,191,0.25); }
+.game-card:hover {
+  border-color: rgba(45,212,191,0.25);
+  box-shadow: 0 0 24px rgba(45,212,191,0.06);
+}
+.game-card-stretched-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
 .game-card-img {
   width: 100%;
   aspect-ratio: 460 / 215;
@@ -906,9 +915,17 @@ body::after {
   background-position: center;
   background-color: #0a0a14;
   border-bottom: 1px solid rgba(45,212,191,0.08);
+  transition: transform 0.3s ease;
+}
+.game-card:hover .game-card-img {
+  transform: scale(1.04);
 }
 .game-card-content {
   padding: 1.25rem;
+  transition: background 0.2s;
+}
+.game-card:hover .game-card-content {
+  background: rgba(45,212,191,0.025);
 }
 .game-card-header {
   display: flex;
@@ -935,6 +952,8 @@ body::after {
   flex-shrink: 0;
 }
 .game-link-btn {
+  position: relative;
+  z-index: 2;
   font-size: 0.75rem !important;
   padding: 0.2rem 0.5rem !important;
 }
@@ -958,6 +977,8 @@ body::after {
   gap: 0.35rem;
 }
 .game-series-link {
+  position: relative;
+  z-index: 2;
   font-size: 0.75rem !important;
   padding: 0.15rem 0.45rem !important;
   border-radius: 12px !important;
@@ -990,8 +1011,26 @@ body::after {
 }
 .game-card.non-game:hover {
   border-color: rgba(192,132,252,0.3);
+  box-shadow: 0 0 24px rgba(192,132,252,0.06);
+}
+.game-card.non-game:hover .game-card-content {
+  background: rgba(192,132,252,0.025);
 }
 .game-card.non-game .game-stat-value { color: #c084fc; }
+.game-card.non-game .game-name { color: #d8b4fe; }
+
+.badge-current {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1em 0.5em;
+  border-radius: 12px;
+  background: rgba(45,212,191,0.12);
+  color: #2dd4bf;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  line-height: 1.4;
+}
 
 .empty-state {
   margin: 2rem 0;

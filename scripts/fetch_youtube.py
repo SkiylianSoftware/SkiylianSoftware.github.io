@@ -27,6 +27,27 @@ except Exception:
     CURRENT_DAYS = 90
     RECENT_DAYS = 365
 
+GAME_LINKS_PATH = "_data/game_links.yml"
+try:
+    with open(GAME_LINKS_PATH) as f:
+        _gl = yaml.safe_load(f) or {}
+    ALIAS_MAP = {}
+    for canonical, entry in _gl.items():
+        if isinstance(entry, dict):
+            for alias in entry.get("aliases", []):
+                ALIAS_MAP[alias] = canonical
+except Exception as e:
+    print(f"Warning: could not load {GAME_LINKS_PATH}: {e}", file=sys.stderr)
+    ALIAS_MAP = {}
+
+CONTENT_TYPES_PATH = "_data/content_types.yml"
+try:
+    with open(CONTENT_TYPES_PATH) as f:
+        CONTENT_TYPES = yaml.safe_load(f) or []
+except Exception as e:
+    print(f"Warning: could not load {CONTENT_TYPES_PATH}: {e}", file=sys.stderr)
+    CONTENT_TYPES = []
+
 
 def api_get(url):
     resp = requests.get(url, timeout=30)
@@ -55,7 +76,7 @@ def fetch_video_details(video_ids):
         ids = ",".join(batch)
         url = (
             f"https://www.googleapis.com/youtube/v3/videos"
-            f"?part=contentDetails,statistics"
+            f"?part=contentDetails,statistics,snippet"
             f"&id={ids}&key={YOUTUBE_API_KEY}"
         )
         data = api_get(url)
@@ -63,12 +84,14 @@ def fetch_video_details(video_ids):
             vid = item["id"]
             cd = item.get("contentDetails", {})
             stats = item.get("statistics", {})
+            snippet = item.get("snippet", {})
             duration = cd.get("duration", "")
             details[vid] = {
                 "duration": duration,
                 "duration_seconds": parse_duration(duration),
                 "view_count": int(stats.get("viewCount", 0)),
                 "like_count": int(stats.get("likeCount", 0)),
+                "tags": snippet.get("tags", []),
             }
     return details
 
@@ -484,16 +507,35 @@ def compute_series_recency(videos):
     return recency
 
 
-def compute_game_stats(videos):
+def _categorize_non_game(video, content_types):
+    title = video.get("title", "")
+    tags = [t.lower() for t in video.get("tags", [])]
+    for ct in content_types:
+        for pattern in ct.get("patterns", []):
+            if re.search(pattern, title):
+                return ct["name"]
+        for tag_pattern in ct.get("tags", []):
+            if tag_pattern.lower() in tags:
+                return ct["name"]
+    for ct in content_types:
+        if ct.get("catch_all"):
+            return ct["name"]
+    return "Misc"
+
+
+def compute_game_stats(videos, alias_map=None, content_types=None):
     games = {}
-    non_game = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None}
+    non_game_total = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None}
+    non_game_categories = {}
     for v in videos:
         s = v.get("series")
         published = v.get("published", "")
         if s and s.get("game"):
             game = s["game"]
+            if alias_map and game in alias_map:
+                game = alias_map[game]
             if game not in games:
-                games[game] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series": set()}
+                games[game] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series": set(), "series_data": {}}
             g = games[game]
             g["episode_count"] += 1
             g["total_duration_seconds"] += v.get("duration_seconds", 0)
@@ -504,22 +546,84 @@ def compute_game_stats(videos):
                     g["first_video"] = published
                 if g["latest_video"] is None or published > g["latest_video"]:
                     g["latest_video"] = published
-            g["series"].add(s.get("series_name", ""))
-        else:
-            non_game["episode_count"] += 1
-            non_game["total_duration_seconds"] += v.get("duration_seconds", 0)
-            non_game["total_views"] += v.get("view_count", 0)
-            non_game["total_likes"] += v.get("like_count", 0)
+            series_name = s.get("series_name", "")
+            g["series"].add(series_name)
+            if series_name not in g["series_data"]:
+                g["series_data"][series_name] = {"episode_count": 0, "first_video": None, "latest_video": None, "active_years": set()}
+            sd = g["series_data"][series_name]
+            sd["episode_count"] += 1
             if published:
-                if non_game["first_video"] is None or published < non_game["first_video"]:
-                    non_game["first_video"] = published
-                if non_game["latest_video"] is None or published > non_game["latest_video"]:
-                    non_game["latest_video"] = published
+                if sd["first_video"] is None or published < sd["first_video"]:
+                    sd["first_video"] = published
+                if sd["latest_video"] is None or published > sd["latest_video"]:
+                    sd["latest_video"] = published
+                sd["active_years"].add(published[:4])
+        else:
+            non_game_total["episode_count"] += 1
+            non_game_total["total_duration_seconds"] += v.get("duration_seconds", 0)
+            non_game_total["total_views"] += v.get("view_count", 0)
+            non_game_total["total_likes"] += v.get("like_count", 0)
+            if published:
+                if non_game_total["first_video"] is None or published < non_game_total["first_video"]:
+                    non_game_total["first_video"] = published
+                if non_game_total["latest_video"] is None or published > non_game_total["latest_video"]:
+                    non_game_total["latest_video"] = published
+
+            if content_types:
+                cat_name = _categorize_non_game(v, content_types)
+                if cat_name not in non_game_categories:
+                    non_game_categories[cat_name] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None}
+                cat = non_game_categories[cat_name]
+                cat["episode_count"] += 1
+                cat["total_duration_seconds"] += v.get("duration_seconds", 0)
+                cat["total_views"] += v.get("view_count", 0)
+                cat["total_likes"] += v.get("like_count", 0)
+                if published:
+                    if cat["first_video"] is None or published < cat["first_video"]:
+                        cat["first_video"] = published
+                    if cat["latest_video"] is None or published > cat["latest_video"]:
+                        cat["latest_video"] = published
+
+    now = datetime.now(timezone.utc)
     result = {}
-    for name, g in sorted(games.items()):
+    for name, g in sorted(games.items(), key=lambda x: x[1].get("latest_video", ""), reverse=True):
         g["series"] = sorted(g["series"])
+        for sname, sd in g.get("series_data", {}).items():
+            sd["active_years"] = sorted(sd["active_years"])
+        latest = g.get("latest_video")
+        if latest:
+            try:
+                dt = datetime.fromisoformat(latest.replace("Z", "+00:00"))
+                delta = now - dt
+                if delta <= timedelta(days=CURRENT_DAYS):
+                    g["status"] = "current"
+                elif delta <= timedelta(days=RECENT_DAYS):
+                    g["status"] = "recent"
+                else:
+                    g["status"] = "historical"
+            except Exception:
+                g["status"] = "historical"
+        else:
+            g["status"] = "historical"
         result[name] = g
-    return {"games": result, "non_game": non_game}
+
+    if content_types:
+        ordered = {}
+        for ct in content_types:
+            n = ct["name"]
+            if n in non_game_categories:
+                ordered[n] = non_game_categories.pop(n)
+        ordered.update(non_game_categories)
+    else:
+        ordered = non_game_categories
+
+    return {
+        "games": result,
+        "non_game": {
+            "total": non_game_total,
+            "categories": ordered,
+        },
+    }
 
 
 def main():
@@ -536,7 +640,7 @@ def main():
 
     all_videos = (videos or []) + (vods or [])
     if all_videos:
-        game_stats = compute_game_stats(all_videos)
+        game_stats = compute_game_stats(all_videos, alias_map=ALIAS_MAP, content_types=CONTENT_TYPES)
         save("games.json", game_stats)
 
     print("Fetching YouTube playlists...")

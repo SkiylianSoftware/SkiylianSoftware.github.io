@@ -10,11 +10,12 @@ group: media
 {% assign game_data = site.data.games %}
 {% assign glinks = site.data.game_links %}
 {% assign playlists = site.data.playlists.playlists %}
+{% assign content_types = site.data.content_types %}
 
 {% if game_data %}
 {% assign games = game_data.games %}
 {% assign non_game = game_data.non_game %}
-{% if games.size > 0 or non_game.episode_count > 0 %}
+{% if games.size > 0 or non_game.total.episode_count > 0 %}
   {% if games.size > 0 %}
   <div class="games-grid">
   {% for pair in games %}
@@ -32,7 +33,9 @@ group: media
     {% assign steam_appid = steam_parts[4] %}
     {% assign img_url = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/" | append: steam_appid | append: "/header.jpg" %}
   {% endif %}
+  {% assign card_link = link.steam | default: link.website %}
   <div class="game-card">
+    {% if card_link %}<a href="{{ card_link }}" class="game-card-stretched-link" target="_blank" rel="noopener"></a>{% endif %}
     {% if img_url %}
     <div class="game-card-img" style="background-image: url('{{ img_url }}')"></div>
     {% endif %}
@@ -41,6 +44,7 @@ group: media
         <h3 class="game-name">
           {% if img_url == nil %}<i class="fas fa-gamepad game-fallback-icon"></i>{% endif %}
           {{ gname }}
+          {% if g.status == "current" %}<span class="badge badge-current">Current</span>{% endif %}
         </h3>
         <div class="game-links">
           {% if link.steam %}
@@ -52,22 +56,27 @@ group: media
         </div>
       </div>
       <div class="game-stats">
-        <span class="game-stat"><span class="game-stat-value">{{ g.episode_count }}</span> episode{% if g.episode_count > 1 %}s{% endif %}</span>
-        <span class="game-stat"><span class="game-stat-value">{{ hours }}h {{ mins }}m</span> recorded</span>
+        <span class="game-stat"><span class="game-stat-value">{{ g.episode_count }}</span> ep</span>
+        <span class="game-stat"><span class="game-stat-value">{{ hours }}h {{ mins }}m</span></span>
         <span class="game-stat"><span class="game-stat-value">{{ g.total_views }}</span> views</span>
-        <span class="game-stat"><span class="game-stat-value">{{ first_year }}&ndash;{{ latest_year }}</span> active</span>
+        <span class="game-stat"><span class="game-stat-value">{{ first_year }}&ndash;{{ latest_year }}</span></span>
+        {% if g.series.size > 1 %}
+        <span class="game-stat"><span class="game-stat-value">{{ g.series | size }}</span> series</span>
+        {% endif %}
       </div>
       <div class="game-series">
         {% for sname in g.series %}
+        {% assign sd = g.series_data[sname] %}
+        {% assign yrs = sd.active_years | join: ", " %}
         {% assign pl_url = nil %}
         {% assign full_name = gname | append: ": " | append: sname %}
         {% for pl in playlists %}
           {% if pl.title contains full_name %}{% assign pl_url = pl.url %}{% break %}{% endif %}
         {% endfor %}
         {% if pl_url %}
-        <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }}</a>
+        <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }} ({{ yrs }})</a>
         {% else %}
-        <span class="game-series-link no-link">{{ sname }}</span>
+        <span class="game-series-link no-link">{{ sname }} ({{ yrs }})</span>
         {% endif %}
         {% endfor %}
       </div>
@@ -77,30 +86,42 @@ group: media
   </div>
   {% endif %}
 
-  {% if non_game.episode_count > 0 %}
-  {% assign nhours = non_game.total_duration_seconds | divided_by: 3600 %}
-  {% assign nrem = non_game.total_duration_seconds | modulo: 3600 %}
+  {% if non_game.total.episode_count > 0 %}
+  {% assign nhours = non_game.total.total_duration_seconds | divided_by: 3600 %}
+  {% assign nrem = non_game.total.total_duration_seconds | modulo: 3600 %}
   {% assign nmins = nrem | divided_by: 60 %}
-  {% assign nfirst = non_game.first_video | truncate: 4, "" %}
-  {% assign nlatest = non_game.latest_video | truncate: 4, "" %}
+  {% assign nfirst = non_game.total.first_video | truncate: 4, "" %}
+  {% assign nlatest = non_game.total.latest_video | truncate: 4, "" %}
   <div class="non-game-section">
     <h2>Other Content</h2>
     <p class="non-game-desc">Videos that don't belong to a specific game series -- programming, IRL, shorts, and miscellany.</p>
+    <div class="games-grid">
+    {% for cat_pair in non_game.categories %}
+    {% assign cat_name = cat_pair[0] %}
+    {% assign cat = cat_pair[1] %}
+    {% assign cat_hours = cat.total_duration_seconds | divided_by: 3600 %}
+    {% assign cat_rem = cat.total_duration_seconds | modulo: 3600 %}
+    {% assign cat_mins = cat_rem | divided_by: 60 %}
+    {% assign cat_first = cat.first_video | truncate: 4, "" %}
+    {% assign cat_latest = cat.latest_video | truncate: 4, "" %}
+    {% assign cat_icon = "fa-folder-open" %}
+    {% for ct in content_types %}
+      {% if ct.name == cat_name %}{% assign cat_icon = ct.icon %}{% break %}{% endif %}
+    {% endfor %}
     <div class="game-card non-game">
       <div class="game-card-content">
         <div class="game-card-header">
-          <h3 class="game-name"><i class="fas fa-code"></i> Creative &amp; Miscellaneous</h3>
-          <div class="game-links">
-            <a href="/videos" class="btn game-link-btn"><i class="fas fa-video"></i> Browse all videos</a>
-          </div>
+          <h3 class="game-name"><i class="fas {{ cat_icon }}"></i> {{ cat_name }}</h3>
         </div>
         <div class="game-stats">
-          <span class="game-stat"><span class="game-stat-value">{{ non_game.episode_count }}</span> video{% if non_game.episode_count > 1 %}s{% endif %}</span>
-          <span class="game-stat"><span class="game-stat-value">{{ nhours }}h {{ nmins }}m</span> total</span>
-          <span class="game-stat"><span class="game-stat-value">{{ non_game.total_views }}</span> views</span>
-          <span class="game-stat"><span class="game-stat-value">{{ nfirst }}&ndash;{{ nlatest }}</span> active</span>
+          <span class="game-stat"><span class="game-stat-value">{{ cat.episode_count }}</span> video{% if cat.episode_count > 1 %}s{% endif %}</span>
+          <span class="game-stat"><span class="game-stat-value">{{ cat_hours }}h {{ cat_mins }}m</span></span>
+          <span class="game-stat"><span class="game-stat-value">{{ cat.total_views }}</span> views</span>
+          <span class="game-stat"><span class="game-stat-value">{{ cat_first }}&ndash;{{ cat_latest }}</span></span>
         </div>
       </div>
+    </div>
+    {% endfor %}
     </div>
   </div>
   {% endif %}

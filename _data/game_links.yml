@@ -1,6 +1,7 @@
 # Manual mapping of game names to external URLs
-# Game name (as extracted from video titles) -> optional steam/website links
-# Add entries as you play new games; missing entries just won't show a link button.
+# The key is the canonical display name. The `aliases` list maps
+# video-title extracted names to the canonical key.
+# Missing entries just won't show a link button.
 Factorio:
   steam: https://store.steampowered.com/app/427520/
   website: https://factorio.com/
@@ -9,10 +10,12 @@ Transport Fever:
   website: https://www.transportfever2.com/
 Minecraft:
   website: https://www.minecraft.net/
-KSP:
+Kerbal Space Program:
   steam: https://store.steampowered.com/app/220200/
   website: https://www.kerbalspaceprogram.com/
-StationFlow:
+  aliases: [KSP]
+Station Flow:
   steam: https://store.steampowered.com/app/1122120/STATIONflow/
+  aliases: [StationFlow, STATIONflow]
 Mars First Logistics:
   steam: https://store.steampowered.com/app/1532200/Mars_First_Logistics/

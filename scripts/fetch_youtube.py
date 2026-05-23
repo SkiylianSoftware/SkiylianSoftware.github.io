@@ -2,7 +2,7 @@ import json
 import re
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import yaml
 import requests
@@ -532,6 +532,31 @@ def _extract_content_series(title):
     return m.group("content_series").strip() if m else None
 
 
+def _extract_steam_appid(steam_url):
+    if not steam_url:
+        return None
+    parts = steam_url.split("/")
+    for i, p in enumerate(parts):
+        if p == "app" and i + 1 < len(parts):
+            return parts[i + 1]
+    return None
+
+
+def _extract_image_color(url):
+    """Download an image and return its dominant colour as a hex string."""
+    try:
+        from PIL import Image
+        from io import BytesIO
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        img = Image.open(BytesIO(resp.content)).convert("RGB")
+        small = img.resize((1, 1))
+        r, g, b = small.getpixel((0, 0))
+        return f"#{r:02x}{g:02x}{b:02x}"
+    except Exception:
+        return None
+
+
 def _categorize_non_game(video, content_types):
     title = video.get("title", "")
     tags = [t.lower() for t in video.get("tags", [])]
@@ -626,6 +651,13 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
                         csd["latest_video"] = published
                     csd["active_years"].add(published[:4])
 
+    _gl_links = {}
+    try:
+        with open(GAME_LINKS_PATH) as f:
+            _gl_links = yaml.safe_load(f) or {}
+    except Exception:
+        pass
+
     now = datetime.now(timezone.utc)
     result = {}
     for name, g in sorted(games.items(), key=lambda x: x[1].get("latest_video", ""), reverse=True):
@@ -648,6 +680,18 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
         else:
             g["status"] = "historical"
         result[name] = g
+
+        if not g.get("accent_color"):
+            gl_entry = _gl_links.get(name, {}) if isinstance(_gl_links, dict) else {}
+            img_url = gl_entry.get("icon") if isinstance(gl_entry, dict) else None
+            if not img_url and isinstance(gl_entry, dict):
+                appid = _extract_steam_appid(gl_entry.get("steam", ""))
+                if appid:
+                    img_url = f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appid}/header.jpg"
+            if img_url:
+                color = _extract_image_color(img_url)
+                if color:
+                    result[name]["accent_color"] = color
 
     if content_types:
         ordered = {}

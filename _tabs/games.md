@@ -32,7 +32,7 @@ group: media
     {% assign img_url = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/" | append: steam_appid | append: "/header.jpg" %}
   {% endif %}
   {% assign card_link = link.steam | default: link.website %}
-  {% assign ac = link.color | default: "#2dd4bf" %}
+  {% assign ac = link.color | default: g.accent_color | default: "#2dd4bf" %}
   <div class="game-card" style="--game-accent: {{ ac }}">
     {% if card_link %}<a href="{{ card_link }}" class="game-card-stretched-link" target="_blank" rel="noopener"></a>{% endif %}
     {% if img_url %}
@@ -73,11 +73,7 @@ group: media
           {% endfor %}
           {% if pl_url %}{% break %}{% endif %}
         {% endfor %}
-        {% if pl_url %}
-        <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }} ({{ sd.active_years }})</a>
-        {% else %}
-        <span class="game-series-link no-link">{{ sname }} ({{ sd.active_years }})</span>
-        {% endif %}
+        <a href="{% if pl_url %}{{ pl_url }}{% else %}/videos{% endif %}" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
         {% endfor %}
       </div>
     </div>
@@ -108,6 +104,9 @@ group: media
       <div class="game-card-content">
         <div class="game-card-header">
           <h3 class="game-name"><i class="fas {{ cat_icon }}"></i> {{ cat_name }}</h3>
+          <div class="game-links">
+            <a href="/videos" class="btn game-link-btn"><i class="fas fa-video"></i> Browse</a>
+          </div>
         </div>
         <div class="game-stats">
           <span class="game-stat"><span class="game-stat-value">{{ cat.episode_count }}</span> video{% if cat.episode_count > 1 %}s{% endif %}</span>
@@ -123,11 +122,7 @@ group: media
           {% for pl in playlists %}
             {% if pl.title contains cs_name %}{% assign cs_pl_url = pl.url %}{% break %}{% endif %}
           {% endfor %}
-          {% if cs_pl_url %}
-          <a href="{{ cs_pl_url }}" class="btn game-series-link">{{ cs_name }} ({{ csd.active_years }})</a>
-          {% else %}
-          <span class="game-series-link no-link">{{ cs_name }} ({{ csd.active_years }})</span>
-          {% endif %}
+          <a href="{% if cs_pl_url %}{{ cs_pl_url }}{% else %}/videos{% endif %}" class="btn game-series-link{% if cs_pl_url == nil %} no-playlist{% endif %}">{{ cs_name }} ({{ csd.active_years }})</a>
           {% endfor %}
         </div>
         {% endif %}

@@ -419,7 +419,7 @@ def fetch_channel_info(channel_id=None):
         "description": snippet.get("description", ""),
         "custom_url": snippet.get("customUrl", ""),
         "avatar_url": avatar,
-        "banner_url": branding.get("image", {}).get("bannerExternalUrl", ""),
+        "banner_url": re.sub(r"=w\d+", "=w2560", branding.get("image", {}).get("bannerExternalUrl", "")),
         "subscriber_count": int(stats.get("subscriberCount", 0)),
         "video_count": int(stats.get("videoCount", 0)),
         "view_count": int(stats.get("viewCount", 0)),

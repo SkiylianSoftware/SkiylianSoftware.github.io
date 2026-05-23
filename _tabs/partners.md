@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-handshake"
 title: Partners
-order: 8
+order: 9
 permalink: /partners/
 ---
 
@@ -97,7 +97,7 @@ permalink: /partners/
    <p>For a full overview, view the <a href="/partners/media-kit/">media kit</a>; auto-updating stats, content pillars, partnership details, and print-friendly.</p>
 </div>
 
-<div class="partner-section contact-section">
+<div class="partner-section contact-section" style="text-align: center;">
   <h2>Let's Talk</h2>
   <p>If any of this sounds like a fit, email me and we'll figure out the rest.</p>
   <a href="mailto:skiyliansoftware@gmail.com?subject=Partnership%20Inquiry" class="btn btn-primary contact-btn">

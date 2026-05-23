@@ -37,8 +37,11 @@ group: media
       {% if lu_epoch > 0 %}
         {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
         {% assign lu_days = now_epoch | minus: lu_epoch | divided_by: 86400 %}
-        {% if lu_days < 90 %}{% assign recency = "current" %}
-        {% elsif lu_days < 365 %}{% assign recency = "recent" %}
+        {% assign rt = site.recency_thresholds %}
+        {% assign cur_days = rt.current_days | default: 90 %}
+        {% assign rec_days = rt.recent_days | default: 365 %}
+        {% if lu_days < cur_days %}{% assign recency = "current" %}
+        {% elsif lu_days < rec_days %}{% assign recency = "recent" %}
         {% endif %}
       {% endif %}
     {% endif %}

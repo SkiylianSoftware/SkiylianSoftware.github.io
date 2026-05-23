@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-timeline"
 title: History
-order: 5
+order: 6
 permalink: /history/
 group: stats
 ---

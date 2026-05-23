@@ -102,6 +102,47 @@ def fetch_schedule(user_id, token):
     return schedule
 
 
+def fetch_vods(user_id, token):
+    vods = []
+    cursor = None
+    while True:
+        params = {"user_id": user_id, "type": "archive", "first": 100}
+        if cursor:
+            params["after"] = cursor
+        resp = requests.get(
+            f"{API_URL}/videos",
+            headers={"Client-ID": TWITCH_CLIENT_ID, "Authorization": f"Bearer {token}"},
+            params=params,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        for item in data.get("data", []):
+            duration_str = item.get("duration", "")
+            seconds = 0
+            parts = duration_str.replace("h", ":").replace("m", ":").replace("s", "").split(":")
+            if len(parts) == 3:
+                seconds = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            elif len(parts) == 2:
+                seconds = int(parts[0]) * 60 + int(parts[1])
+            elif len(parts) == 1:
+                seconds = int(parts[0])
+            vods.append({
+                "video_id": item["id"],
+                "title": item.get("title", ""),
+                "url": item.get("url", ""),
+                "thumbnail": item.get("thumbnail_url", "").replace("{width}", "640").replace("{height}", "360"),
+                "published": item.get("created_at", ""),
+                "duration_seconds": seconds,
+                "view_count": item.get("view_count", 0),
+                "description": (item.get("description") or "")[:500],
+            })
+        cursor = data.get("pagination", {}).get("cursor")
+        if not cursor:
+            break
+    return vods
+
+
 def main():
     token = get_app_token()
     if not token:
@@ -131,6 +172,14 @@ def main():
         print(f"Twitch schedule: {len(schedule)} upcoming segments")
     except Exception as e:
         print(f"Could not fetch Twitch schedule: {e}", file=sys.stderr)
+
+    print("Fetching Twitch VODs...")
+    try:
+        vods = fetch_vods(user_id, token)
+        save("twitch_vods.json", {"videos": vods})
+        print(f"Twitch VODs: {len(vods)} past broadcasts")
+    except Exception as e:
+        print(f"Could not fetch Twitch VODs: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

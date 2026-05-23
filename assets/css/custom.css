@@ -882,3 +882,103 @@ body::after {
 
 /* Active state for any nav item */
 .nav-item.active .nav-link { color: #2dd4bf !important; }
+
+/* === PAGE: Games === */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+.game-card {
+  background: var(--clr-card-bg);
+  border: 1px solid rgba(45,212,191,0.08);
+  border-radius: 10px;
+  padding: 1.25rem;
+  transition: border-color 0.2s;
+}
+.game-card:hover { border-color: rgba(45,212,191,0.25); }
+.game-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.game-name {
+  font-size: 1rem;
+  margin: 0;
+  color: #e0e0f0;
+}
+.game-links {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.game-link-btn {
+  font-size: 0.75rem !important;
+  padding: 0.2rem 0.5rem !important;
+}
+.game-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.game-stat {
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+.game-stat-value {
+  color: #2dd4bf;
+  font-weight: 600;
+}
+.game-series {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.game-series-link {
+  font-size: 0.75rem !important;
+  padding: 0.15rem 0.45rem !important;
+  border-radius: 12px !important;
+}
+.game-series-link.no-link {
+  opacity: 0.5;
+  cursor: default;
+  border-color: transparent;
+}
+.game-series-link.no-link:hover {
+  transform: none !important;
+  background: transparent !important;
+}
+.non-game-section {
+  margin: 2rem 0;
+}
+.non-game-section h2 {
+  font-size: 1rem;
+  margin: 0 0 0.25rem;
+  border-bottom: 1px solid rgba(45,212,191,0.12);
+  padding-bottom: 0.3rem;
+}
+.non-game-desc {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  margin: 0.4rem 0 0.75rem;
+}
+.game-card.non-game {
+  border-color: rgba(192,132,252,0.12);
+}
+.game-card.non-game:hover {
+  border-color: rgba(192,132,252,0.3);
+}
+.game-card.non-game .game-stat-value { color: #c084fc; }
+.empty-state {
+  margin: 2rem 0;
+  padding: 2rem;
+  border: 1px dashed rgba(45,212,191,0.15);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.6;
+}

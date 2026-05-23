@@ -2,7 +2,7 @@
 layout: page
 icon: "fa-solid fa-chart-simple"
 title: Dashboard
-order: 6
+order: 7
 permalink: /dashboard/
 group: stats
 ---
@@ -16,41 +16,6 @@ group: stats
 
 {% assign has_vods = false %}
 {% if vods_list.size > 0 or meta.vods_subscriber_count %}{% assign has_vods = true %}{% endif %}
-
-{% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-
-{% assign yt_start = nil %}
-{% if videos.size > 0 %}
-  {% assign sorted = videos | sort: "published" %}
-  {% assign yt_start = sorted[0].published %}
-{% endif %}
-{% unless yt_start %}{% assign yt_start = meta.published_at %}{% endunless %}
-
-{% assign vods_start = nil %}
-{% if vods_list.size > 0 %}
-  {% assign vods_sorted = vods_list | sort: "published" %}
-  {% assign vods_start = vods_sorted[0].published %}
-{% endif %}
-{% unless vods_start %}{% assign vods_start = meta.vods_published_at %}{% endunless %}
-
-{% if yt_start %}
-  {% assign yt_epoch = yt_start | plus: 0 %}
-  {% if yt_epoch == 0 %}{% assign yt_epoch = yt_start | truncate: 10, "" | date: "%s" | plus: 0 %}{% endif %}
-  {% if yt_epoch > 0 %}
-    {% assign yt_age_days = now_epoch | minus: yt_epoch | divided_by: 86400 %}
-    {% assign yt_age_years = yt_age_days | divided_by: 365 %}
-  {% endif %}
-{% endif %}
-
-{% if twitch.created_at or vods_start %}
-  {% assign twitch_start = vods_start | default: twitch.created_at %}
-  {% assign tw_epoch = twitch_start | plus: 0 %}
-  {% if tw_epoch == 0 %}{% assign tw_epoch = twitch_start | truncate: 10, "" | date: "%s" | plus: 0 %}{% endif %}
-  {% if tw_epoch > 0 %}
-    {% assign twitch_age_days = now_epoch | minus: tw_epoch | divided_by: 86400 %}
-    {% assign twitch_age_years = twitch_age_days | divided_by: 365 %}
-  {% endif %}
-{% endif %}
 
 <!-- Combined Overview -->
 <h2 class="stats-subtitle">Overview</h2>
@@ -210,15 +175,11 @@ group: stats
     <span class="stat-label">Status</span>
   </div>
   {% endif %}
-{% if twitch.created_at %}
-  {% assign twitch_epoch = twitch.created_at | plus: 0 %}
-  {% if twitch_epoch == 0 %}
-    {% assign twitch_epoch = twitch.created_at | truncate: 10, "" | date: "%s" | plus: 0 %}
-  {% endif %}
-  {% assign twitch_age_days = now_epoch | minus: twitch_epoch | divided_by: 86400 %}
-  {% assign twitch_age_years = twitch_age_days | divided_by: 365 %}
-{% endif %}
-</div>
+{% if twitch_age_years %}
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ twitch_age_years }}y</span>
+    <span class="stat-label">Account Age</span>
+  </div>
 
 <!-- Store -->
 {% if store %}

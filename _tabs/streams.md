@@ -7,41 +7,52 @@ permalink: /streams/
 group: media
 ---
 
-<p>Catch me live on <a href="https://live.skiylia.dev">Twitch</a>. Past streams are archived on the <a href="https://vods.skiylia.dev">YouTube VODs channel</a>.</p>
-
-<div class="video-grid">
-  {% assign vods = site.data.youtube_vods.videos %}
-  {% if vods.size > 0 %}
-    {% for vod in vods %}
-      <div class="video-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}" onclick="openPlayer(this)">
-        <div class="thumb-wrap">
-          <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
-          <div class="play-overlay"><i class="fas fa-play"></i></div>
-          {% if vod.duration_seconds and vod.duration_seconds > 0 %}
-            <span class="duration-badge">{{ vod.duration_seconds | divided_by: 3600 }}:{{ vod.duration_seconds | modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ vod.duration_seconds | modulo: 60 | prepend: '00' | slice: -2, 2 }}</span>
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <h3>{{ vod.title }}</h3>
-          <div class="meta-row">
-            {% if vod.published %}
-              <span class="meta-date"><time datetime="{{ vod.published }}">{{ vod.published | date: "%d %b %Y" }}</time>
-              <span class="reltime" datetime="{{ vod.published }}"></span></span>
-            {% endif %}
-            {% if vod.view_count and vod.view_count > 0 %}
-              <span class="views">{{ vod.view_count }} views</span>
-            {% endif %}
-          </div>
-          {% if vod.description %}
-            <p class="video-desc">{{ vod.description | truncate: 120 }}</p>
-          {% endif %}
-        </div>
-      </div>
-    {% endfor %}
-  {% else %}
-    <p>No stream archives loaded yet. Check back soon!</p>
-  {% endif %}
+<div class="streams-hero">
+  <p>Catch me live on <a href="https://live.skiylia.dev" class="btn"><i class="fab fa-twitch"></i> Twitch</a>.
+  Past streams are archived on the <a href="https://vods.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> VODs channel</a>.</p>
 </div>
+
+{% assign yt_vods = site.data.youtube_vods.videos %}
+{% assign tw_vods = site.data.twitch_vods.videos %}
+{% assign vods = yt_vods | concat: tw_vods | sort: "published" | reverse %}
+{% if vods.size > 0 %}
+<div class="video-grid">
+  {% for vod in vods %}
+    <div class="video-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}" onclick="openPlayer(this)">
+      <div class="thumb-wrap">
+        <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
+        <div class="play-overlay"><i class="fas fa-play"></i></div>
+        {% if vod.duration_seconds and vod.duration_seconds > 0 %}
+          <span class="duration-badge">{{ vod.duration_seconds | divided_by: 3600 }}:{{ vod.duration_seconds | modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ vod.duration_seconds | modulo: 60 | prepend: '00' | slice: -2, 2 }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h3>{{ vod.title }}</h3>
+        <div class="meta-row">
+          {% if vod.published %}
+            <span class="meta-date"><time datetime="{{ vod.published }}">{{ vod.published | date: "%d %b %Y" }}</time>
+            <span class="reltime" datetime="{{ vod.published }}"></span></span>
+          {% endif %}
+          {% if vod.view_count and vod.view_count > 0 %}
+            <span class="views">{{ vod.view_count }} views</span>
+          {% endif %}
+        </div>
+        {% if vod.description %}
+          <p class="video-desc">{{ vod.description | truncate: 120 }}</p>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="streams-empty">
+  <p>No stream archives yet. When I go live and save the VOD, they'll appear here.</p>
+  <div class="streams-empty-links">
+    <a href="https://live.skiylia.dev" class="btn" target="_blank"><i class="fab fa-twitch"></i> Watch on Twitch</a>
+    <a href="https://vods.skiylia.dev" class="btn" target="_blank"><i class="fab fa-youtube"></i> Browse VODs</a>
+  </div>
+</div>
+{% endif %}
 
 <div id="video-modal" class="modal" onclick="if(event.target==this)closePlayer()">
   <div class="modal-content">

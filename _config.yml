@@ -2,6 +2,10 @@ pcpartpicker_list_id: phfd9K
 
 youtube_memberships: auto
 
+recency_thresholds:
+  current_days: 180
+  recent_days: 365
+
 theme: jekyll-theme-chirpy
 
 lang: en

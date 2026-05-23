@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime, timezone
 
+import yaml
 import requests
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
@@ -14,6 +15,17 @@ VODS_PLAYLIST_ID = "UUC8qQOj7P2CWEcCDmOq0q7Q"
 
 DATA_DIR = "_data"
 os.makedirs(DATA_DIR, exist_ok=True)
+
+CONFIG_PATH = "_config.yml"
+try:
+    with open(CONFIG_PATH) as f:
+        _cfg = yaml.safe_load(f)
+    _rt = _cfg.get("recency_thresholds", {})
+    CURRENT_DAYS = _rt.get("current_days", 90)
+    RECENT_DAYS = _rt.get("recent_days", 365)
+except Exception:
+    CURRENT_DAYS = 90
+    RECENT_DAYS = 365
 
 
 def api_get(url):
@@ -462,14 +474,52 @@ def compute_series_recency(videos):
             recency[name] = {"status": "historical", "episodes": data["episode_count"]}
             continue
         days = (now - dt).days
-        if days < 90:
+        if days < CURRENT_DAYS:
             status = "current"
-        elif days < 365:
+        elif days < RECENT_DAYS:
             status = "recent"
         else:
             status = "historical"
         recency[name] = {"status": status, "episodes": data["episode_count"]}
     return recency
+
+
+def compute_game_stats(videos):
+    games = {}
+    non_game = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None}
+    for v in videos:
+        s = v.get("series")
+        published = v.get("published", "")
+        if s and s.get("game"):
+            game = s["game"]
+            if game not in games:
+                games[game] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series": set()}
+            g = games[game]
+            g["episode_count"] += 1
+            g["total_duration_seconds"] += v.get("duration_seconds", 0)
+            g["total_views"] += v.get("view_count", 0)
+            g["total_likes"] += v.get("like_count", 0)
+            if published:
+                if g["first_video"] is None or published < g["first_video"]:
+                    g["first_video"] = published
+                if g["latest_video"] is None or published > g["latest_video"]:
+                    g["latest_video"] = published
+            g["series"].add(s.get("series_name", ""))
+        else:
+            non_game["episode_count"] += 1
+            non_game["total_duration_seconds"] += v.get("duration_seconds", 0)
+            non_game["total_views"] += v.get("view_count", 0)
+            non_game["total_likes"] += v.get("like_count", 0)
+            if published:
+                if non_game["first_video"] is None or published < non_game["first_video"]:
+                    non_game["first_video"] = published
+                if non_game["latest_video"] is None or published > non_game["latest_video"]:
+                    non_game["latest_video"] = published
+    result = {}
+    for name, g in sorted(games.items()):
+        g["series"] = sorted(g["series"])
+        result[name] = g
+    return {"games": result, "non_game": non_game}
 
 
 def main():
@@ -483,6 +533,11 @@ def main():
     vods = fetch_uploads(VODS_PLAYLIST_ID, "VODs channel uploads")
     if vods is not None:
         save("youtube_vods.json", {"videos": vods})
+
+    all_videos = (videos or []) + (vods or [])
+    if all_videos:
+        game_stats = compute_game_stats(all_videos)
+        save("games.json", game_stats)
 
     print("Fetching YouTube playlists...")
     playlists = fetch_playlists()

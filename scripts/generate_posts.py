@@ -41,7 +41,6 @@ def generate_video_posts(videos, label, channel_url):
         title = v.get("title", "Untitled")
         published = v.get("published", "")
         desc = v.get("description", "")
-        views = v.get("view_count", 0)
         series = v.get("series", {})
         game = series.get("game", "") if series else ""
 
@@ -73,8 +72,6 @@ def generate_video_posts(videos, label, channel_url):
         }
 
         body = f"[Watch on YouTube]({channel_url}/watch?v={vid})"
-        if views:
-            body += f" | {views} views"
         if desc:
             body += f"\n\n{desc}"
 
@@ -89,7 +86,6 @@ def generate_livestream_post(vods):
         title = v.get("title", "Untitled")
         published = v.get("published", "")
         desc = v.get("description", "")
-        views = v.get("view_count", 0)
 
         if not published or not vid:
             continue
@@ -110,8 +106,6 @@ def generate_livestream_post(vods):
         }
 
         body = f"[Watch VOD on YouTube](https://watch.skiylia.dev/watch?v={vid})"
-        if views:
-            body += f" | {views} views"
         if desc:
             body += f"\n\n{desc}"
 
@@ -150,6 +144,41 @@ def main():
         vods_list = vods.get("videos", [])
         print(f"Generating posts for {len(vods_list)} VODs...")
         generate_livestream_post(vods_list)
+
+    twitch_vods = read_json("twitch_vods.json")
+    if twitch_vods:
+        tvods = twitch_vods.get("videos", [])
+        print(f"Generating posts for {len(tvods)} Twitch VODs...")
+        for v in tvods:
+            vid = v.get("video_id", "")
+            title = v.get("title", "Untitled")
+            published = v.get("published", "")
+            desc = v.get("description", "")
+            vod_url = v.get("url", f"https://www.twitch.tv/videos/{vid}")
+
+            if not published or not vid:
+                continue
+
+            date = published[:10]
+            filename = f"{date}-twitch-{vid}.md"
+
+            short_desc = (desc[:200] + "...") if desc and len(desc) > 200 else (desc or "Stream archive available.")
+
+            frontmatter = {
+                "title": f'"{title}"',
+                "date": published,
+                "categories": "streams",
+                "tags": "[twitch, vod]",
+                "pin": "false",
+                "image": "",
+                "description": f'"{short_desc}"',
+            }
+
+            body = f"[Watch VOD on Twitch]({vod_url})"
+            if desc:
+                body += f"\n\n{desc}"
+
+            write_post(filename, frontmatter, body)
 
     print("Done.")
 

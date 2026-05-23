@@ -54,8 +54,11 @@ permalink: /about/
             {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
             {% assign lu_days = now_epoch | minus: lu_epoch | divided_by: 86400 %}
             {% assign status = "historical" %}
-            {% if lu_days < 90 %}{% assign status = "current" %}
-            {% elsif lu_days < 365 %}{% assign status = "recent" %}
+            {% assign rt = site.recency_thresholds %}
+            {% assign cur_days = rt.current_days | default: 90 %}
+            {% assign rec_days = rt.recent_days | default: 365 %}
+            {% if lu_days < cur_days %}{% assign status = "current" %}
+            {% elsif lu_days < rec_days %}{% assign status = "recent" %}
             {% endif %}
             {% if status != "historical" %}
               {% capture item %}<span class="series-dot {{ status }}"></span> <a href="{{ pl.url }}" class="btn series-btn"><strong>{{ pl.title }}</strong></a>{% if pl.item_count > 0 %} <span class="ep-count">{{ pl.item_count }} episodes</span>{% endif %}{% endcapture %}

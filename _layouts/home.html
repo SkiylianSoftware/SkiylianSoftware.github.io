@@ -30,8 +30,16 @@ layout: default
               &#11088; {{ site.data.milestones.current.count }} {{ site.data.milestones.current.type }}! {{ site.data.milestones.current.message }}
             {% endif %}
           </div>
-        {% endif %}
+  {% else %}
+    <div class="offline-panel">
+      <div class="offline-icon"><i class="fas fa-circle"></i></div>
+      <div class="offline-text">
+        <h2>Currently Offline</h2>
+        <p>Not streaming right now. Browse <a href="/videos" class="btn">videos</a> or check <a href="/streams" class="btn">past VODs</a>.</p>
       </div>
+    </div>
+  {% endif %}
+</div>
     </div>
     <div class="hero-links">
       <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
@@ -201,13 +209,11 @@ layout: default
       {% endif %}
       {% if recency == "historical" %}
         {% if pl.last_updated %}
-          {% assign lu_epoch = pl.last_updated | truncate: 10, "" | date: "%s" | plus: 0 %}
-          {% if lu_epoch == 0 %}{% assign lu_epoch = pl.last_updated | plus: 0 %}{% endif %}
-          {% if lu_epoch > 0 %}
-            {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-            {% assign lu_days = now_epoch | minus: lu_epoch | divided_by: 86400 %}
-            {% if lu_days < 90 %}{% assign recency = "current" %}
-            {% elsif lu_days < 365 %}{% assign recency = "recent" %}
+          {% assign lu_epoch = pl.last_updated | truncate: 4, "" | plus: 0 %}
+          {% if lu_epoch > 2000 %}
+            {% assign current_year = site.time | date: "%Y" | plus: 0 %}
+            {% if lu_epoch == current_year %}{% assign recency = "recent" %}
+            {% elsif lu_epoch == current_year | minus: 1 %}{% assign recency = "recent" %}
             {% endif %}
           {% endif %}
         {% endif %}
@@ -294,6 +300,24 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
   padding: 1.5rem;
   position: relative;
 }
+.offline-panel {
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 12px;
+  background: var(--clr-card-bg);
+  border: 1px solid rgba(45,212,191,0.08);
+  text-align: center;
+  max-width: 500px;
+}
+.offline-panel .offline-icon i {
+  font-size: 2rem;
+  color: #555577;
+  animation: offline-pulse 3s ease-in-out infinite;
+}
+@keyframes offline-pulse { 0%,100%{opacity:0.4} 50%{opacity:0.8} }
+.offline-panel h2 { font-size: 1.1rem; margin: 0.5rem 0; }
+.offline-panel p { font-size: 0.9rem; opacity: 0.7; margin: 0; }
+.offline-panel .btn { font-size: 0.85rem; }
 .live-badge {
   position: absolute; top: 0.5rem; left: 0.5rem;
   background: #ff0000; color: #fff;

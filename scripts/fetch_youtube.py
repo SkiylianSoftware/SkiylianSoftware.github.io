@@ -614,7 +614,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
 
                 content_series = _extract_content_series(v.get("title", ""))
                 if not content_series:
-                    content_series = video.get("title", "")
+                    content_series = v.get("title", "")
                 if content_series not in cat["series_data"]:
                     cat["series_data"][content_series] = {"episode_count": 0, "first_video": None, "latest_video": None, "active_years": set()}
                 csd = cat["series_data"][content_series]

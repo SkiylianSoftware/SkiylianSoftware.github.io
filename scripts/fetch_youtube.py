@@ -1,11 +1,11 @@
 import json
-import re
 import os
+import re
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
-import yaml
 import requests
+import yaml
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
 CHANNEL_ID = "UC4s4eXHuzj7OxwJXgiZgAYw"
@@ -60,7 +60,8 @@ def parse_duration(iso_duration):
         return 0
     seconds = 0
     import re
-    m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', iso_duration)
+
+    m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", iso_duration)
     if m:
         h, mi, s = [int(g) if g else 0 for g in m.groups()]
         seconds = h * 3600 + mi * 60 + s
@@ -72,7 +73,7 @@ def fetch_video_details(video_ids):
         return {}
     details = {}
     for i in range(0, len(video_ids), 50):
-        batch = video_ids[i:i+50]
+        batch = video_ids[i : i + 50]
         ids = ",".join(batch)
         url = (
             f"https://www.googleapis.com/youtube/v3/videos"
@@ -96,9 +97,9 @@ def fetch_video_details(video_ids):
     return details
 
 
-import re
-SERIES_RE = re.compile(r'^(?P<game>[^:]+):\s*(?P<series>.+?)#(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$')
-CONTENT_SERIES_RE = re.compile(r'^(?P<content_series>[^#]+?)\s*#\d+\s*[-–]\s*(?P<subtitle>.+)$')
+SERIES_RE = re.compile(r"^(?P<game>[^:]+):\s*(?P<series>.+?)#(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$")
+CONTENT_SERIES_RE = re.compile(r"^(?P<content_series>[^#]+?)\s*#\d+\s*[-–]\s*(?P<subtitle>.+)$")
+
 
 def parse_series(title):
     m = SERIES_RE.match(title)
@@ -169,15 +170,17 @@ def fetch_uploads(playlist_id, label="uploads"):
             thumbnail = (
                 thumbnails.get("maxres", {}) or thumbnails.get("high", {}) or thumbnails.get("medium", {})
             ).get("url", "")
-            videos.append({
-                "title": snippet.get("title", ""),
-                "url": f"https://www.youtube.com/watch?v={video_id}",
-                "video_id": video_id,
-                "thumbnail": thumbnail,
-                "published": snippet.get("publishedAt", ""),
-                "description": snippet.get("description", "")[:500],
-                "series": parse_series(snippet.get("title", "")),
-            })
+            videos.append(
+                {
+                    "title": snippet.get("title", ""),
+                    "url": f"https://www.youtube.com/watch?v={video_id}",
+                    "video_id": video_id,
+                    "thumbnail": thumbnail,
+                    "published": snippet.get("publishedAt", ""),
+                    "description": snippet.get("description", "")[:500],
+                    "series": parse_series(snippet.get("title", "")),
+                }
+            )
         page_token = data.get("nextPageToken")
         if not page_token:
             break
@@ -223,7 +226,7 @@ def enrich_playlist_stats(playlists):
     all_vids = list(set(vid for ids in playlist_video_ids.values() for vid in ids))
     video_details = {}
     for i in range(0, len(all_vids), 50):
-        batch = all_vids[i:i+50]
+        batch = all_vids[i : i + 50]
         ids = ",".join(batch)
         url = (
             f"https://www.googleapis.com/youtube/v3/videos"
@@ -249,16 +252,14 @@ def enrich_playlist_stats(playlists):
     for pl in playlists:
         pid = pl["playlist_id"]
         vids = playlist_video_ids.get(pid, [])
-        pl["total_duration_seconds"] = sum(
-            video_details.get(v, {}).get("duration_seconds", 0) for v in vids
-        )
-        pl["total_views"] = sum(
-            video_details.get(v, {}).get("view_count", 0) for v in vids
-        )
-        pl["total_likes"] = sum(
-            video_details.get(v, {}).get("like_count", 0) for v in vids
-        )
-        dates = [video_details.get(v, {}).get("published_at", "") for v in vids if video_details.get(v, {}).get("published_at")]
+        pl["total_duration_seconds"] = sum(video_details.get(v, {}).get("duration_seconds", 0) for v in vids)
+        pl["total_views"] = sum(video_details.get(v, {}).get("view_count", 0) for v in vids)
+        pl["total_likes"] = sum(video_details.get(v, {}).get("like_count", 0) for v in vids)
+        dates = [
+            video_details.get(v, {}).get("published_at", "")
+            for v in vids
+            if video_details.get(v, {}).get("published_at")
+        ]
         pl["last_updated"] = max(dates) if dates else pl.get("published", "")
     return playlists
 
@@ -280,17 +281,24 @@ def fetch_playlists():
         for item in data.get("items", []):
             snippet = item.get("snippet", {})
             thumb = snippet.get("thumbnails", {})
-            all_playlists.append({
-                "title": snippet.get("title", ""),
-                "url": f"https://www.youtube.com/playlist?list={item['id']}",
-                "playlist_id": item["id"],
-                "item_count": item.get("contentDetails", {}).get("itemCount", 0),
-                "thumbnail": (thumb.get("maxres", {}) or thumb.get("medium", {}) or thumb.get("high", {}) or thumb.get("default", {})).get("url", ""),
-"description": snippet.get("description", ""),
-                "description_parts": snippet.get("description", "").split("\n"),
-                "published": snippet.get("publishedAt", ""),
-                "channel_title": snippet.get("channelTitle", ""),
-            })
+            all_playlists.append(
+                {
+                    "title": snippet.get("title", ""),
+                    "url": f"https://www.youtube.com/playlist?list={item['id']}",
+                    "playlist_id": item["id"],
+                    "item_count": item.get("contentDetails", {}).get("itemCount", 0),
+                    "thumbnail": (
+                        thumb.get("maxres", {})
+                        or thumb.get("medium", {})
+                        or thumb.get("high", {})
+                        or thumb.get("default", {})
+                    ).get("url", ""),
+                    "description": snippet.get("description", ""),
+                    "description_parts": snippet.get("description", "").split("\n"),
+                    "published": snippet.get("publishedAt", ""),
+                    "channel_title": snippet.get("channelTitle", ""),
+                }
+            )
         page_token = data.get("nextPageToken")
         if not page_token:
             break
@@ -351,13 +359,11 @@ def check_youtube_memberships():
             return False
         text = resp.text
         # Look for a Membership tab in the channel page data
-        m = re.search(r'ytInitialData\s*=\s*({.*?});', text, re.DOTALL)
+        m = re.search(r"ytInitialData\s*=\s*({.*?});", text, re.DOTALL)
         if m:
             try:
                 data = json.loads(m.group(1))
-                tabs = data.get("contents", {}).get(
-                    "twoColumnBrowseResultsRenderer", {}
-                ).get("tabs", [])
+                tabs = data.get("contents", {}).get("twoColumnBrowseResultsRenderer", {}).get("tabs", [])
                 for tab in tabs:
                     title = tab.get("tabRenderer", {}).get("title", "")
                     if title and "membership" in title.lower():
@@ -379,10 +385,7 @@ def check_youtube_memberships():
         for n in negatives:
             if n in text_lower:
                 return False
-        for p in positives:
-            if p in text_lower:
-                return True
-        return False
+        return any(p in text_lower for p in positives)
     except requests.RequestException:
         pass
     return False
@@ -407,9 +410,9 @@ def fetch_channel_info(channel_id=None):
     branding = item.get("brandingSettings", {})
     stats = item.get("statistics", {})
     thumbnails = snippet.get("thumbnails", {})
-    avatar = (
-        thumbnails.get("high", {}) or thumbnails.get("medium", {}) or thumbnails.get("default", {})
-    ).get("url", "")
+    avatar = (thumbnails.get("high", {}) or thumbnails.get("medium", {}) or thumbnails.get("default", {})).get(
+        "url", ""
+    )
     memberships_available = check_youtube_memberships()
     return {
         "title": snippet.get("title", ""),
@@ -431,7 +434,7 @@ def update_config_avatar(avatar_url):
     config_path = "_config.yml"
     with open(config_path) as f:
         content = f.read()
-    old_line = [l for l in content.splitlines() if l.startswith("avatar:")][0]
+    old_line = [ln for ln in content.splitlines() if ln.startswith("avatar:")][0]
     new_line = f"avatar: {avatar_url}"
     if old_line.strip() == new_line.strip():
         return
@@ -545,8 +548,10 @@ def _extract_steam_appid(steam_url):
 def _extract_image_color(url):
     """Download an image and return its dominant colour as a hex string."""
     try:
-        from PIL import Image
         from io import BytesIO
+
+        from PIL import Image
+
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         img = Image.open(BytesIO(resp.content)).convert("RGB")
@@ -575,7 +580,14 @@ def _categorize_non_game(video, content_types):
 
 def compute_game_stats(videos, alias_map=None, content_types=None):
     games = {}
-    non_game_total = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None}
+    non_game_total = {
+        "episode_count": 0,
+        "total_duration_seconds": 0,
+        "total_views": 0,
+        "total_likes": 0,
+        "first_video": None,
+        "latest_video": None,
+    }
     non_game_categories = {}
     for v in videos:
         s = v.get("series")
@@ -585,7 +597,17 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
             if alias_map and game in alias_map:
                 game = alias_map[game]
             if game not in games:
-                games[game] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series": set(), "series_data": {}, "original_names": [game]}
+                games[game] = {
+                    "episode_count": 0,
+                    "total_duration_seconds": 0,
+                    "total_views": 0,
+                    "total_likes": 0,
+                    "first_video": None,
+                    "latest_video": None,
+                    "series": set(),
+                    "series_data": {},
+                    "original_names": [game],
+                }
             g = games[game]
             g["episode_count"] += 1
             g["total_duration_seconds"] += v.get("duration_seconds", 0)
@@ -602,7 +624,12 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
             if original_name not in g["original_names"]:
                 g["original_names"].append(original_name)
             if series_name not in g["series_data"]:
-                g["series_data"][series_name] = {"episode_count": 0, "first_video": None, "latest_video": None, "active_years": set()}
+                g["series_data"][series_name] = {
+                    "episode_count": 0,
+                    "first_video": None,
+                    "latest_video": None,
+                    "active_years": set(),
+                }
             sd = g["series_data"][series_name]
             sd["episode_count"] += 1
             if published:
@@ -625,7 +652,15 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
             if content_types:
                 cat_name = _categorize_non_game(v, content_types)
                 if cat_name not in non_game_categories:
-                    non_game_categories[cat_name] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series_data": {}}
+                    non_game_categories[cat_name] = {
+                        "episode_count": 0,
+                        "total_duration_seconds": 0,
+                        "total_views": 0,
+                        "total_likes": 0,
+                        "first_video": None,
+                        "latest_video": None,
+                        "series_data": {},
+                    }
                 cat = non_game_categories[cat_name]
                 cat["episode_count"] += 1
                 cat["total_duration_seconds"] += v.get("duration_seconds", 0)
@@ -641,7 +676,12 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
                 if not content_series:
                     content_series = v.get("title", "")
                 if content_series not in cat["series_data"]:
-                    cat["series_data"][content_series] = {"episode_count": 0, "first_video": None, "latest_video": None, "active_years": set()}
+                    cat["series_data"][content_series] = {
+                        "episode_count": 0,
+                        "first_video": None,
+                        "latest_video": None,
+                        "active_years": set(),
+                    }
                 csd = cat["series_data"][content_series]
                 csd["episode_count"] += 1
                 if published:
@@ -662,7 +702,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
     result = {}
     for name, g in sorted(games.items(), key=lambda x: x[1].get("latest_video", ""), reverse=True):
         g["series"] = sorted(g["series"])
-        for sname, sd in g.get("series_data", {}).items():
+        for _sname, sd in g.get("series_data", {}).items():
             sd["active_years"] = format_years(sd["active_years"])
         latest = g.get("latest_video")
         if latest:
@@ -703,8 +743,8 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
     else:
         ordered = non_game_categories
 
-    for cat_name, cat in ordered.items():
-        for cs_name, csd in cat.get("series_data", {}).items():
+    for _cat_name, cat in ordered.items():
+        for _cs_name, csd in cat.get("series_data", {}).items():
             csd["active_years"] = format_years(csd["active_years"])
 
     return {

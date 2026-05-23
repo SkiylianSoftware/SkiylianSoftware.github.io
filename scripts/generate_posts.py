@@ -7,7 +7,6 @@ This populates feed.xml so subscribers can see new content in their feed reader.
 
 import json
 import os
-from datetime import datetime, timezone
 
 DATA_DIR = "_data"
 POSTS_DIR = "_posts"
@@ -114,7 +113,7 @@ def generate_livestream_post(vods):
 
 def clean_old_posts():
     kept = set()
-    for root, dirs, files in os.walk(POSTS_DIR):
+    for _root, _dirs, files in os.walk(POSTS_DIR):
         for f in files:
             if f.endswith(".md"):
                 kept.add(f)

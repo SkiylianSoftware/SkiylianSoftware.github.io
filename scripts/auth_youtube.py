@@ -11,12 +11,10 @@ Save the printed refresh token as YOUTUBE_REFRESH_TOKEN in GitHub secrets.
 Also save CLIENT_ID and CLIENT_SECRET as YOUTUBE_CLIENT_ID and YOUTUBE_CLIENT_SECRET.
 """
 
-import json
 import os
-import socket
 import sys
 import webbrowser
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import requests
 
@@ -35,6 +33,7 @@ class RedirectHandler(BaseHTTPRequestHandler):
         self.server.auth_code = None
         if "code=" in self.path:
             import urllib.parse
+
             parsed = urllib.parse.urlparse(self.path)
             qs = urllib.parse.parse_qs(parsed.query)
             self.server.auth_code = qs.get("code", [None])[0]
@@ -68,13 +67,17 @@ def get_auth_code():
 
 
 def exchange_code(code):
-    resp = requests.post("https://oauth2.googleapis.com/token", data={
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "code": code,
-        "grant_type": "authorization_code",
-        "redirect_uri": REDIRECT_URI,
-    }, timeout=30)
+    resp = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": REDIRECT_URI,
+        },
+        timeout=30,
+    )
     resp.raise_for_status()
     return resp.json()
 
@@ -106,9 +109,9 @@ def main():
         print("https://myaccount.google.com/permissions and running again.")
         sys.exit(1)
 
-    print(f"\n=== SUCCESS ===")
+    print("\n=== SUCCESS ===")
     print(f"Access token (expires in {expires_in}s): {access_token[:50]}...")
-    print(f"\nAdd these to GitHub repository secrets:")
+    print("\nAdd these to GitHub repository secrets:")
     print(f"  YOUTUBE_REFRESH_TOKEN: {refresh_token}")
     print(f"  YOUTUBE_CLIENT_ID:     {CLIENT_ID}")
     print(f"  YOUTUBE_CLIENT_SECRET: {CLIENT_SECRET}")

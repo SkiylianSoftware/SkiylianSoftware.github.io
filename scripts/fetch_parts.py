@@ -1,3 +1,4 @@
+import contextlib
 import json
 import os
 import re
@@ -11,9 +12,7 @@ DATA_DIR = "_data"
 
 BROWSER_HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (X11; Linux x86_64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/134.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "en-GB,en;q=0.9",
@@ -60,9 +59,16 @@ def extract_tag_content(text, tag, attrs=None):
 
 
 CORE_COMPONENTS = [
-    "CPU", "Video Card", "Memory", "Motherboard",
-    "CPU Cooler", "Storage", "Power Supply", "Case",
-    "External Storage", "UPS",
+    "CPU",
+    "Video Card",
+    "Memory",
+    "Motherboard",
+    "CPU Cooler",
+    "Storage",
+    "Power Supply",
+    "Case",
+    "External Storage",
+    "UPS",
 ]
 
 
@@ -169,10 +175,8 @@ def main():
     session = requests.Session()
     session.headers.update(BROWSER_HEADERS)
     # Warm up with the base domain to get cookies
-    try:
+    with contextlib.suppress(Exception):
         session.get(PCPARTPICKER_BASE, timeout=15)
-    except Exception:
-        pass
     url = f"{PCPARTPICKER_BASE}/list/{list_id}"
     resp = session.get(url, timeout=30)
     if resp.status_code != 200:
@@ -234,21 +238,21 @@ def main():
         price = None
         price = None
         if 'td__price--none"' not in row[: row.find("</tr>")]:
-            price_cell = extract_between(
-                row, '<td class="td__price td__price-2025">', "</td>"
-            )
+            price_cell = extract_between(row, '<td class="td__price td__price-2025">', "</td>")
             if price_cell:
                 price_match = re.search(r"£[\d,]+\.?\d*", price_cell)
                 if price_match:
                     price = price_match.group(0)
 
         if comp or name:
-            parts.append({
-                "component": comp,
-                "name": name,
-                "url": part_url,
-                "price": price,
-            })
+            parts.append(
+                {
+                    "component": comp,
+                    "name": name,
+                    "url": part_url,
+                    "price": price,
+                }
+            )
 
     # Extract totals from tr.tr__total rows
     total_base = None

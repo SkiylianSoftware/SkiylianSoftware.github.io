@@ -25,12 +25,16 @@ HISTORY_FILE = os.path.join(DATA_DIR, "history.json")
 
 
 def refresh_access_token():
-    resp = requests.post("https://oauth2.googleapis.com/token", data={
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "refresh_token": REFRESH_TOKEN,
-        "grant_type": "refresh_token",
-    }, timeout=30)
+    resp = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "refresh_token": REFRESH_TOKEN,
+            "grant_type": "refresh_token",
+        },
+        timeout=30,
+    )
     resp.raise_for_status()
     return resp.json()["access_token"]
 
@@ -139,20 +143,22 @@ def main():
         running_watch += day["watch_time"]
 
         if date not in existing_dates:
-            history.append({
-                "date": date,
-                "youtube_main": {
-                    "subs": max(0, running_subs),
-                    "views": running_views,
-                    "videos": 0,  # Analytics doesn't provide video count; track_history.py updates this
-                },
-                "_analytics": {
-                    "views_gained": day["views"],
-                    "watch_time_minutes": round(day["watch_time"] / 60),
-                    "subs_gained": day["subs_gained"],
-                    "subs_lost": day["subs_lost"],
-                },
-            })
+            history.append(
+                {
+                    "date": date,
+                    "youtube_main": {
+                        "subs": max(0, running_subs),
+                        "views": running_views,
+                        "videos": 0,  # Analytics doesn't provide video count; track_history.py updates this
+                    },
+                    "_analytics": {
+                        "views_gained": day["views"],
+                        "watch_time_minutes": round(day["watch_time"] / 60),
+                        "subs_gained": day["subs_gained"],
+                        "subs_lost": day["subs_lost"],
+                    },
+                }
+            )
             new_entries += 1
 
     # Update today's entry with the current snapshot from site_meta
@@ -160,11 +166,13 @@ def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     for entry in history:
         if entry["date"] == today:
-            entry.setdefault("youtube_main", {}).update({
-                "subs": current_subs,
-                "views": current_views,
-                "videos": current_videos,
-            })
+            entry.setdefault("youtube_main", {}).update(
+                {
+                    "subs": current_subs,
+                    "views": current_views,
+                    "videos": current_videos,
+                }
+            )
             break
 
     save_history(history)

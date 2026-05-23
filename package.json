@@ -1,0 +1,12 @@
+{
+  "name": "skiylia-dev-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint assets/js/",
+    "lint:fix": "eslint assets/js/ --fix"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
+}

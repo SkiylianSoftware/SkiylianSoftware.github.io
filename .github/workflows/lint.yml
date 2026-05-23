@@ -1,0 +1,76 @@
+name: Lint
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**.py"
+      - pyproject.toml
+      - assets/js/**.js
+      - "**/*.yml"
+      - "**/*.yaml"
+      - package.json
+      - eslint.config.js
+  push:
+    branches: [master]
+    paths:
+      - "scripts/**.py"
+      - pyproject.toml
+      - assets/js/**.js
+      - "**/*.yml"
+      - "**/*.yaml"
+      - package.json
+      - eslint.config.js
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [python, javascript, yaml]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: matrix.tool == 'python' || matrix.tool == 'yaml'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Python lint tools
+        if: matrix.tool == 'python' || matrix.tool == 'yaml'
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy yamllint
+          pip install types-requests types-PyYAML
+
+      - name: Set up Node
+        if: matrix.tool == 'javascript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install JS lint tools
+        if: matrix.tool == 'javascript'
+        run: npm ci
+
+      - name: Ruff check
+        if: matrix.tool == 'python'
+        run: ruff check scripts/
+
+      - name: Ruff format check
+        if: matrix.tool == 'python'
+        run: ruff format --check scripts/
+
+      - name: mypy check
+        if: matrix.tool == 'python'
+        run: mypy scripts/ --ignore-missing-imports --scripts-are-modules
+
+      - name: ESLint
+        if: matrix.tool == 'javascript'
+        run: npx eslint assets/js/
+
+      - name: yamllint
+        if: matrix.tool == 'yaml'
+        run: |
+          yamllint -c .yamllint.yml .

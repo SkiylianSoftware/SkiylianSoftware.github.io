@@ -18,11 +18,15 @@ def get_app_token():
     if not TWITCH_CLIENT_ID or not TWITCH_CLIENT_SECRET:
         print("No Twitch credentials set, skipping Twitch fetch", file=sys.stderr)
         return None
-    resp = requests.post(TOKEN_URL, params={
-        "client_id": TWITCH_CLIENT_ID,
-        "client_secret": TWITCH_CLIENT_SECRET,
-        "grant_type": "client_credentials",
-    }, timeout=30)
+    resp = requests.post(
+        TOKEN_URL,
+        params={
+            "client_id": TWITCH_CLIENT_ID,
+            "client_secret": TWITCH_CLIENT_SECRET,
+            "grant_type": "client_credentials",
+        },
+        timeout=30,
+    )
     resp.raise_for_status()
     return resp.json()["access_token"]
 
@@ -92,13 +96,15 @@ def fetch_schedule(user_id, token):
     segments = data.get("segments", [])
     schedule = []
     for s in segments:
-        schedule.append({
-            "start_time": s.get("start_time", ""),
-            "end_time": s.get("end_time", ""),
-            "title": s.get("title", ""),
-            "category": s.get("category", {}).get("name", "") if s.get("category") else "",
-            "is_recurring": s.get("is_recurring", False),
-        })
+        schedule.append(
+            {
+                "start_time": s.get("start_time", ""),
+                "end_time": s.get("end_time", ""),
+                "title": s.get("title", ""),
+                "category": s.get("category", {}).get("name", "") if s.get("category") else "",
+                "is_recurring": s.get("is_recurring", False),
+            }
+        )
     return schedule
 
 
@@ -127,16 +133,18 @@ def fetch_vods(user_id, token):
                 seconds = int(parts[0]) * 60 + int(parts[1])
             elif len(parts) == 1:
                 seconds = int(parts[0])
-            vods.append({
-                "video_id": item["id"],
-                "title": item.get("title", ""),
-                "url": item.get("url", ""),
-                "thumbnail": item.get("thumbnail_url", "").replace("{width}", "640").replace("{height}", "360"),
-                "published": item.get("created_at", ""),
-                "duration_seconds": seconds,
-                "view_count": item.get("view_count", 0),
-                "description": (item.get("description") or "")[:500],
-            })
+            vods.append(
+                {
+                    "video_id": item["id"],
+                    "title": item.get("title", ""),
+                    "url": item.get("url", ""),
+                    "thumbnail": item.get("thumbnail_url", "").replace("{width}", "640").replace("{height}", "360"),
+                    "published": item.get("created_at", ""),
+                    "duration_seconds": seconds,
+                    "view_count": item.get("view_count", 0),
+                    "description": (item.get("description") or "")[:500],
+                }
+            )
         cursor = data.get("pagination", {}).get("cursor")
         if not cursor:
             break
@@ -160,7 +168,14 @@ def main():
     print("Fetching Twitch follower count...")
     try:
         followers = fetch_followers(user_id, token)
-        save("twitch_stats.json", {"follower_count": followers, "broadcaster_type": broadcaster_type, "view_count": twitch_views, "created_at": twitch_created, "fetched_at": datetime.now(timezone.utc).isoformat()})
+        stats = {
+            "follower_count": followers,
+            "broadcaster_type": broadcaster_type,
+            "view_count": twitch_views,
+            "created_at": twitch_created,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+        }
+        save("twitch_stats.json", stats)
         print(f"Twitch followers: {followers}")
     except Exception as e:
         print(f"Could not fetch Twitch followers: {e}", file=sys.stderr)

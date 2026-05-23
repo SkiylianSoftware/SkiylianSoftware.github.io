@@ -351,9 +351,17 @@ if (mt) {
 }
 
 @media (min-width: 1200px) {
+  #main-wrapper {
+    position: relative;
+  }
   .channel-hero {
-    width: calc(100% + 30%);
-    margin-left: -10%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+  }
+  .channel-hero + * {
+    margin-top: 240px !important;
   }
 }
 

@@ -3,8 +3,11 @@ layout: compress
 swcache: true
 ---
 
+{% assign has_prev = false %}
 [
   {% for post in site.posts %}
+  {% if has_prev %},{% endif %}
+  {% assign has_prev = true %}
   {
     "title": {{ post.title | jsonify }},
     "url": {{ post.url | relative_url | jsonify }},
@@ -13,9 +16,11 @@ swcache: true
     "date": {{ post.date | jsonify }},
     {% capture content -%}{% include post-summary.html full_text=true %}{%- endcapture -%}
     "content": {{ content | jsonify }}
-  }{% unless forloop.last %},{% endunless %}
+  }
   {% endfor %}
   {% for page in site.tabs %}
+  {% if has_prev %},{% endif %}
+  {% assign has_prev = true %}
   {
     "title": {{ page.title | jsonify }},
     "url": {{ page.url | relative_url | jsonify }},
@@ -23,9 +28,11 @@ swcache: true
     "tags": "",
     "date": "",
     "content": {{ page.content | strip_html | normalize_whitespace | jsonify }}
-  }{% unless forloop.last %},{% endunless %}
+  }
   {% endfor %}
   {% if site.data.site_meta.description %}
+  {% if has_prev %},{% endif %}
+  {% assign has_prev = true %}
   {
     "title": "Channel Description",
     "url": "/",
@@ -33,10 +40,12 @@ swcache: true
     "tags": "",
     "date": "",
     "content": {{ site.data.site_meta.description | jsonify }}
-  },
+  }
   {% endif %}
   {% if site.data.youtube_main.videos %}
     {% for video in site.data.youtube_main.videos %}
+    {% if has_prev %},{% endif %}
+    {% assign has_prev = true %}
     {
       "title": {{ video.title | jsonify }},
       "url": "/videos",
@@ -44,11 +53,13 @@ swcache: true
       "tags": "video{% if video.series %}, {{ video.series.game }}, {{ video.series.series_name }}{% endif %}",
       "date": {{ video.published | default: "" | jsonify }},
       "content": {% if video.description %}{{ video.description | jsonify }}{% else %}""{% endif %}
-    }{% unless forloop.last %},{% endunless %}
+    }
     {% endfor %}
   {% endif %}
   {% if site.data.youtube_vods.videos %}
     {% for vod in site.data.youtube_vods.videos %}
+    {% if has_prev %},{% endif %}
+    {% assign has_prev = true %}
     {
       "title": {{ vod.title | jsonify }},
       "url": "/streams",
@@ -56,11 +67,13 @@ swcache: true
       "tags": "vod{% if vod.series %}, {{ vod.series.game }}{% endif %}",
       "date": {{ vod.published | default: "" | jsonify }},
       "content": {% if vod.description %}{{ vod.description | jsonify }}{% else %}""{% endif %}
-    }{% unless forloop.last %},{% endunless %}
+    }
     {% endfor %}
   {% endif %}
   {% if site.data.playlists.playlists %}
     {% for pl in site.data.playlists.playlists %}
+    {% if has_prev %},{% endif %}
+    {% assign has_prev = true %}
     {
       "title": {{ pl.title | jsonify }},
       "url": "/playlists",
@@ -68,24 +81,23 @@ swcache: true
       "tags": "playlist",
       "date": {{ pl.published | default: "" | jsonify }},
       "content": {% if pl.description %}{{ pl.description | jsonify }}{% else %}""{% endif %}
-    }{% unless forloop.last %},{% endunless %}
+    }
     {% endfor %}
   {% endif %}
-  {% if site.data.games %}
-    {% assign games_data = site.data.games.games %}
-    {% if games_data %}
-      {% for pair in games_data %}
-      {% assign gname = pair[0] %}
-      {% assign g = pair[1] %}
-      {
-        "title": {{ gname | jsonify }},
-        "url": "/games",
-        "categories": "Game",
-        "tags": "game, {{ gname }}",
-        "date": "",
-        "content": "{{ g.episode_count }} episodes, {{ g.total_views }} views{% for s in g.series %}, {{ s }}{% endfor %}"
-      }{% unless forloop.last %},{% endunless %}
-      {% endfor %}
-    {% endif %}
+  {% if site.data.games and site.data.games.games %}
+    {% for pair in site.data.games.games %}
+    {% if has_prev %},{% endif %}
+    {% assign has_prev = true %}
+    {% assign gname = pair[0] %}
+    {% assign g = pair[1] %}
+    {
+      "title": {{ gname | jsonify }},
+      "url": "/games",
+      "categories": "Game",
+      "tags": "game, {{ gname }}",
+      "date": "",
+      "content": "{{ g.episode_count }} episodes, {{ g.total_views }} views{% for s in g.series %}, {{ s }}{% endfor %}"
+    }
+    {% endfor %}
   {% endif %}
 ]

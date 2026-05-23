@@ -894,10 +894,29 @@ body::after {
   background: var(--clr-card-bg);
   border: 1px solid rgba(45,212,191,0.08);
   border-radius: 10px;
-  padding: 1.25rem;
+  overflow: hidden;
   transition: border-color 0.2s;
 }
 .game-card:hover { border-color: rgba(45,212,191,0.25); }
+.game-card-bg {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  min-height: 180px;
+  display: flex;
+  align-items: flex-end;
+}
+.game-card-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,20,0.15) 0%, rgba(10,10,20,0.95) 70%);
+}
+.game-card-content {
+  position: relative;
+  padding: 1.25rem;
+  width: 100%;
+}
 .game-card-header {
   display: flex;
   align-items: flex-start;
@@ -906,9 +925,16 @@ body::after {
   margin-bottom: 0.75rem;
 }
 .game-name {
-  font-size: 1rem;
+  font-size: 1.1rem;
   margin: 0;
   color: #e0e0f0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.game-fallback-icon {
+  font-size: 1rem;
+  color: #c084fc;
 }
 .game-links {
   display: flex;
@@ -973,6 +999,8 @@ body::after {
   border-color: rgba(192,132,252,0.3);
 }
 .game-card.non-game .game-stat-value { color: #c084fc; }
+.game-card.non-game .game-card-bg { min-height: 0; background: none; display: block; }
+.game-card.non-game .game-card-bg::before { display: none; }
 .empty-state {
   margin: 2rem 0;
   padding: 2rem;

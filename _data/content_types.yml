@@ -1,19 +1,20 @@
 # Content types for non-game videos
-# Each entry defines a category with title patterns for matching.
+# Each entry defines a category with patterns for matching.
 # Videos that don't match any game series regex get categorized here.
 # The catch_all entry matches anything remaining.
-- name: Infrastructure Programming
+# Pattern matching is case-insensitive.
+- name: Programming
   icon: fa-code
-  patterns: ["^Infrastructure Programming"]
+  patterns: ["^Infrastructure Programming", "^Programming", "Infrastructure", "Automation"]
 - name: Vlogs & Events
   icon: fa-video
-  patterns: ["Vlog", "Vlogs"]
+  patterns: ["Vlog", "Vlogs", "Exhibition", "Event", "Vlog"]
 - name: Channel Content
   icon: fa-star
-  patterns: ["^Skiy:"]
+  patterns: ["^Skiy:", "Trailer", "Channel", "Update"]
 - name: Shorts
   icon: fa-bolt
-  tags: ["shorts", "Short"]
+  tags: ["shorts", "Short", "#shorts"]
 - name: Misc
   icon: fa-folder-open
   catch_all: true

@@ -98,6 +98,7 @@ def fetch_video_details(video_ids):
 
 import re
 SERIES_RE = re.compile(r'^(?P<game>[^:]+):\s*(?P<series>.+?)#(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$')
+CONTENT_SERIES_RE = re.compile(r'^(?P<content_series>[^#]+?)\s*#\d+\s*[-–]\s*(?P<subtitle>.+)$')
 
 def parse_series(title):
     m = SERIES_RE.match(title)
@@ -109,6 +110,25 @@ def parse_series(title):
             "episode_title": m.group("subtitle").strip(),
         }
     return None
+
+
+def format_years(years):
+    if not years:
+        return ""
+    years = sorted(int(y) for y in years)
+    ranges = []
+    start = end = years[0]
+    for y in years[1:]:
+        if y == end + 1:
+            end = y
+        else:
+            ranges.append((start, end))
+            start = end = y
+    ranges.append((start, end))
+    parts = []
+    for s, e in ranges:
+        parts.append(str(s) if s == e else f"{s}-{e}")
+    return ", ".join(parts)
 
 
 def fetch_uploads(playlist_id, label="uploads"):
@@ -507,12 +527,17 @@ def compute_series_recency(videos):
     return recency
 
 
+def _extract_content_series(title):
+    m = CONTENT_SERIES_RE.match(title)
+    return m.group("content_series").strip() if m else None
+
+
 def _categorize_non_game(video, content_types):
     title = video.get("title", "")
     tags = [t.lower() for t in video.get("tags", [])]
     for ct in content_types:
         for pattern in ct.get("patterns", []):
-            if re.search(pattern, title):
+            if re.search(pattern, title, re.IGNORECASE):
                 return ct["name"]
         for tag_pattern in ct.get("tags", []):
             if tag_pattern.lower() in tags:
@@ -535,7 +560,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
             if alias_map and game in alias_map:
                 game = alias_map[game]
             if game not in games:
-                games[game] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series": set(), "series_data": {}}
+                games[game] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series": set(), "series_data": {}, "original_names": [game]}
             g = games[game]
             g["episode_count"] += 1
             g["total_duration_seconds"] += v.get("duration_seconds", 0)
@@ -548,6 +573,9 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
                     g["latest_video"] = published
             series_name = s.get("series_name", "")
             g["series"].add(series_name)
+            original_name = s["game"]
+            if original_name not in g["original_names"]:
+                g["original_names"].append(original_name)
             if series_name not in g["series_data"]:
                 g["series_data"][series_name] = {"episode_count": 0, "first_video": None, "latest_video": None, "active_years": set()}
             sd = g["series_data"][series_name]
@@ -572,7 +600,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
             if content_types:
                 cat_name = _categorize_non_game(v, content_types)
                 if cat_name not in non_game_categories:
-                    non_game_categories[cat_name] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None}
+                    non_game_categories[cat_name] = {"episode_count": 0, "total_duration_seconds": 0, "total_views": 0, "total_likes": 0, "first_video": None, "latest_video": None, "series_data": {}}
                 cat = non_game_categories[cat_name]
                 cat["episode_count"] += 1
                 cat["total_duration_seconds"] += v.get("duration_seconds", 0)
@@ -584,12 +612,26 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
                     if cat["latest_video"] is None or published > cat["latest_video"]:
                         cat["latest_video"] = published
 
+                content_series = _extract_content_series(video.get("title", ""))
+                if not content_series:
+                    content_series = video.get("title", "")
+                if content_series not in cat["series_data"]:
+                    cat["series_data"][content_series] = {"episode_count": 0, "first_video": None, "latest_video": None, "active_years": set()}
+                csd = cat["series_data"][content_series]
+                csd["episode_count"] += 1
+                if published:
+                    if csd["first_video"] is None or published < csd["first_video"]:
+                        csd["first_video"] = published
+                    if csd["latest_video"] is None or published > csd["latest_video"]:
+                        csd["latest_video"] = published
+                    csd["active_years"].add(published[:4])
+
     now = datetime.now(timezone.utc)
     result = {}
     for name, g in sorted(games.items(), key=lambda x: x[1].get("latest_video", ""), reverse=True):
         g["series"] = sorted(g["series"])
         for sname, sd in g.get("series_data", {}).items():
-            sd["active_years"] = sorted(sd["active_years"])
+            sd["active_years"] = format_years(sd["active_years"])
         latest = g.get("latest_video")
         if latest:
             try:
@@ -616,6 +658,10 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
         ordered.update(non_game_categories)
     else:
         ordered = non_game_categories
+
+    for cat_name, cat in ordered.items():
+        for cs_name, csd in cat.get("series_data", {}).items():
+            csd["active_years"] = format_years(csd["active_years"])
 
     return {
         "games": result,

@@ -1,10 +1,12 @@
 # Manual mapping of game names to external URLs
 # The key is the canonical display name. The `aliases` list maps
 # video-title extracted names to the canonical key.
+# The `color` field sets the hover accent on game cards (hex).
 # Missing entries just won't show a link button.
 Factorio:
   steam: https://store.steampowered.com/app/427520/
   website: https://factorio.com/
+  color: "#e87d2b"
 Transport Fever:
   steam: https://store.steampowered.com/app/1066780/
   website: https://www.transportfever2.com/
@@ -14,8 +16,11 @@ Kerbal Space Program:
   steam: https://store.steampowered.com/app/220200/
   website: https://www.kerbalspaceprogram.com/
   aliases: [KSP]
+  color: "#e85d30"
 Station Flow:
   steam: https://store.steampowered.com/app/1122120/STATIONflow/
   aliases: [StationFlow, STATIONflow]
+  color: "#3b82f6"
 Mars First Logistics:
   steam: https://store.steampowered.com/app/1532200/Mars_First_Logistics/
+  color: "#d97706"

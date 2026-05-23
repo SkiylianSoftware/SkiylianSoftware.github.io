@@ -25,8 +25,6 @@ group: media
   {% assign hours = g.total_duration_seconds | divided_by: 3600 %}
   {% assign rem_secs = g.total_duration_seconds | modulo: 3600 %}
   {% assign mins = rem_secs | divided_by: 60 %}
-  {% assign first_year = g.first_video | truncate: 4, "" %}
-  {% assign latest_year = g.latest_video | truncate: 4, "" %}
   {% assign img_url = link.icon %}
   {% if img_url == nil and link.steam %}
     {% assign steam_parts = link.steam | split: '/' %}
@@ -34,7 +32,8 @@ group: media
     {% assign img_url = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/" | append: steam_appid | append: "/header.jpg" %}
   {% endif %}
   {% assign card_link = link.steam | default: link.website %}
-  <div class="game-card">
+  {% assign ac = link.color | default: "#2dd4bf" %}
+  <div class="game-card" style="--game-accent: {{ ac }}">
     {% if card_link %}<a href="{{ card_link }}" class="game-card-stretched-link" target="_blank" rel="noopener"></a>{% endif %}
     {% if img_url %}
     <div class="game-card-img" style="background-image: url('{{ img_url }}')"></div>
@@ -59,7 +58,6 @@ group: media
         <span class="game-stat"><span class="game-stat-value">{{ g.episode_count }}</span> ep</span>
         <span class="game-stat"><span class="game-stat-value">{{ hours }}h {{ mins }}m</span></span>
         <span class="game-stat"><span class="game-stat-value">{{ g.total_views }}</span> views</span>
-        <span class="game-stat"><span class="game-stat-value">{{ first_year }}&ndash;{{ latest_year }}</span></span>
         {% if g.series.size > 1 %}
         <span class="game-stat"><span class="game-stat-value">{{ g.series | size }}</span> series</span>
         {% endif %}
@@ -67,16 +65,18 @@ group: media
       <div class="game-series">
         {% for sname in g.series %}
         {% assign sd = g.series_data[sname] %}
-        {% assign yrs = sd.active_years | join: ", " %}
         {% assign pl_url = nil %}
-        {% assign full_name = gname | append: ": " | append: sname %}
-        {% for pl in playlists %}
-          {% if pl.title contains full_name %}{% assign pl_url = pl.url %}{% break %}{% endif %}
+        {% for try_name in g.original_names %}
+          {% assign candidate = try_name | append: ": " | append: sname %}
+          {% for pl in playlists %}
+            {% if pl.title contains candidate %}{% assign pl_url = pl.url %}{% break %}{% endif %}
+          {% endfor %}
+          {% if pl_url %}{% break %}{% endif %}
         {% endfor %}
         {% if pl_url %}
-        <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }} ({{ yrs }})</a>
+        <a href="{{ pl_url }}" class="btn game-series-link">{{ sname }} ({{ sd.active_years }})</a>
         {% else %}
-        <span class="game-series-link no-link">{{ sname }} ({{ yrs }})</span>
+        <span class="game-series-link no-link">{{ sname }} ({{ sd.active_years }})</span>
         {% endif %}
         {% endfor %}
       </div>
@@ -90,8 +90,6 @@ group: media
   {% assign nhours = non_game.total.total_duration_seconds | divided_by: 3600 %}
   {% assign nrem = non_game.total.total_duration_seconds | modulo: 3600 %}
   {% assign nmins = nrem | divided_by: 60 %}
-  {% assign nfirst = non_game.total.first_video | truncate: 4, "" %}
-  {% assign nlatest = non_game.total.latest_video | truncate: 4, "" %}
   <div class="non-game-section">
     <h2>Other Content</h2>
     <p class="non-game-desc">Videos that don't belong to a specific game series -- programming, IRL, shorts, and miscellany.</p>
@@ -102,8 +100,6 @@ group: media
     {% assign cat_hours = cat.total_duration_seconds | divided_by: 3600 %}
     {% assign cat_rem = cat.total_duration_seconds | modulo: 3600 %}
     {% assign cat_mins = cat_rem | divided_by: 60 %}
-    {% assign cat_first = cat.first_video | truncate: 4, "" %}
-    {% assign cat_latest = cat.latest_video | truncate: 4, "" %}
     {% assign cat_icon = "fa-folder-open" %}
     {% for ct in content_types %}
       {% if ct.name == cat_name %}{% assign cat_icon = ct.icon %}{% break %}{% endif %}
@@ -117,8 +113,24 @@ group: media
           <span class="game-stat"><span class="game-stat-value">{{ cat.episode_count }}</span> video{% if cat.episode_count > 1 %}s{% endif %}</span>
           <span class="game-stat"><span class="game-stat-value">{{ cat_hours }}h {{ cat_mins }}m</span></span>
           <span class="game-stat"><span class="game-stat-value">{{ cat.total_views }}</span> views</span>
-          <span class="game-stat"><span class="game-stat-value">{{ cat_first }}&ndash;{{ cat_latest }}</span></span>
         </div>
+        {% if cat.series_data %}
+        <div class="game-series">
+          {% for cs_pair in cat.series_data %}
+          {% assign cs_name = cs_pair[0] %}
+          {% assign csd = cs_pair[1] %}
+          {% assign cs_pl_url = nil %}
+          {% for pl in playlists %}
+            {% if pl.title contains cs_name %}{% assign cs_pl_url = pl.url %}{% break %}{% endif %}
+          {% endfor %}
+          {% if cs_pl_url %}
+          <a href="{{ cs_pl_url }}" class="btn game-series-link">{{ cs_name }} ({{ csd.active_years }})</a>
+          {% else %}
+          <span class="game-series-link no-link">{{ cs_name }} ({{ csd.active_years }})</span>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
     </div>
     {% endfor %}

@@ -893,14 +893,28 @@ body::after {
 .game-card {
   position: relative;
   background: var(--clr-card-bg);
-  border: 1px solid rgba(45,212,191,0.08);
+  border: 1px solid color-mix(in srgb, var(--game-accent, #2dd4bf) 15%, var(--clr-card-bg));
   border-radius: 10px;
   overflow: hidden;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+.game-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: var(--game-accent, #2dd4bf);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 0;
+}
 .game-card:hover {
-  border-color: rgba(45,212,191,0.25);
-  box-shadow: 0 0 24px rgba(45,212,191,0.06);
+  border-color: color-mix(in srgb, var(--game-accent, #2dd4bf) 50%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--game-accent, #2dd4bf) 15%, transparent);
+}
+.game-card:hover::before {
+  opacity: 0.04;
 }
 .game-card-stretched-link {
   position: absolute;
@@ -914,7 +928,7 @@ body::after {
   background-repeat: no-repeat;
   background-position: center;
   background-color: #0a0a14;
-  border-bottom: 1px solid rgba(45,212,191,0.08);
+  border-bottom: 1px solid color-mix(in srgb, var(--game-accent, #2dd4bf) 15%, var(--clr-card-bg));
   transition: transform 0.3s ease;
 }
 .game-card:hover .game-card-img {
@@ -922,10 +936,6 @@ body::after {
 }
 .game-card-content {
   padding: 1.25rem;
-  transition: background 0.2s;
-}
-.game-card:hover .game-card-content {
-  background: rgba(45,212,191,0.025);
 }
 .game-card-header {
   display: flex;
@@ -1007,14 +1017,14 @@ body::after {
   margin: 0.4rem 0 0.75rem;
 }
 .game-card.non-game {
-  border-color: rgba(192,132,252,0.12);
+  border-color: color-mix(in srgb, #c084fc 12%, var(--clr-card-bg));
+}
+.game-card.non-game::before {
+  background: #c084fc;
 }
 .game-card.non-game:hover {
-  border-color: rgba(192,132,252,0.3);
-  box-shadow: 0 0 24px rgba(192,132,252,0.06);
-}
-.game-card.non-game:hover .game-card-content {
-  background: rgba(192,132,252,0.025);
+  border-color: color-mix(in srgb, #c084fc 50%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, #c084fc 15%, transparent);
 }
 .game-card.non-game .game-stat-value { color: #c084fc; }
 .game-card.non-game .game-name { color: #d8b4fe; }

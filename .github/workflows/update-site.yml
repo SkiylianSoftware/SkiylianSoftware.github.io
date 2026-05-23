@@ -73,6 +73,9 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python scripts/fetch_youtube_analytics.py
 
+      - name: Generate RSS feed posts
+        run: python scripts/generate_posts.py
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

@@ -40,21 +40,49 @@ permalink: /about/
         {% capture recent_html %}{{ recent_html }}<li>{{ item }}</li>{% endcapture %}
       {% endif %}
     {% endfor %}
+    {% comment %}Check playlists not matched to any parsed series for current/recent{% endcomment %}
+    {% for pl in site.data.playlists.playlists %}
+      {% assign already_shown = false %}
+      {% for pair in site.data.youtube_main.series_recency %}
+        {% if pl.title contains pair[0] or pair[0] contains pl.title %}{% assign already_shown = true %}{% break %}{% endif %}
+      {% endfor %}
+      {% unless already_shown %}
+        {% if pl.last_updated %}
+          {% assign lu_epoch = pl.last_updated | truncate: 10, "" | date: "%s" | plus: 0 %}
+          {% if lu_epoch == 0 %}{% assign lu_epoch = pl.last_updated | plus: 0 %}{% endif %}
+          {% if lu_epoch > 0 %}
+            {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+            {% assign lu_days = now_epoch | minus: lu_epoch | divided_by: 86400 %}
+            {% assign status = "historical" %}
+            {% if lu_days < 90 %}{% assign status = "current" %}
+            {% elsif lu_days < 365 %}{% assign status = "recent" %}
+            {% endif %}
+            {% if status != "historical" %}
+              {% capture item %}<span class="series-dot {{ status }}"></span> <a href="{{ pl.url }}" class="btn series-btn"><strong>{{ pl.title }}</strong></a>{% if pl.item_count > 0 %} <span class="ep-count">{{ pl.item_count }} episodes</span>{% endif %}{% endcapture %}
+              {% if status == "current" %}
+                {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
+              {% else %}
+                {% capture recent_html %}{{ recent_html }}<li>{{ item }}</li>{% endcapture %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endunless %}
+    {% endfor %}
     {% if current_html != "" or recent_html != "" %}
     <div class="series-section">
       {% if current_html != "" %}
       <div class="series-group">
-        <h3 class="series-heading current-heading"><span class="series-dot current"></span> Currently Playing</h3>
+        <h3 class="series-heading current-heading"><span class="series-dot current"></span> Current</h3>
         <ul class="series-list">{{ current_html }}</ul>
       </div>
       {% endif %}
       {% if recent_html != "" %}
       <div class="series-group">
-        <h3 class="series-heading recent-heading"><span class="series-dot recent"></span> Recently Played</h3>
+        <h3 class="series-heading recent-heading"><span class="series-dot recent"></span> Recent</h3>
         <ul class="series-list">{{ recent_html }}</ul>
       </div>
       {% endif %}
-    </div>
     </div>
     {% endif %}
   </div>

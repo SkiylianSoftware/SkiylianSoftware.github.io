@@ -34,3 +34,5 @@ __pycache__
 _data/*.json
 # PC parts are semi-static - keep tracked as CI fallback
 !_data/pc_parts.json
+# Posts (generated for RSS feed)
+_posts/

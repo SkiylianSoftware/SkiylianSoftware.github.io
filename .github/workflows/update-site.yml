@@ -1,6 +1,14 @@
 name: Update site data
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - "scripts/**.py"
+      - pyproject.toml
+      - _config.yml
+      - _data/*.yml
+      - _data/*.yaml
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:

@@ -4,365 +4,583 @@ layout: default
 
 <div class="hero-stage">
 
-{% include banner.html %}
+    {% include banner.html %}
 
-{% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.message %}
-<div class="milestone-marquee">
-  <div class="milestone-track" id="milestone-track">
-    <span class="milestone-item">&#11088; {{ site.data.milestones.current.message }}</span>
-    <span class="milestone-item" aria-hidden="true">&#11088; {{ site.data.milestones.current.message }}</span>
-  </div>
-</div>
-{% endif %}
+    {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.message %}
+    <div class="milestone-marquee">
+        <div class="milestone-track" id="milestone-track">
+            <span class="milestone-item">&#11088; {{ site.data.milestones.current.message }}</span>
+            <span class="milestone-item" aria-hidden="true">&#11088; {{ site.data.milestones.current.message }}</span>
+        </div>
+    </div>
+    {% endif %}
 
-<div class="hero-links">
-  <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
-  <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
-  <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-  <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i class="fas fa-heart"></i> Support</a>
-</div>
+    <div class="hero-links">
+        <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i
+                class="fab fa-youtube"></i> YouTube</a>
+        <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i
+                class="fab fa-twitch"></i> Twitch</a>
+        <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i
+                class="fab fa-github"></i> GitHub</a>
+        <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i
+                class="fas fa-heart"></i> Support</a>
+    </div>
 
-<div id="live-status" class="live-section">
-  {% if site.data.livestream.platform == "twitch" %}
-    <div class="live-embed">
-      <div class="live-badge">LIVE</div>
-      <h2>Live on Twitch</h2>
-      <iframe src="https://player.twitch.tv/?channel=skiylia&parent={{ site.url | remove: 'https://' | remove: 'http://' | default: 'localhost' }}" height="480" width="100%" allowfullscreen></iframe>
-      <p class="live-title">{{ site.data.livestream.title }}</p>
-      <a href="https://live.skiylia.dev" class="btn btn-primary" target="_blank">Watch on Twitch</a>
+    <div id="live-status" class="live-section">
+        {% if site.data.livestream.platform == "twitch" %}
+        <div class="live-embed">
+            <div class="live-badge">LIVE</div>
+            <h2>Live on Twitch</h2>
+            <iframe
+                src="https://player.twitch.tv/?channel=skiylia&parent={{ site.url | remove: 'https://' | remove: 'http://' | default: 'localhost' }}"
+                height="480" width="100%" allowfullscreen></iframe>
+            <p class="live-title">{{ site.data.livestream.title }}</p>
+            <a href="https://live.skiylia.dev" class="btn btn-primary" target="_blank">Watch on Twitch</a>
+        </div>
+        {% elsif site.data.livestream.platform == "youtube" %}
+        <div class="live-embed">
+            <div class="live-badge">LIVE</div>
+            <h2>Live on YouTube</h2>
+            <iframe width="100%" height="480" src="https://www.youtube.com/embed/{{ site.data.livestream.video_id }}"
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <p class="live-title">{{ site.data.livestream.title }}</p>
+            <a href="https://watch.skiylia.dev" class="btn btn-primary" target="_blank">Watch on YouTube</a>
+        </div>
+        {% else %}
+        <div class="offline-panel">
+            <div class="offline-icon"><i class="fas fa-circle"></i></div>
+            <div class="offline-text">
+                <h2>Currently Offline</h2>
+                <p>Not streaming right now.</p>
+                <p>Browse <a href="/videos" class="btn">videos</a> or check <a href="/streams" class="btn">past
+                        VODs</a></p>
+            </div>
+        </div>
+        {% endif %}
     </div>
-  {% elsif site.data.livestream.platform == "youtube" %}
-    <div class="live-embed">
-      <div class="live-badge">LIVE</div>
-      <h2>Live on YouTube</h2>
-      <iframe width="100%" height="480" src="https://www.youtube.com/embed/{{ site.data.livestream.video_id }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      <p class="live-title">{{ site.data.livestream.title }}</p>
-      <a href="https://watch.skiylia.dev" class="btn btn-primary" target="_blank">Watch on YouTube</a>
-    </div>
-  {% else %}
-    <div class="offline-panel">
-      <div class="offline-icon"><i class="fas fa-circle"></i></div>
-      <div class="offline-text">
-        <h2>Currently Offline</h2>
-        <p>Not streaming right now. Browse <a href="/videos" class="btn">videos</a> or check <a href="/streams" class="btn">past VODs</a>.</p>
-      </div>
-    </div>
-  {% endif %}
-</div>
 </div>
 
 <div class="section-break"></div>
 
 <div class="sidebar-widgets">
-  {% assign twitch_sched = site.data.twitch_schedule.segments %}
-  {% if twitch_sched and twitch_sched.size > 0 %}
+    {% assign twitch_sched = site.data.twitch_schedule.segments %}
+    {% if twitch_sched and twitch_sched.size > 0 %}
     <div class="widget-card">
-      <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Upcoming Streams</h3>
-      <div class="widget-body">
-        {% for s in twitch_sched limit: 2 %}
-          {% assign start = s.start_time | date: "%A" %}
-          <div class="schedule-item">
-            <span class="schedule-day">{{ start }}</span>
-            <span class="schedule-time">{{ s.start_time | date: "%H:%M" }}</span>
-            <span class="schedule-type">{{ s.category | default: s.title | truncate: 40 }}</span>
-          </div>
-        {% endfor %}
-      </div>
+        <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Upcoming Streams</h3>
+        <div class="widget-body">
+            {% for s in twitch_sched limit: 2 %}
+            {% assign start = s.start_time | date: "%A" %}
+            <div class="schedule-item">
+                <span class="schedule-day">{{ start }}</span>
+                <span class="schedule-time">{{ s.start_time | date: "%H:%M" }}</span>
+                <span class="schedule-type">{{ s.category | default: s.title | truncate: 40 }}</span>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-  {% endif %}
+    {% endif %}
 
-  {% if site.data.favorites.games or site.data.favorites.music %}
+    {% if site.data.favorites.games or site.data.favorites.music %}
     <div class="widget-card">
-      <h3 class="widget-title"><i class="fas fa-star"></i> Currently Obsessed With</h3>
-      <div class="widget-body">
-        {% for g in site.data.favorites.games %}
-          <div class="obsession-item">
-            {% if g.url %}<a href="{{ g.url }}" target="_blank">{% endif %}
-              <span class="obsession-title">{{ g.title }}</span>
-            {% if g.url %}</a>{% endif %}
-            {% if g.reason %}<span class="obsession-reason">{{ g.reason }}</span>{% endif %}
-          </div>
-        {% endfor %}
-        {% for m in site.data.favorites.music %}
-          <div class="obsession-item">
-            <span class="obsession-title">{{ m.title }}</span>
-            {% if m.reason %}<span class="obsession-reason">{{ m.reason }}</span>{% endif %}
-          </div>
-        {% endfor %}
-      </div>
+        <h3 class="widget-title"><i class="fas fa-star"></i> Currently Obsessed With</h3>
+        <div class="widget-body">
+            {% for g in site.data.favorites.games %}
+            <div class="obsession-item">
+                {% if g.url %}<a href="{{ g.url }}" target="_blank">{% endif %}
+                    <span class="obsession-title">{{ g.title }}</span>
+                    {% if g.url %}</a>{% endif %}
+                {% if g.reason %}<span class="obsession-reason">{{ g.reason }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            {% for m in site.data.favorites.music %}
+            <div class="obsession-item">
+                <span class="obsession-title">{{ m.title }}</span>
+                {% if m.reason %}<span class="obsession-reason">{{ m.reason }}</span>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
     </div>
-  {% endif %}
+    {% endif %}
 </div>
 
 {% if site.data.youtube_main.videos %}
-  <h2 class="section-title">Latest Videos</h2>
-  <div class="video-grid">
+<h2 class="section-title">Latest Videos</h2>
+<div class="video-grid">
     {% assign videos = site.data.youtube_main.videos %}
     {% for video in videos limit: 6 %}
-      <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}" onclick="openPlayer(this)">
+    <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}"
+        onclick="openPlayer(this)">
         <div class="thumb-wrap">
-          <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy">
-          <div class="play-overlay"><i class="fas fa-play"></i></div>
-          {% if video.duration_seconds and video.duration_seconds > 0 %}
-            <span class="duration-badge">{{ video.duration_seconds | divided_by: 3600 }}:{{ video.duration_seconds | modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ video.duration_seconds | modulo: 60 | prepend: '00' | slice: -2, 2 }}</span>
-          {% endif %}
+            <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy">
+            <div class="play-overlay"><i class="fas fa-play"></i></div>
+            {% if video.duration_seconds and video.duration_seconds > 0 %}
+            <span class="duration-badge">{{ video.duration_seconds | divided_by: 3600 }}:{{ video.duration_seconds |
+                modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ video.duration_seconds | modulo: 60 |
+                prepend: '00' | slice: -2, 2 }}</span>
+            {% endif %}
         </div>
         <div class="card-body">
-          <h3>{{ video.title }}</h3>
-          <div class="meta-row">
-            {% if video.published %}
-              <span class="meta-date"><time datetime="{{ video.published }}">{{ video.published | date: "%d %b %Y" }}</time><span class="reltime" datetime="{{ video.published }}"></span></span>
-            {% endif %}
-            {% if video.view_count and video.view_count > 0 %}
-              <span class="views">{{ video.view_count }} views</span>
-            {% endif %}
-          </div>
-          {% if video.description %}
+            <h3>{{ video.title }}</h3>
+            <div class="meta-row">
+                {% if video.published %}
+                <span class="meta-date"><time datetime="{{ video.published }}">{{ video.published | date: "%d %b %Y"
+                        }}</time><span class="reltime" datetime="{{ video.published }}"></span></span>
+                {% endif %}
+                {% if video.view_count and video.view_count > 0 %}
+                <span class="views">{{ video.view_count }} views</span>
+                {% endif %}
+            </div>
+            {% if video.description %}
             <p class="video-desc">{{ video.description | truncate: 120 }}</p>
-          {% endif %}
+            {% endif %}
         </div>
-      </div>
+    </div>
     {% endfor %}
-  </div>
-  <p class="text-center"><a href="/videos" class="btn">View All Videos</a></p>
+</div>
+<p class="text-center"><a href="/videos" class="btn">View All Videos</a></p>
 {% endif %}
 
 {% if site.data.youtube_vods.videos %}
-  <h2 class="section-title">Latest VODs</h2>
-  <div class="video-grid">
+<h2 class="section-title">Latest VODs</h2>
+<div class="video-grid">
     {% assign vods = site.data.youtube_vods.videos %}
     {% for vod in vods limit: 3 %}
-      <div class="video-card vod-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}" onclick="openPlayer(this)">
+    <div class="video-card vod-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}"
+        onclick="openPlayer(this)">
         <div class="thumb-wrap">
-          <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
-          <div class="play-overlay"><i class="fas fa-play"></i></div>
-          {% if vod.duration_seconds and vod.duration_seconds > 0 %}
-            <span class="duration-badge">{{ vod.duration_seconds | divided_by: 3600 }}:{{ vod.duration_seconds | modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ vod.duration_seconds | modulo: 60 | prepend: '00' | slice: -2, 2 }}</span>
-          {% endif %}
+            <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
+            <div class="play-overlay"><i class="fas fa-play"></i></div>
+            {% if vod.duration_seconds and vod.duration_seconds > 0 %}
+            <span class="duration-badge">{{ vod.duration_seconds | divided_by: 3600 }}:{{ vod.duration_seconds | modulo:
+                3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ vod.duration_seconds | modulo: 60 | prepend:
+                '00' | slice: -2, 2 }}</span>
+            {% endif %}
         </div>
         <div class="card-body">
-          <h3>{{ vod.title }}</h3>
-          <div class="meta-row">
-            {% if vod.published %}
-              <span class="meta-date"><time datetime="{{ vod.published }}">{{ vod.published | date: "%d %b %Y" }}</time><span class="reltime" datetime="{{ vod.published }}"></span></span>
-            {% endif %}
-            {% if vod.view_count and vod.view_count > 0 %}
-              <span class="views">{{ vod.view_count }} views</span>
-            {% endif %}
-          </div>
-          {% if vod.description %}
+            <h3>{{ vod.title }}</h3>
+            <div class="meta-row">
+                {% if vod.published %}
+                <span class="meta-date"><time datetime="{{ vod.published }}">{{ vod.published | date: "%d %b %Y"
+                        }}</time><span class="reltime" datetime="{{ vod.published }}"></span></span>
+                {% endif %}
+                {% if vod.view_count and vod.view_count > 0 %}
+                <span class="views">{{ vod.view_count }} views</span>
+                {% endif %}
+            </div>
+            {% if vod.description %}
             <p class="video-desc">{{ vod.description | truncate: 120 }}</p>
-          {% endif %}
+            {% endif %}
         </div>
-      </div>
+    </div>
     {% endfor %}
-  </div>
-  <p class="text-center"><a href="/streams" class="btn">View All VODs</a></p>
+</div>
+<p class="text-center"><a href="/streams" class="btn">View All VODs</a></p>
 {% endif %}
 
 {% if site.data.playlists.playlists %}
-  <h2 class="section-title">Playlists</h2>
-  <div class="playlist-rows">
+<h2 class="section-title">Playlists</h2>
+<div class="playlist-rows">
     {% assign playlists = site.data.playlists.playlists %}
     {% for pl in playlists limit: 4 %}
-      {% assign recency = "historical" %}
-      {% assign sr = site.data.youtube_main.series_recency %}
-      {% if sr %}
-        {% for pair in sr %}
-          {% assign sname = pair[0] %}
-          {% assign sinfo = pair[1] %}
-          {% if pl.title contains sname or sname contains pl.title %}
-            {% assign recency = sinfo.status | default: "historical" %}
-            {% break %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-      {% if recency == "historical" %}
-        {% if pl.last_updated %}
-          {% assign lu_epoch = pl.last_updated | truncate: 4, "" | plus: 0 %}
-          {% if lu_epoch > 2000 %}
-            {% assign current_year = site.time | date: "%Y" | plus: 0 %}
-            {% if lu_epoch == current_year %}{% assign recency = "recent" %}
-            {% elsif lu_epoch == current_year | minus: 1 %}{% assign recency = "recent" %}
-            {% endif %}
-          {% endif %}
-        {% endif %}
-        {% if recency == "historical" %}{% assign recency = nil %}{% endif %}
-      {% endif %}
-      <a href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}" data-published="{{ pl.published | default: '' }}" data-views="{{ pl.total_views | default: 0 }}" data-duration="{{ pl.total_duration_seconds | default: 0 }}">
+    {% assign recency = "historical" %}
+    {% assign sr = site.data.youtube_main.series_recency %}
+    {% if sr %}
+    {% for pair in sr %}
+    {% assign sname = pair[0] %}
+    {% assign sinfo = pair[1] %}
+    {% if pl.title contains sname or sname contains pl.title %}
+    {% assign recency = sinfo.status | default: "historical" %}
+    {% break %}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% if recency == "historical" %}
+    {% if pl.last_updated %}
+    {% assign lu_epoch = pl.last_updated | truncate: 4, "" | plus: 0 %}
+    {% if lu_epoch > 2000 %}
+    {% assign current_year = site.time | date: "%Y" | plus: 0 %}
+    {% if lu_epoch == current_year %}{% assign recency = "recent" %}
+    {% elsif lu_epoch == current_year | minus: 1 %}{% assign recency = "recent" %}
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% if recency == "historical" %}{% assign recency = nil %}{% endif %}
+    {% endif %}
+    <a href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}"
+        data-published="{{ pl.published | default: '' }}" data-views="{{ pl.total_views | default: 0 }}"
+        data-duration="{{ pl.total_duration_seconds | default: 0 }}">
         {% if pl.thumbnail %}
-          <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
+        <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
         {% endif %}
         <div class="playlist-row-info">
-          <h3>{{ pl.title }}</h3>
-          {% if pl.description %}
+            <h3>{{ pl.title }}</h3>
+            {% if pl.description %}
             {% assign desc_parts = pl.description_parts | default: nil %}
             {% if desc_parts %}
-              <p class="playlist-row-desc">{{ desc_parts | join: "<br>" }}</p>
+            <p class="playlist-row-desc">{{ desc_parts | join: "<br>" }}</p>
             {% elsif pl.description %}
-              <p class="playlist-row-desc">{{ pl.description }}</p>
-            {% endif %}
-          {% endif %}
-          <div class="playlist-row-meta">
-            <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>
-            {% if pl.total_duration_seconds and pl.total_duration_seconds > 0 %}
-              {% assign hours = pl.total_duration_seconds | divided_by: 3600 %}
-              {% assign rem = pl.total_duration_seconds | modulo: 3600 %}
-              {% assign mins = rem | divided_by: 60 %}
-              <span class="playlist-row-duration">{{ hours }}h {{ mins }}m</span>
-            {% endif %}
-            {% if pl.total_views and pl.total_views > 0 %}
-              <span class="playlist-row-views">{{ pl.total_views }} views</span>
-            {% endif %}
-            {% if pl.published %}
-              <span class="meta-date"><span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span><span class="reltime" datetime="{{ pl.published }}"></span></span>
-            {% if pl.last_updated and pl.last_updated != pl.published %}
-              <span class="meta-date"><span class="playlist-row-date">&#9655; {{ pl.last_updated | date: "%b %Y" }}</span><span class="reltime" datetime="{{ pl.last_updated }}"></span></span>
+            <p class="playlist-row-desc">{{ pl.description }}</p>
             {% endif %}
             {% endif %}
-          </div>
+            <div class="playlist-row-meta">
+                <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>
+                {% if pl.total_duration_seconds and pl.total_duration_seconds > 0 %}
+                {% assign hours = pl.total_duration_seconds | divided_by: 3600 %}
+                {% assign rem = pl.total_duration_seconds | modulo: 3600 %}
+                {% assign mins = rem | divided_by: 60 %}
+                <span class="playlist-row-duration">{{ hours }}h {{ mins }}m</span>
+                {% endif %}
+                {% if pl.total_views and pl.total_views > 0 %}
+                <span class="playlist-row-views">{{ pl.total_views }} views</span>
+                {% endif %}
+                {% if pl.published %}
+                <span class="meta-date"><span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span><span
+                        class="reltime" datetime="{{ pl.published }}"></span></span>
+                {% if pl.last_updated and pl.last_updated != pl.published %}
+                <span class="meta-date"><span class="playlist-row-date">&#9655; {{ pl.last_updated | date: "%b %Y"
+                        }}</span><span class="reltime" datetime="{{ pl.last_updated }}"></span></span>
+                {% endif %}
+                {% endif %}
+            </div>
         </div>
-      </a>
+    </a>
     {% endfor %}
-  </div>
-  <p class="text-center"><a href="/playlists" class="btn">View All Playlists</a></p>
+</div>
+<p class="text-center"><a href="/playlists" class="btn">View All Playlists</a></p>
 {% endif %}
 
 <div id="video-modal" class="modal" onclick="if(event.target==this)closePlayer()">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closePlayer()">&times;</button>
-    <div id="player-wrap"></div>
-    <p id="modal-title" class="modal-title"></p>
-    <a id="modal-link" href="#" target="_blank" class="btn">Watch on YouTube</a>
-  </div>
+    <div class="modal-content">
+        <button class="modal-close" onclick="closePlayer()">&times;</button>
+        <div id="player-wrap"></div>
+        <p id="modal-title" class="modal-title"></p>
+        <a id="modal-link" href="#" target="_blank" class="btn">Watch on YouTube</a>
+    </div>
 </div>
 
 <script>
-function openPlayer(el) {
-  var id = el.getAttribute('data-video-id');
-  var title = el.getAttribute('data-title');
-  var wrap = document.getElementById('player-wrap');
-  wrap.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + id + '?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-link').href = 'https://www.youtube.com/watch?v=' + id;
-  document.getElementById('video-modal').classList.add('open');
-}
-function closePlayer() {
-  document.getElementById('player-wrap').innerHTML = '';
-  document.getElementById('video-modal').classList.remove('open');
-}
-document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closePlayer(); });
+    function openPlayer(el) {
+        var id = el.getAttribute('data-video-id');
+        var title = el.getAttribute('data-title');
+        var wrap = document.getElementById('player-wrap');
+        wrap.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + id + '?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-link').href = 'https://www.youtube.com/watch?v=' + id;
+        document.getElementById('video-modal').classList.add('open');
+    }
+    function closePlayer() {
+        document.getElementById('player-wrap').innerHTML = '';
+        document.getElementById('video-modal').classList.remove('open');
+    }
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlayer(); });
 
-var mt = document.getElementById('milestone-track');
-if (mt) {
-  mt.style.transform = 'translateX(100vw)';
-  requestAnimationFrame(function() {
-    mt.style.transition = 'transform 0.6s ease-out';
-    mt.style.transform = 'translateX(0)';
-    mt.addEventListener('transitionend', function() {
-      mt.style.transition = 'none';
-      mt.style.animation = 'marquee 30s linear infinite';
-    }, { once: true });
-  });
-}
+    var mt = document.getElementById('milestone-track');
+    if (mt) {
+        mt.style.transform = 'translateX(100vw)';
+        requestAnimationFrame(function () {
+            mt.style.transition = 'transform 0.6s ease-out';
+            mt.style.transform = 'translateX(0)';
+            mt.addEventListener('transitionend', function () {
+                mt.style.transition = 'none';
+                mt.style.animation = 'marquee 30s linear infinite';
+            }, { once: true });
+        });
+    }
 </script>
 
 <style>
-#topbar-wrapper { background: var(--topbar-bg) !important; }
+    #topbar-wrapper {
+        background: var(--topbar-bg) !important;
+    }
 
-@media (min-width: 1200px) {
-  #main-wrapper { position: relative; }
-  .hero-stage {
-    min-height: calc((100vw - 260px) / 3.3);
-    display: flex; flex-direction: column;
-    justify-content: flex-start;
-  }
-  .live-section {
-    margin-top: auto; margin-bottom: 0;
-  }
-  .channel-hero {
-    position: absolute; left: 0; right: 0; top: -60px;
-    min-height: calc((100vw - 260px) / 3.3 + 60px);
-    margin: 0; border-radius: 0;
-    background-position: center;
-    z-index: -1;
-    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-  }
-}
+    @media (min-width: 1200px) {
+        #main-wrapper {
+            position: relative;
+        }
 
-@media (max-width: 767px) {
-  main { padding-left: 0 !important; padding-right: 0 !important; }
-}
-  .channel-hero + * {
-    margin-top: 0 !important;
-  }
-}
+        .hero-stage {
+            min-height: calc((100vw - 260px) / 3.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
 
-@media (max-width: 767px) {
-  main { padding-left: 0 !important; padding-right: 0 !important; }
-}
+        .live-section {
+            margin-top: auto;
+            margin-bottom: 0;
+        }
 
-.milestone-marquee {
-  overflow: hidden; position: relative; margin: 0; padding: 0.5rem 0;
-  background: linear-gradient(90deg, rgba(45,212,191,0.06), rgba(192,132,252,0.06));
-  border-top: 1px solid rgba(45,212,191,0.1); border-bottom: 1px solid rgba(45,212,191,0.1);
-  white-space: nowrap;
-}
-.milestone-track { display: inline-flex; }
-.animating { animation: marquee 30s linear infinite; }
-.milestone-item { padding: 0 2rem; font-size: 0.85rem; opacity: 0.85; white-space: nowrap; }
-@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .channel-hero {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -60px;
+            min-height: calc((100vw - 260px) / 3.3 + 60px);
+            margin: 0;
+            border-radius: 0;
+            background-position: center;
+            z-index: -1;
+            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        }
+    }
 
-.hero-links {
-  display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;
-  margin: 1.5rem auto; max-width: 500px;
-}
-.hero-links .btn { font-size: 0.85rem; padding: 0.4rem 1rem; }
+    @media (max-width: 767px) {
+        main {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
 
-.section-break {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(45,212,191,0.2), transparent);
-  margin: 1.5rem 0;
-}
+    .channel-hero+* {
+        margin-top: 0 !important;
+    }
+    }
 
-.live-section { margin: 2rem 0; text-align: center; }
-.live-section .live-embed { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; position: relative; }
-.live-badge {
-  position: absolute; top: 0.5rem; left: 0.5rem;
-  background: #ff0000; color: #fff; font-weight: 700; font-size: 0.8rem;
-  padding: 0.2rem 0.6rem; border-radius: 4px; animation: pulse 2s infinite; z-index: 1;
-}
-@keyframes pulse { 0%{opacity:1} 50%{opacity:0.6} 100%{opacity:1} }
-.live-title { margin: 0.75rem 0; font-weight: 500; }
-.offline-panel {
-  margin: 2rem auto; padding: 2rem; border-radius: 12px;
-  background: var(--clr-card-bg); border: 1px solid rgba(45,212,191,0.08);
-  text-align: center; max-width: 500px;
-}
-.offline-panel .offline-icon i { font-size: 2rem; color: #555577; animation: offline-pulse 3s ease-in-out infinite; }
-@keyframes offline-pulse { 0%,100%{opacity:0.4} 50%{opacity:0.8} }
-.offline-panel h2 { font-size: 1.1rem; margin: 0.5rem 0; }
-.offline-panel p { font-size: 0.9rem; opacity: 0.7; margin: 0; }
-.offline-panel .btn { font-size: 0.85rem; }
+    @media (max-width: 767px) {
+        main {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
 
-.section-break { height: 1px; background: linear-gradient(90deg, transparent, rgba(45,212,191,0.2), transparent); margin: 1.5rem 0; }
+    .milestone-marquee {
+        overflow: hidden;
+        position: relative;
+        margin: 0;
+        padding: 0.5rem 0;
+        background: linear-gradient(90deg, rgba(45, 212, 191, 0.06), rgba(192, 132, 252, 0.06));
+        border-top: 1px solid rgba(45, 212, 191, 0.1);
+        border-bottom: 1px solid rgba(45, 212, 191, 0.1);
+        white-space: nowrap;
+    }
 
-.sidebar-widgets { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.widget-card { flex: 1; min-width: 200px; background: var(--card-bg); border: 1px solid rgba(45,212,191,0.1); border-radius: 10px; padding: 1rem; }
-.widget-title { font-size: 0.85rem; margin: 0 0 0.75rem; opacity: 0.8; border-bottom: 1px solid rgba(45,212,191,0.1); padding-bottom: 0.4rem; }
-.widget-title i { margin-right: 0.35rem; color: #c084fc; }
-.widget-body { font-size: 0.85rem; }
-.schedule-item { display: flex; gap: 0.5rem; align-items: baseline; margin-bottom: 0.4rem; }
-.schedule-day { font-weight: 600; color: #2dd4bf; min-width: 4em; }
-.schedule-time { opacity: 0.8; }
-.schedule-type { opacity: 0.6; font-size: 0.8rem; }
-.obsession-item { margin-bottom: 0.5rem; }
-.obsession-item a { color: inherit; text-decoration: none; }
-.obsession-item a:hover { color: #2dd4bf; }
-.obsession-title { display: block; font-weight: 500; }
-.obsession-reason { display: block; font-size: 0.75rem; opacity: 0.6; }
+    .milestone-track {
+        display: inline-flex;
+    }
 
-.section-title { margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem; font-size: 1.1rem; }
-.text-center { text-align: center; }
+    .animating {
+        animation: marquee 30s linear infinite;
+    }
+
+    .milestone-item {
+        padding: 0 2rem;
+        font-size: 0.85rem;
+        opacity: 0.85;
+        white-space: nowrap;
+    }
+
+    @keyframes marquee {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    .hero-links {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 1.5rem auto;
+        max-width: 500px;
+    }
+
+    .hero-links .btn {
+        font-size: 0.85rem;
+        padding: 0.4rem 1rem;
+    }
+
+    .section-break {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.2), transparent);
+        margin: 1.5rem 0;
+    }
+
+    .live-section {
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .live-section .live-embed {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+    }
+
+    .live-badge {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        background: #ff0000;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        animation: pulse 2s infinite;
+        z-index: 1;
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: 0.6
+        }
+
+        100% {
+            opacity: 1
+        }
+    }
+
+    .live-title {
+        margin: 0.75rem 0;
+        font-weight: 500;
+    }
+
+    .offline-panel {
+        margin: 2rem auto;
+        padding: 2rem;
+        border-radius: 12px;
+        background: var(--clr-card-bg);
+        border: 1px solid rgba(45, 212, 191, 0.08);
+        text-align: center;
+        max-width: 500px;
+    }
+
+    .offline-panel .offline-icon i {
+        font-size: 2rem;
+        color: #555577;
+        animation: offline-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes offline-pulse {
+
+        0%,
+        100% {
+            opacity: 0.4
+        }
+
+        50% {
+            opacity: 0.8
+        }
+    }
+
+    .offline-panel h2 {
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+    }
+
+    .offline-panel p {
+        font-size: 0.9rem;
+        opacity: 0.7;
+        margin: 0;
+    }
+
+    .offline-panel .btn {
+        font-size: 0.85rem;
+    }
+
+    .section-break {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.2), transparent);
+        margin: 1.5rem 0;
+    }
+
+    .sidebar-widgets {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .widget-card {
+        flex: 1;
+        min-width: 200px;
+        background: var(--card-bg);
+        border: 1px solid rgba(45, 212, 191, 0.1);
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .widget-title {
+        font-size: 0.85rem;
+        margin: 0 0 0.75rem;
+        opacity: 0.8;
+        border-bottom: 1px solid rgba(45, 212, 191, 0.1);
+        padding-bottom: 0.4rem;
+    }
+
+    .widget-title i {
+        margin-right: 0.35rem;
+        color: #c084fc;
+    }
+
+    .widget-body {
+        font-size: 0.85rem;
+    }
+
+    .schedule-item {
+        display: flex;
+        gap: 0.5rem;
+        align-items: baseline;
+        margin-bottom: 0.4rem;
+    }
+
+    .schedule-day {
+        font-weight: 600;
+        color: #2dd4bf;
+        min-width: 4em;
+    }
+
+    .schedule-time {
+        opacity: 0.8;
+    }
+
+    .schedule-type {
+        opacity: 0.6;
+        font-size: 0.8rem;
+    }
+
+    .obsession-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .obsession-item a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .obsession-item a:hover {
+        color: #2dd4bf;
+    }
+
+    .obsession-title {
+        display: block;
+        font-weight: 500;
+    }
+
+    .obsession-reason {
+        display: block;
+        font-size: 0.75rem;
+        opacity: 0.6;
+    }
+
+    .section-title {
+        margin: 2rem 0 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.4rem;
+        font-size: 1.1rem;
+    }
+
+    .text-center {
+        text-align: center;
+    }
 </style>

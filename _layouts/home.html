@@ -2,6 +2,7 @@
 layout: default
 ---
 
+<div class="top-matter">
 {% include banner.html %}
 
 {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.message %}
@@ -19,6 +20,9 @@ layout: default
   <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i class="fab fa-github"></i> GitHub</a>
   <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i class="fas fa-heart"></i> Support</a>
 </div>
+</div>
+
+<div class="section-break"></div>
 
 <div id="live-status" class="live-section">
   {% if site.data.livestream.platform == "twitch" %}
@@ -269,15 +273,18 @@ if (mt) {
 
 @media (min-width: 1200px) {
   #main-wrapper { position: relative; }
-  .channel-hero {
-    position: absolute; left: 0; right: 0; top: -60px;
+  .top-matter {
+    position: relative; width: 100vw;
+    margin-left: calc(-50vw + 50%);
     aspect-ratio: 3.3 / 1;
-    background-position: center;
-    z-index: -1;
-    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    overflow: hidden;
   }
-  .channel-hero + * {
+  .channel-hero {
+    position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+    margin: 0; border-radius: 0;
+    background-position: center;
+  }
+  .top-matter + * {
     margin-top: 0 !important;
   }
 }

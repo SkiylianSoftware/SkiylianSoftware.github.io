@@ -461,23 +461,140 @@ def save(filename, data):
     print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
-MILESTONE_SUBS = [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000]
-MILESTONE_VIEWS = [1000, 5000, 10000, 50000, 100000, 500000, 1000000]
-MILESTONE_VIDEOS = [10, 25, 50, 100, 250, 500, 1000]
+POWERS_OF_3 = [1, 3, 9, 27, 81, 243, 729, 2187, 6561, 19683, 59049, 177147, 531441]
+ROUND_SUBS = [100, 500, 1000, 5000, 10000, 50000, 100000]
+ROUND_VIEWS = [1000, 10000, 50000, 100000, 500000, 1000000]
+ROUND_VIDEOS = [10, 25, 50, 100, 250, 500, 1000]
+AGE_DAYS = [3, 9, 27, 81, 243, 729, 2187, 6561]
+GAME_EPISODES = [1, 3, 9, 27, 81]
+GAME_VIEWS = [27, 81, 243, 729, 2187, 6561]
+GAME_HOURS = [3, 9, 27, 81, 243]
+GAME_RETURN = [27, 81, 243, 729]
+DAILY_RECORDS = [10, 100, 1000]
 
-MILESTONE_MESSAGES = {
-    10: "First double digits!",
-    50: "Halfway to 100!",
+POWER3_SUB_MSGS = {
+    1: "The unitary state",
+    3: "Three-body problem solved",
+    9: "Nonary game complete",
+    27: "Cube it!",
+    81: "Trit-trit-trit!",
+    243: "3^5 - Fifth power unlocked",
+    729: "3^6 - One gross in balanced ternary",
+    2187: "3^7 - Lucky sevens",
+    6561: "3^8 - Octotrit",
+    19683: "3^9 - Padovan sequence spotted",
+    59049: "3^10 - Decitrit! Tenfold power!",
+}
+ROUND_SUB_MSGS = {
     100: "Triple digits!",
-    250: "Quarter of the way!",
     500: "Half a thousand!",
     1000: "The big 1K!",
-    2500: "2.5K and growing!",
     5000: "5K strong!",
     10000: "10K! Unreal!",
-    25000: "25K! Amazing!",
     50000: "50K! Halfway to 100K!",
     100000: "100K!!! Thank you!",
+}
+POWER3_VIEW_MSGS = {
+    1: "1 view! The first peep!",
+    3: "3 views! Trinary initiation!",
+    9: "9 views! Ternary complete!",
+    27: "27 views! Cubic curiosity!",
+    81: "81 views! Nonagon of views!",
+    243: "243 views! 3^5 viewshed!",
+    729: "729 views! 3^6 and counting!",
+    2187: "2187 views! Lucky production!",
+    6561: "6561 views! 3^8 view drought!",
+}
+POWER3_VIDEO_MSGS = {
+    1: "First video uploaded!",
+    3: "3 videos! Trifecta!",
+    9: "9 videos! Nonary upload!",
+    27: "27 videos! Cubed content!",
+    81: "81 videos! 3^4 uploads!",
+}
+AGE_DAY_MSGS = {
+    3: "3 days old! The first milestone!",
+    9: "9 days! A week plus two!",
+    27: "27 days! A cubic month!",
+    81: "81 days! One grossly long time!",
+    243: "243 days! 3^5 days online!",
+    729: "729 days! Two years in ternary!",
+    2187: "2187 days! 3^7 days! Six years!",
+    6561: "6561 days! 3^8 days! Nearly 18 years!",
+}
+DAILY_RECORD_MSGS = {
+    10: "First day with double-digit views!",
+    100: "First 100-view day!",
+    1000: "First 1,000-view day!",
+}
+
+GAME_FIRST_MSGS = {
+    "Kerbal Space Program": "First launch at KSC!",
+    "Factorio": "First automation started!",
+    "Minecraft": "First block placed!",
+    "Transport Fever": "First route established!",
+    "Transport Fever 2": "First route established!",
+    "Mars First Logistics": "First martian delivery!",
+    "Station Flow": "First passenger processed!",
+    "STATIONflow": "First passenger processed!",
+}
+GAME_EPISODE_MSGS = {
+    "Kerbal Space Program": {
+        3: "Münar flyby complete!",
+        9: "Duna landing!",
+        27: "Jool system fleet deployed!",
+        81: "Kerbals across the galaxy!",
+    },
+    "Factorio": {
+        3: "Green science automated!",
+        9: "Blue science online!",
+        27: "Rocket silo constructed!",
+        81: "Mega base operational!",
+    },
+    "Minecraft": {
+        3: "Nether portal activated!",
+        9: "Stronghold located!",
+        27: "Ender Dragon defeated!",
+        81: "Full beacon pyramid!",
+    },
+    "Transport Fever": {
+        3: "Three lines running!",
+        9: "Train network growing!",
+        27: "Maglev network online!",
+        81: "Transcontinental empire!",
+    },
+    "Transport Fever 2": {
+        3: "Three lines running!",
+        9: "Train network growing!",
+        27: "Maglev network online!",
+        81: "Transcontinental empire!",
+    },
+    "Mars First Logistics": {
+        3: "Rover delivered!",
+        9: "Base camp established!",
+        27: "Three colonies linked!",
+        81: "Martian city!",
+    },
+    "Station Flow": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"},
+    "STATIONflow": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"},
+}
+GAME_VIEW_MSGS = {
+    "Kerbal Space Program": "{{count}} kerbonauts watched!",
+    "Factorio": "{{count}} factories inspected!",
+    "Minecraft": "{{count}} creepers exploded!",
+    "Transport Fever": "{{count}} tickets sold!",
+    "Transport Fever 2": "{{count}} tickets sold!",
+    "Mars First Logistics": "{{count}} packages delivered!",
+    "Station Flow": "{{count}} passengers routed!",
+}
+GAME_HOUR_MSGS = {
+    "Kerbal Space Program": "{{hours}} hours in the VAB!",
+    "Factorio": "{{hours}} hours on the factory floor!",
+    "Minecraft": "{{hours}} hours mining!",
+    "Transport Fever": "{{hours}} hours in transit!",
+    "Transport Fever 2": "{{hours}} hours in transit!",
+    "Mars First Logistics": "{{hours}} hours on Mars!",
+    "Station Flow": "{{hours}} hours directing flow!",
 }
 
 
@@ -488,7 +605,84 @@ def _parse_iso_date(s):
         return None
 
 
-def detect_milestones(subs, views, videos_count):
+def _detect_game_milestones(games, prev_reached, now, cutoff):
+    reached = {}
+    current = {}
+    for gname, g in games.items():
+        ep = g.get("episode_count", 0)
+        gv = g.get("total_views", 0)
+        gh = g.get("total_duration_seconds", 0) // 3600
+        first = g.get("first_video", "")
+        latest = g.get("latest_video", "")
+
+        for m in sorted(GAME_EPISODES, reverse=True):
+            if ep >= m:
+                key = f"game_{gname}_ep_{m}"
+                if key not in prev_reached:
+                    reached[key] = now.isoformat()
+                    msg = GAME_EPISODE_MSGS.get(gname, {}).get(m, f"{m} episodes in {gname}!")
+                    current[key] = {"type": "game", "game": gname, "count": m, "message": msg}
+                elif (
+                    prev_reached.get(key)
+                    and _parse_iso_date(prev_reached[key])
+                    and _parse_iso_date(prev_reached[key]) >= cutoff
+                ):
+                    current[key] = {
+                        "type": "game",
+                        "game": gname,
+                        "count": m,
+                        "message": GAME_EPISODE_MSGS.get(gname, {}).get(m, f"{m} episodes in {gname}!"),
+                    }
+                break
+
+        for m in sorted(GAME_VIEWS, reverse=True):
+            if gv >= m:
+                key = f"game_{gname}_views_{m}"
+                if key not in prev_reached:
+                    reached[key] = now.isoformat()
+                    tmpl = GAME_VIEW_MSGS.get(gname, "{{count}} views in {gname}!")
+                    msg = tmpl.replace("{{count}}", str(m)).replace("{gname}", gname)
+                    current[key] = {"type": "game_views", "game": gname, "count": m, "message": msg}
+                break
+
+        for m in sorted(GAME_HOURS, reverse=True):
+            if gh >= m:
+                key = f"game_{gname}_hours_{m}"
+                if key not in prev_reached:
+                    reached[key] = now.isoformat()
+                    tmpl = GAME_HOUR_MSGS.get(gname, "{{hours}} hours in {gname}!")
+                    msg = tmpl.replace("{{hours}}", str(m)).replace("{gname}", gname)
+                    current[key] = {"type": "game_hours", "game": gname, "count": m, "message": msg}
+                break
+
+        if first and latest:
+            try:
+                from datetime import datetime as _dt
+
+                fd = _dt.fromisoformat(first.replace("Z", "+00:00"))
+                ld = _dt.fromisoformat(latest.replace("Z", "+00:00"))
+                gap_days = (ld - fd).days
+                for m in sorted(GAME_RETURN, reverse=True):
+                    if gap_days >= m:
+                        key = f"game_{gname}_return_{m}"
+                        if key not in prev_reached:
+                            reached[key] = now.isoformat()
+                            current[key] = {
+                                "type": "game_return",
+                                "game": gname,
+                                "count": m,
+                                "message": f"Back to {gname} after {m} days!",
+                            }
+                        break
+            except Exception:
+                pass
+
+    return reached, current
+
+
+def detect_milestones(
+    subs, views, videos_count, games_data=None, first_video_date=None, gh_data=None, twitch_data=None
+):
     prev = {}
     prev_path = os.path.join(DATA_DIR, "milestones.json")
     if os.path.exists(prev_path):
@@ -498,39 +692,107 @@ def detect_milestones(subs, views, videos_count):
         except Exception:
             prev = {}
 
-    reached = prev.get("reached", {})
+    prev_reached = prev.get("reached", {})
     current = {}
     now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=14)
 
-    for _metric, value, milestones_list, label, msg_fn in [
-        ("subs", subs, MILESTONE_SUBS, "subs", lambda m: MILESTONE_MESSAGES.get(m, "Milestone!")),
-        ("views", views, MILESTONE_VIEWS, "views", lambda m: f"{m} views!"),
-        ("videos", videos_count, MILESTONE_VIDEOS, "videos", lambda m: f"{m} videos uploaded!"),
-    ]:
-        for m in sorted(milestones_list, reverse=True):
+    milestone_sets = [
+        ("subs", subs, POWERS_OF_3, POWER3_SUB_MSGS),
+        ("subs", subs, ROUND_SUBS, ROUND_SUB_MSGS),
+        ("views", views, POWERS_OF_3, POWER3_VIEW_MSGS),
+        ("views_rnd", views, ROUND_VIEWS, lambda m: f"{m:,} views!"),
+        ("videos", videos_count, POWERS_OF_3, POWER3_VIDEO_MSGS),
+        ("videos_rnd", videos_count, ROUND_VIDEOS, lambda m: f"{m} videos!"),
+        (
+            "views_p3k",
+            views,
+            [3000, 9000, 27000, 81000, 243000, 729000],
+            {
+                3000: "3K views! Ternary thousand!",
+                9000: "9K views! Nonary thousand!",
+                27000: "27K views! Cubic thousand!",
+                81000: "81K views! 3^4 thousand!",
+                243000: "243K views! 3^5 thousand!",
+                729000: "729K views! 3^6 thousand!",
+            },
+        ),
+    ]
+
+    for label, value, thresholds, msgs in milestone_sets:
+        for m in sorted(thresholds, reverse=True):
             if value >= m:
                 key = f"{label}_{m}"
-                if key not in reached:
-                    reached[key] = now.isoformat()
+                if key not in prev_reached:
+                    prev_reached[key] = now.isoformat()
+                    msg = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
                     print(f"New milestone: {m} {label}")
-                if not current or m > current.get("count", 0):
-                    current = {"type": label, "count": m, "message": msg_fn(m)}
                 break
 
-    cutoff = now - timedelta(days=14)
-    expired = [k for k, v in reached.items() if _parse_iso_date(v) and _parse_iso_date(v) < cutoff]
+    if first_video_date:
+        try:
+            fd = _parse_iso_date(first_video_date.replace("Z", "+00:00"))
+            if fd:
+                age_days = (now - fd).days
+                for m in sorted(AGE_DAYS, reverse=True):
+                    if age_days >= m:
+                        key = f"age_{m}"
+                        if key not in prev_reached:
+                            prev_reached[key] = now.isoformat()
+                            print(f"New milestone: channel age {m} days")
+                        break
+        except Exception:
+            pass
+
+    if games_data:
+        game_reached, game_current = _detect_game_milestones(games_data, prev_reached, now, cutoff)
+        prev_reached.update(game_reached)
+        current.update(game_current)
+
+    for label, value, thresholds, msgs in milestone_sets:
+        for m in sorted(thresholds, reverse=True):
+            if value >= m:
+                key = f"{label}_{m}"
+                reached_at = prev_reached.get(key, "")
+                if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
+                    msg = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
+                    priority = 0
+                    if label.startswith("subs"):
+                        priority = 4
+                    elif label.startswith("views"):
+                        priority = 3
+                    elif label.startswith("videos"):
+                        priority = 2
+                    elif label.startswith("age"):
+                        priority = 1
+                    ckey = f"{key}_{priority}"
+                    current[ckey] = {"type": label, "count": m, "message": msg, "priority": priority}
+                break
+
+    if first_video_date:
+        try:
+            fd = _parse_iso_date(first_video_date.replace("Z", "+00:00"))
+            if fd:
+                age_days = (now - fd).days
+                for m in sorted(AGE_DAYS, reverse=True):
+                    if age_days >= m:
+                        key = f"age_{m}"
+                        reached_at = prev_reached.get(key, "")
+                        if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
+                            msg = AGE_DAY_MSGS.get(m, f"{m} days old!")
+                            current[f"age_{m}_0"] = {"type": "age", "count": m, "message": msg, "priority": 0}
+                        break
+        except Exception:
+            pass
+
+    expired = [k for k, v in prev_reached.items() if _parse_iso_date(v) and _parse_iso_date(v) < cutoff]
     for k in expired:
-        del reached[k]
+        del prev_reached[k]
 
-    if current.get("count"):
-        milestone_key = f"{current['type']}_{current['count']}"
-        reached_at = reached.get(milestone_key, "")
-        if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) < cutoff:
-            current = {}
-    elif not current:
-        current = {}
+    active = [v for v in current.values() if v.get("priority", 0) > 0]
+    best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}
 
-    save("milestones.json", {"current": current, "milestones": None, "reached": reached})
+    save("milestones.json", {"current": best, "reached": prev_reached})
 
 
 def compute_series_recency(videos):
@@ -812,6 +1074,7 @@ def main():
         save("youtube_vods.json", {"videos": vods})
 
     all_videos = (videos or []) + (vods or [])
+    game_stats = None
     if all_videos:
         game_stats = compute_game_stats(all_videos, alias_map=ALIAS_MAP, content_types=CONTENT_TYPES)
         save("games.json", game_stats)
@@ -842,10 +1105,18 @@ def main():
     save("site_meta.json", info)
     update_config_avatar(info.get("avatar_url", ""))
 
+    first_video_date = None
+    if all_videos:
+        dates = [v.get("published") for v in all_videos if v.get("published")]
+        if dates:
+            first_video_date = min(dates)
+
     detect_milestones(
         info.get("subscriber_count", 0),
         info.get("view_count", 0),
         info.get("video_count", 0),
+        games_data=game_stats.get("games") if all_videos else None,
+        first_video_date=first_video_date,
     )
 
 

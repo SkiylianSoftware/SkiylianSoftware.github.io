@@ -207,3 +207,9 @@ function toggleMetric(metric) {
   <p>No milestone data yet. They'll appear here as thresholds are crossed during the data pipeline runs.</p>
 </div>
 {% endif %}
+
+{% else %}
+<div class="timeline-empty">
+  <p>No historical data yet. The chart and timeline will populate as the daily tracking pipeline collects data over the coming days.</p>
+</div>
+{% endif %}

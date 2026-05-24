@@ -2,7 +2,6 @@
 layout: default
 ---
 
-<div class="top-matter">
 {% include banner.html %}
 
 {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.message %}
@@ -20,7 +19,8 @@ layout: default
   <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i class="fab fa-github"></i> GitHub</a>
   <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i class="fas fa-heart"></i> Support</a>
 </div>
-</div>
+
+<div class="section-break"></div>
 
 <div class="section-break"></div>
 
@@ -273,20 +273,20 @@ if (mt) {
 
 @media (min-width: 1200px) {
   #main-wrapper { position: relative; }
-  .top-matter {
-    position: relative; width: 100%;
-    min-height: calc((100vw - 260px) / 3.3);
-    overflow: clip;
-  }
   .channel-hero {
-    position: absolute; left: 0; right: 0; top: 0; min-height: 100%;
+    position: absolute; left: 0; right: 0; top: -60px;
+    min-height: calc((100vw - 260px) / 3.3 + 60px);
     margin: 0; border-radius: 0;
     background-position: center;
+    z-index: -1;
   }
-  .channel-hero .hero-overlay { display: none; }
-  .top-matter + * {
+  .channel-hero + * {
     margin-top: 0 !important;
   }
+}
+
+@media (max-width: 767px) {
+  main { padding-left: 0 !important; padding-right: 0 !important; }
 }
   .channel-hero + * {
     margin-top: 0 !important;

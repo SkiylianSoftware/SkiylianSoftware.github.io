@@ -311,15 +311,11 @@ if (mt) {
   #main-wrapper { position: relative; }
   .channel-hero {
     position: absolute; left: 0; right: 0; top: 0;
-    aspect-ratio: 1.54 / 1;
+    aspect-ratio: 6.05 / 1;
+    background-position: center;
     z-index: -1;
-  }
-  .channel-hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(transparent 50%, rgba(10,10,20,0.95) 100%);
-    pointer-events: none;
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
   }
   .channel-hero + * {
     margin-top: 0 !important;

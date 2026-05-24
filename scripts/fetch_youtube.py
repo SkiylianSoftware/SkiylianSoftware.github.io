@@ -725,7 +725,8 @@ def detect_milestones(
                 key = f"{label}_{m}"
                 if key not in prev_reached:
                     prev_reached[key] = now.isoformat()
-                    msg = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
+                    base = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
+                    msg = f"{m:,}: {base}" if isinstance(msgs, dict) else base
                     print(f"New milestone: {m} {label}")
                 break
 
@@ -755,7 +756,8 @@ def detect_milestones(
                 key = f"{label}_{m}"
                 reached_at = prev_reached.get(key, "")
                 if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
-                    msg = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
+                    base = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
+                    msg = f"{m:,}: {base}" if isinstance(msgs, dict) else base
                     priority = 0
                     if label.startswith("subs"):
                         priority = 4

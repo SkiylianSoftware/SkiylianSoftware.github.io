@@ -4,14 +4,7 @@ layout: default
 
 {% if site.data.site_meta.banner_url or site.data.site_meta.description %}
 <div class="channel-hero"{% if site.data.site_meta.banner_url %} style="background-image: url('{{ site.data.site_meta.banner_url }}')"{% endif %}>
-  <div class="hero-overlay">
-    <div class="hero-links">
-      <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
-      <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
-      <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-      <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i class="fas fa-heart"></i> Support</a>
-    </div>
-  </div>
+  <div class="hero-overlay"></div>
 </div>
 {% endif %}
 
@@ -20,6 +13,21 @@ layout: default
   <div class="milestone-track" id="milestone-track">
     <span class="milestone-item">&#11088; {{ site.data.milestones.current.message }}</span>
     <span class="milestone-item" aria-hidden="true">&#11088; {{ site.data.milestones.current.message }}</span>
+  </div>
+  <div class="milestone-links">
+    <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+    <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
+    <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+    <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i class="fas fa-heart"></i> Support</a>
+  </div>
+</div>
+{% else %}
+<div class="milestone-marquee">
+  <div class="milestone-links milestone-links-only">
+    <a href="https://watch.skiylia.dev" class="btn platform-btn youtube-btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+    <a href="https://live.skiylia.dev" class="btn platform-btn twitch-btn" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
+    <a href="https://code.skiylia.dev" class="btn platform-btn github-btn" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+    <a href="https://support.skiylia.dev" class="btn platform-btn kofi-btn" target="_blank"><i class="fas fa-heart"></i> Support</a>
   </div>
 </div>
 {% endif %}
@@ -290,10 +298,9 @@ if (mt) {
 .hero-overlay {
   width: 100%; padding: 1.5rem;
   background: linear-gradient(transparent 0%, rgba(10,10,20,0.85) 50%, rgba(10,10,20,0.95) 100%);
-  display: flex; flex-direction: column; gap: 1rem;
+  flex: 1;
 }
-.hero-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-.hero-links .btn { font-size: 0.82rem; padding: 0.35rem 0.85rem; }
+.hero-overlay:empty { padding: 0; }
 
 @media (min-width: 1200px) {
   #main-wrapper { position: relative; }
@@ -302,12 +309,16 @@ if (mt) {
     aspect-ratio: 4 / 1;
     background-position: center;
     z-index: -1;
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
   }
   .channel-hero + * {
     margin-top: 0 !important;
   }
+}
+
+@media (max-width: 767px) {
+  main { padding-left: 0 !important; padding-right: 0 !important; }
 }
 
 .milestone-marquee {
@@ -320,6 +331,13 @@ if (mt) {
 .animating { animation: marquee 30s linear infinite; }
 .milestone-item { padding: 0 2rem; font-size: 0.85rem; opacity: 0.85; white-space: nowrap; }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.milestone-links {
+  display: flex; gap: 0.5rem; align-items: center;
+  margin-top: 0.5rem; padding: 0 1rem;
+  white-space: nowrap; flex-wrap: wrap;
+}
+.milestone-links .btn { font-size: 0.75rem; padding: 0.2rem 0.6rem; }
+.milestone-links-only { margin-top: 0; }
 
 .live-section { margin: 2rem 0; text-align: center; }
 .live-section .live-embed { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; position: relative; }

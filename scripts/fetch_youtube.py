@@ -461,156 +461,97 @@ def save(filename, data):
     print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
-MILESTONES: dict = {
-    "subs_p3": {
-        "thresholds": [3**i for i in range(0, 13)],
-        "messages": {
-            1: "The unitary state",
-            3: "Three-body problem solved",
-            9: "Nonary game complete",
-            27: "Cube it!",
-            81: "Trit-trit-trit!",
-            243: "3^5 - Fifth power unlocked",
-            729: "3^6 - One gross in balanced ternary",
-            2187: "3^7 - Lucky sevens",
-            6561: "3^8 - Octotrit",
-            19683: "3^9 - Padovan sequence spotted",
-            59049: "3^10 - Decitrit! Tenfold power!",
-            177147: "3^11 - Ternary galaxy!",
-            531441: "3^12 - Dozenal trit!",
-        },
-    },
-    "subs_p2": {
-        "thresholds": [2**i for i in range(0, 21)],
-        "messages": {
-            1: "First subscriber!",
-            2: "A pair!",
-            4: "Four! Quadbit!",
-            8: "Byte!",
-            16: "Half-word!",
-            32: "Word!",
-            64: "Double-word!",
-            128: "Kilobit!",
-            256: "Byte plural!",
-            512: "Half a K!",
-            1024: "1K! A true kilobyte!",
-            2048: "2K!",
-            4096: "4K! Page boundary!",
-            8192: "8K!",
-            16384: "16K!",
-            32768: "Half of 64K!",
-            65536: "64K! Full address space!",
-            131072: "128K! Expanded memory!",
-            262144: "256K! High memory area!",
-            524288: "512K! Extended memory!",
-            1048576: "1M! Megabyte territory!",
-        },
-    },
-    "subs_rnd": {
-        "thresholds": [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
-        "messages": {
-            10: "First double digits!",
-            50: "Halfway to 100!",
-            100: "Triple digits!",
-            500: "Half a thousand!",
-            1000: "The big 1K!",
-            5000: "5K strong!",
-            10000: "10K! Unreal!",
-            50000: "50K! Halfway to 100K!",
-            100000: "100K!!! Thank you!",
-            500000: "Half a million!",
-            1000000: "1 MILLION! Unbelievable!",
-        },
-    },
+P3 = [3**i for i in range(13)]
+P2 = [2**i for i in range(21)]
+RND = [1, 10, 25, 50, 100, 250, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
+
+P3_MSG = {
+    1: "The unitary state",
+    3: "Three-body problem solved",
+    9: "Nonary game complete",
+    27: "Cube it!",
+    81: "Trit-trit-trit!",
+    243: "3^5 - Fifth power unlocked",
+    729: "3^6 - One gross in balanced ternary",
+    2187: "3^7 - Lucky sevens",
+    6561: "3^8 - Octotrit",
+    19683: "3^9 - Padovan sequence spotted",
+    59049: "3^10 - Decitrit! Tenfold power!",
+    177147: "3^11 - Ternary galaxy!",
+    531441: "3^12 - Dozenal trit!",
+}
+P2_MSG = {
+    2: "A pair!",
+    4: "Four! Quadbit!",
+    8: "Byte!",
+    16: "Half-word!",
+    32: "Word!",
+    64: "Double-word!",
+    128: "Kilobit!",
+    256: "Byte plural!",
+    512: "Half a K!",
+    1024: "1K! A true kilobyte!",
+    2048: "2K!",
+    4096: "4K! Page boundary!",
+    8192: "8K!",
+    16384: "16K!",
+    32768: "Half of 64K!",
+    65536: "64K! Full address space!",
+    131072: "128K! Expanded memory!",
+    262144: "256K! High memory area!",
+    524288: "512K! Extended memory!",
+    1048576: "1M! Megabyte territory!",
+}
+RND_MSG = {
+    10: "First double digits!",
+    50: "Halfway to 100!",
+    100: "Triple digits!",
+    500: "Half a thousand!",
+    1000: "The big 1K!",
+    5000: "5K strong!",
+    10000: "10K! Unreal!",
+    50000: "50K! Halfway to 100K!",
+    100000: "100K!!! Thank you!",
+    500000: "Half a million!",
+    1000000: "1 MILLION! Unbelievable!",
 }
 
-# Generate view and video milestones from the same thresholds
-for prefix, thresholds, msgs in [
-    (
-        "views_p3",
-        MILESTONES["subs_p3"]["thresholds"],
-        {
-            1: "1 view! The first peep!",
-            3: "3 views! Trinary initiation!",
-            9: "9 views! Ternary complete!",
-            27: "27 views! Cubic curiosity!",
-            81: "81 views! Nonagon of views!",
-            243: "243 views! 3^5 viewshed!",
-            729: "729 views! 3^6 and counting!",
-            2187: "2187 views! Lucky production!",
-            6561: "6561 views! 3^8 view drought!",
-        },
-    ),
-    ("views_p2", MILESTONES["subs_p2"]["thresholds"], MILESTONES["subs_p2"]["messages"]),
-    (
-        "views_rnd",
-        MILESTONES["subs_rnd"]["thresholds"],
-        {
-            1000: "1K views!",
-            10000: "10K views!",
-            50000: "50K views!",
-            100000: "100K views!",
-            500000: "Half a million views!",
-            1000000: "1M views!",
-        },
-    ),
-    (
-        "videos_p3",
-        MILESTONES["subs_p3"]["thresholds"],
-        {
-            1: "First video uploaded!",
-            3: "3 videos! Trifecta!",
-            9: "9 videos! Nonary upload!",
-            27: "27 videos! Cubed content!",
-            81: "81 videos! 3^4 uploads!",
-        },
-    ),
-    (
-        "videos_p2",
-        [2**i for i in range(0, 11)],
-        {
-            1: "First video!",
-            2: "A pair!",
-            4: "Four!",
-            8: "Byte of videos!",
-            16: "Sweet sixteen!",
-            32: "32 videos!",
-            64: "64 videos!",
-            128: "128 videos!",
-            256: "256 videos!",
-        },
-    ),
-    (
-        "videos_rnd",
-        [10, 25, 50, 100, 250, 500, 1000],
-        {
-            10: "10 videos!",
-            25: "25 videos!",
-            50: "50 videos!",
-            100: "100 videos!",
-            250: "250 videos!",
-        },
-    ),
-    (
-        "views_p3k",
-        MILESTONES["subs_p3"]["thresholds"][4:],
-        {
-            81: "81 views!",
-            243: "243 views!",
-            729: "729 views!",
-            2187: "2187 views!",
-        },
-    ),
-]:
-    MILESTONES[prefix] = {"thresholds": thresholds, "messages": msgs}
+
+def _fmt_ms(m, b):
+    return f"{m:,}: {b}" if b else f"{m:,} units!"
+
+
+FORMAT_MS = _fmt_ms
+
+MILESTONE_SPECS = [
+    ("subs", P3, P3_MSG, FORMAT_MS),
+    ("subs", P2, P2_MSG, FORMAT_MS),
+    ("subs", RND, RND_MSG, FORMAT_MS),
+    ("views", P3, P3_MSG, FORMAT_MS),
+    ("views", P2, P2_MSG, FORMAT_MS),
+    ("views", RND, RND_MSG, FORMAT_MS),
+    ("videos", P3, P3_MSG, FORMAT_MS),
+    ("videos", P2, P2_MSG, FORMAT_MS),
+    ("videos", RND, RND_MSG, FORMAT_MS),
+]
+
 GAME_EPISODES = [1, 3, 9, 27, 81]
 GAME_VIEWS = [27, 81, 243, 729, 2187, 6561]
 GAME_HOURS = [3, 9, 27, 81, 243]
 GAME_RETURN = [27, 81, 243, 729]
-
-GAME_EPISODE_MSGS = {
+GAME_EP_MSG = {
+    1: "First episode in {game}!",
+    3: "3 episodes in {game}! Getting somewhere!",
+    9: "9 episodes in {game}! Fan favorite!",
+    27: "27 episodes in {game}! Dedicated!",
+    81: "81 episodes in {game}! Wow!",
+}
+GAME_VIEW_MSG_TMPL = "{{count}} views across {game}!"
+GAME_HOUR_MSG_TMPL = "{{hours}} hours in {game}!"
+GAME_RETURN_MSG_TMPL = "Back to {game} after {{days}} days!"
+GAME_EP_OVERRIDE = {
     "Kerbal Space Program": {
-        3: "Münar flyby complete!",
+        3: "Mun flyby complete!",
         9: "Duna landing!",
         27: "Jool system fleet deployed!",
         81: "Kerbals across the galaxy!",
@@ -648,24 +589,6 @@ GAME_EPISODE_MSGS = {
     "Station Flow": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"},
     "STATIONflow": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"},
 }
-GAME_VIEW_MSGS = {
-    "Kerbal Space Program": "{{count}} kerbonauts watched!",
-    "Factorio": "{{count}} factories inspected!",
-    "Minecraft": "{{count}} creepers exploded!",
-    "Transport Fever": "{{count}} tickets sold!",
-    "Transport Fever 2": "{{count}} tickets sold!",
-    "Mars First Logistics": "{{count}} packages delivered!",
-    "Station Flow": "{{count}} passengers routed!",
-}
-GAME_HOUR_MSGS = {
-    "Kerbal Space Program": "{{hours}} hours in the VAB!",
-    "Factorio": "{{hours}} hours on the factory floor!",
-    "Minecraft": "{{hours}} hours mining!",
-    "Transport Fever": "{{hours}} hours in transit!",
-    "Transport Fever 2": "{{hours}} hours in transit!",
-    "Mars First Logistics": "{{hours}} hours on Mars!",
-    "Station Flow": "{{hours}} hours directing flow!",
-}
 
 
 def _parse_iso_date(s):
@@ -688,61 +611,49 @@ def _detect_game_milestones(games, prev_reached, now, cutoff):
         for m in sorted(GAME_EPISODES, reverse=True):
             if ep >= m:
                 key = f"game_{gname}_ep_{m}"
+                override = GAME_EP_OVERRIDE.get(gname, {}).get(m)
+                msg = override or GAME_EP_MSG[m].format(game=gname)
                 if key not in prev_reached:
                     reached[key] = now.isoformat()
-                    msg = GAME_EPISODE_MSGS.get(gname, {}).get(m, f"{m} episodes in {gname}!")
                     current[key] = {"type": "game", "game": gname, "count": m, "message": msg}
                 elif (
                     prev_reached.get(key)
                     and _parse_iso_date(prev_reached[key])
                     and _parse_iso_date(prev_reached[key]) >= cutoff
                 ):
-                    current[key] = {
-                        "type": "game",
-                        "game": gname,
-                        "count": m,
-                        "message": GAME_EPISODE_MSGS.get(gname, {}).get(m, f"{m} episodes in {gname}!"),
-                    }
+                    current[key] = {"type": "game", "game": gname, "count": m, "message": msg}
                 break
 
         for m in sorted(GAME_VIEWS, reverse=True):
             if gv >= m:
                 key = f"game_{gname}_views_{m}"
+                msg = GAME_VIEW_MSG_TMPL.replace("{game}", gname).replace("{{count}}", str(m))
                 if key not in prev_reached:
                     reached[key] = now.isoformat()
-                    tmpl = GAME_VIEW_MSGS.get(gname, "{{count}} views in {gname}!")
-                    msg = tmpl.replace("{{count}}", str(m)).replace("{gname}", gname)
                     current[key] = {"type": "game_views", "game": gname, "count": m, "message": msg}
                 break
 
         for m in sorted(GAME_HOURS, reverse=True):
             if gh >= m:
                 key = f"game_{gname}_hours_{m}"
+                msg = GAME_HOUR_MSG_TMPL.replace("{game}", gname).replace("{{hours}}", str(m))
                 if key not in prev_reached:
                     reached[key] = now.isoformat()
-                    tmpl = GAME_HOUR_MSGS.get(gname, "{{hours}} hours in {gname}!")
-                    msg = tmpl.replace("{{hours}}", str(m)).replace("{gname}", gname)
                     current[key] = {"type": "game_hours", "game": gname, "count": m, "message": msg}
                 break
 
         if first and latest:
             try:
-                from datetime import datetime as _dt
-
-                fd = _dt.fromisoformat(first.replace("Z", "+00:00"))
-                ld = _dt.fromisoformat(latest.replace("Z", "+00:00"))
+                fd = datetime.fromisoformat(first.replace("Z", "+00:00"))
+                ld = datetime.fromisoformat(latest.replace("Z", "+00:00"))
                 gap_days = (ld - fd).days
                 for m in sorted(GAME_RETURN, reverse=True):
                     if gap_days >= m:
                         key = f"game_{gname}_return_{m}"
+                        msg = GAME_RETURN_MSG_TMPL.replace("{game}", gname).replace("{{days}}", str(m))
                         if key not in prev_reached:
                             reached[key] = now.isoformat()
-                            current[key] = {
-                                "type": "game_return",
-                                "game": gname,
-                                "count": m,
-                                "message": f"Back to {gname} after {m} days!",
-                            }
+                            current[key] = {"type": "game_return", "game": gname, "count": m, "message": msg}
                         break
             except Exception:
                 pass
@@ -767,18 +678,17 @@ def detect_milestones(
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(days=14)
     values = {"subs": subs, "views": views, "videos": videos_count}
-    priority_map = {"subs": 4, "views": 3, "videos": 2}
+    priority_map = {"subs": 4, "views": 3, "videos": 2, "age": 1}
 
-    for key, spec in MILESTONES.items():
-        prefix = key.split("_")[0]
-        value = values.get(prefix, 0)
-        for m in sorted(spec["thresholds"], reverse=True):
+    for label, thresholds, msgs, formatter in MILESTONE_SPECS:
+        value = values.get(label, 0)
+        for m in sorted(thresholds, reverse=True):
             if value >= m:
-                skey = f"{key}_{m}"
+                skey = f"{label}_{m}"
                 if skey not in prev_reached:
                     prev_reached[skey] = now.isoformat()
-                    msg = spec["messages"].get(m, f"{m:,} {prefix}!")
-                    print(f"New milestone: {m:,}: {msg}")
+                    msg = formatter(m, msgs.get(m, ""))
+                    print(f"New milestone: {msg}")
                 break
 
     if first_video_date:
@@ -801,17 +711,16 @@ def detect_milestones(
         prev_reached.update(game_reached)
         current.update(game_current)
 
-    for key, spec in MILESTONES.items():
-        prefix = key.split("_")[0]
-        value = values.get(prefix, 0)
-        for m in sorted(spec["thresholds"], reverse=True):
+    for label, thresholds, msgs, formatter in MILESTONE_SPECS:
+        value = values.get(label, 0)
+        for m in sorted(thresholds, reverse=True):
             if value >= m:
-                skey = f"{key}_{m}"
+                skey = f"{label}_{m}"
                 reached_at = prev_reached.get(skey, "")
                 if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
-                    msg = spec["messages"].get(m, f"{m:,} {prefix}!")
-                    p = priority_map.get(prefix, 0)
-                    current[skey + f"_{p}"] = {"type": key, "count": m, "message": msg, "priority": p}
+                    msg = formatter(m, msgs.get(m, ""))
+                    p = priority_map.get(label, 0)
+                    current[skey + f"_{p}"] = {"type": label, "count": m, "message": msg, "priority": p}
                 break
 
     if first_video_date:

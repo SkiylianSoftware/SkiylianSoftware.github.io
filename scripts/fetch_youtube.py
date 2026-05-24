@@ -535,19 +535,67 @@ MILESTONE_SPECS = [
     ("videos", RND, RND_MSG, FORMAT_MS),
 ]
 
-GAME_EPISODES = [1, 3, 9, 27, 81]
-GAME_VIEWS = [27, 81, 243, 729, 2187, 6561]
-GAME_HOURS = [3, 9, 27, 81, 243]
-GAME_RETURN = [27, 81, 243, 729]
-GAME_EP_MSG = {
-    1: "First episode in {game}!",
-    3: "3 episodes in {game}! Getting somewhere!",
-    9: "9 episodes in {game}! Fan favorite!",
-    27: "27 episodes in {game}! Dedicated!",
-    81: "81 episodes in {game}! Wow!",
+GAME_DEFAULT = {
+    "ep": "{{m}} episodes in {game}!",
+    "views": "{{count}} views across {game}!",
+    "hours": "{{hours}} hours in {game}!",
+    "return": "Back to {game} after {{days}} days!",
 }
-GAME_VIEW_MSG_TMPL = "{{count}} views across {game}!"
-GAME_HOUR_MSG_TMPL = "{{hours}} hours in {game}!"
+GAME_THRESHOLDS = {
+    "ep": P3,
+    "views": [27, 81, 243, 729, 2187, 6561],
+    "hours": [3, 9, 27, 81, 243],
+    "return": [27, 81, 243, 729],
+}
+# Per-game per-type overrides. Falls back to GAME_DEFAULT for any missing key.
+GAME_OVERRIDES = {
+    "Kerbal Space Program": {
+        "ep": {
+            3: "Mun flyby complete!",
+            9: "Duna landing!",
+            27: "Jool system fleet deployed!",
+            81: "Kerbals across the galaxy!",
+        }
+    },
+    "Factorio": {
+        "ep": {
+            3: "Green science automated!",
+            9: "Blue science online!",
+            27: "Rocket silo constructed!",
+            81: "Mega base operational!",
+        }
+    },
+    "Minecraft": {
+        "ep": {
+            3: "Nether portal activated!",
+            9: "Stronghold located!",
+            27: "Ender Dragon defeated!",
+            81: "Full beacon pyramid!",
+        }
+    },
+    "Transport Fever": {
+        "ep": {
+            3: "Three lines running!",
+            9: "Train network growing!",
+            27: "Maglev network online!",
+            81: "Transcontinental empire!",
+        }
+    },
+    "Transport Fever 2": {
+        "ep": {
+            3: "Three lines running!",
+            9: "Train network growing!",
+            27: "Maglev network online!",
+            81: "Transcontinental empire!",
+        }
+    },
+    "Mars First Logistics": {
+        "ep": {3: "Rover delivered!", 9: "Base camp established!", 27: "Three colonies linked!", 81: "Martian city!"}
+    },
+    "Station Flow": {
+        "ep": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"}
+    },
+}
 GAME_RETURN_MSG_TMPL = "Back to {game} after {{days}} days!"
 GAME_EP_OVERRIDE = {
     "Kerbal Space Program": {
@@ -608,49 +656,45 @@ def _detect_game_milestones(games, prev_reached, now, cutoff):
         first = g.get("first_video", "")
         latest = g.get("latest_video", "")
 
-        for m in sorted(GAME_EPISODES, reverse=True):
-            if ep >= m:
-                key = f"game_{gname}_ep_{m}"
-                override = GAME_EP_OVERRIDE.get(gname, {}).get(m)
-                msg = override or GAME_EP_MSG[m].format(game=gname)
-                if key not in prev_reached:
-                    reached[key] = now.isoformat()
-                    current[key] = {"type": "game", "game": gname, "count": m, "message": msg}
-                elif (
-                    prev_reached.get(key)
-                    and _parse_iso_date(prev_reached[key])
-                    and _parse_iso_date(prev_reached[key]) >= cutoff
-                ):
-                    current[key] = {"type": "game", "game": gname, "count": m, "message": msg}
-                break
-
-        for m in sorted(GAME_VIEWS, reverse=True):
-            if gv >= m:
-                key = f"game_{gname}_views_{m}"
-                msg = GAME_VIEW_MSG_TMPL.replace("{game}", gname).replace("{{count}}", str(m))
-                if key not in prev_reached:
-                    reached[key] = now.isoformat()
-                    current[key] = {"type": "game_views", "game": gname, "count": m, "message": msg}
-                break
-
-        for m in sorted(GAME_HOURS, reverse=True):
-            if gh >= m:
-                key = f"game_{gname}_hours_{m}"
-                msg = GAME_HOUR_MSG_TMPL.replace("{game}", gname).replace("{{hours}}", str(m))
-                if key not in prev_reached:
-                    reached[key] = now.isoformat()
-                    current[key] = {"type": "game_hours", "game": gname, "count": m, "message": msg}
-                break
+        for gtype, thresholds, key_suffix, value in [
+            ("ep", GAME_THRESHOLDS["ep"], "ep", ep),
+            ("views", GAME_THRESHOLDS["views"], "views", gv),
+            ("hours", GAME_THRESHOLDS["hours"], "hours", gh),
+        ]:
+            for m in sorted(thresholds, reverse=True):
+                if value >= m:
+                    key = f"game_{gname}_{key_suffix}_{m}"
+                    override = GAME_OVERRIDES.get(gname, {}).get(gtype, {}).get(m)
+                    if override:
+                        msg = override
+                    else:
+                        tmpl = GAME_DEFAULT[gtype]
+                        msg = (
+                            tmpl.replace("{{m}}", str(m))
+                            .replace("{{count}}", str(m))
+                            .replace("{{hours}}", str(m))
+                            .replace("{game}", gname)
+                        )
+                    if key not in prev_reached:
+                        reached[key] = now.isoformat()
+                        current[key] = {"type": f"game_{gtype}", "game": gname, "count": m, "message": msg}
+                    elif (
+                        prev_reached.get(key)
+                        and _parse_iso_date(prev_reached[key])
+                        and _parse_iso_date(prev_reached[key]) >= cutoff
+                    ):
+                        current[key] = {"type": f"game_{gtype}", "game": gname, "count": m, "message": msg}
+                    break
 
         if first and latest:
             try:
                 fd = datetime.fromisoformat(first.replace("Z", "+00:00"))
                 ld = datetime.fromisoformat(latest.replace("Z", "+00:00"))
                 gap_days = (ld - fd).days
-                for m in sorted(GAME_RETURN, reverse=True):
+                for m in sorted(GAME_THRESHOLDS["return"], reverse=True):
                     if gap_days >= m:
                         key = f"game_{gname}_return_{m}"
-                        msg = GAME_RETURN_MSG_TMPL.replace("{game}", gname).replace("{{days}}", str(m))
+                        msg = GAME_DEFAULT["return"].replace("{game}", gname).replace("{{days}}", str(m))
                         if key not in prev_reached:
                             reached[key] = now.isoformat()
                             current[key] = {"type": "game_return", "game": gname, "count": m, "message": msg}

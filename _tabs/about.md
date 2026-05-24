@@ -12,6 +12,18 @@ permalink: /about/
   <p class="about-intro">{{ site.data.site_meta.description }}</p>
 {% endif %}
 
+<p class="about-intro">
+  I count in balanced ternary. Not as a party trick -- because it's the best base for computing. 
+  
+  Negatives are natural in balanced ternary (just invert + and - symbols, no ugly two's complement). 
+  It has the best radix economy of any integer base: packing the most information into the fewest digits. 
+  And 3<sup>n</sup> thresholds create a beautiful spread: 1, 3, 9, 27, 81, 243, 729, 2187&hellip; 
+  where each milestone genuinely feels earned.
+  
+  Powers of two are for software. Round numbers are for growing up in Britain. 
+  Powers of three are my own little corner of the universe.
+</p>
+
 <div class="about-grid">
   <div class="about-section">
     <h2>Content</h2>

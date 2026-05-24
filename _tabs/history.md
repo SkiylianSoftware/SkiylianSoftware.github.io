@@ -151,58 +151,53 @@ function toggleMetric(metric) {
     {% assign icon = "&#9679;" %}
     {% assign mclass = "" %}
     {% assign link = nil %}
+    {% assign display = key %}
 
     {% if key contains "subs_p3" %}
       {% assign icon = "&#128293;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+      {% assign p = key | remove: "subs_p3_" %}{% capture d %}3^{{ p }} subscribers{% endcapture %}{% assign display = d %}
     {% elsif key contains "subs_p2" %}
       {% assign icon = "&#128187;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+      {% assign p = key | remove: "subs_p2_" %}{% capture d %}2^{{ p }} subscribers{% endcapture %}{% assign display = d %}
     {% elsif key contains "subs_rnd" %}
       {% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+      {% assign display = key | remove: "subs_rnd_" | append: " subscribers" %}
     {% elsif key contains "views_p3" or key contains "views_p3k" %}
       {% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+      {% capture d %}3^{{ key | remove: "views_p3_" | remove: "views_p3k_" }} views{% endcapture %}{% assign display = d %}
     {% elsif key contains "views_p2" %}
       {% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+      {% capture d %}2^{{ key | remove: "views_p2_" }} views{% endcapture %}{% assign display = d %}
     {% elsif key contains "views_rnd" %}
       {% assign icon = "&#128200;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+      {% assign display = key | remove: "views_rnd_" | append: " views" %}
     {% elsif key contains "videos_p3" %}
       {% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+      {% capture d %}3^{{ key | remove: "videos_p3_" }} videos{% endcapture %}{% assign display = d %}
     {% elsif key contains "videos_p2" %}
       {% assign icon = "&#128421;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+      {% capture d %}2^{{ key | remove: "videos_p2_" }} videos{% endcapture %}{% assign display = d %}
     {% elsif key contains "videos_rnd" %}
       {% assign icon = "&#127910;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+      {% assign display = key | remove: "videos_rnd_" | append: " videos" %}
     {% elsif key contains "game_" %}
       {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}{% assign link = "/games" %}
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
+      {% assign display = key | remove: "age_" | append: " days old" %}
     {% endif %}
-
-    {% capture display %}
-      {% if key contains "subs_p3" %}3^{% assign p = key | remove: "subs_p3_" %}{{ p }} subscribers
-      {% elsif key contains "subs_p2" %}2^{% assign p = key | remove: "subs_p2_" %}{{ p }} subscribers
-      {% elsif key contains "subs_rnd" %}{{ key | remove: "subs_rnd_" }} subscribers
-      {% elsif key contains "views_p3" %}3^{% assign p = key | remove: "views_p3_" %}{{ p }} views
-      {% elsif key contains "views_p2" %}2^{% assign p = key | remove: "views_p2_" %}{{ p }} views
-      {% elsif key contains "views_p3k" %}{% assign v = key | remove: "views_p3k_" %}{{ v | append: "" | slice: 0, 1 }}K views
-      {% elsif key contains "views_rnd" %}{{ key | remove: "views_rnd_" }} views
-      {% elsif key contains "videos_p3" %}3^{% assign p = key | remove: "videos_p3_" %}{{ p }} videos
-      {% elsif key contains "videos_p2" %}2^{% assign p = key | remove: "videos_p2_" %}{{ p }} videos
-      {% elsif key contains "videos_rnd" %}{{ key | remove: "videos_rnd_" }} videos
-      {% elsif key contains "game_" %}{{ key | remove: "game_" | replace: "_ep_", " - Episode " | replace: "_views_", " - " | replace: "_hours_", "h - " | replace: "_return_", " return after " | replace: "_", " " }} days
-      {% elsif key contains "age_" %}Channel age: {{ key | remove: "age_" }} days
-      {% else %}{{ key }}{% endif %}
-    {% endcapture %}
 
     {% if link %}
     <a href="{{ link }}" class="timeline-item milestone {{ mclass }}">
       <span class="tl-date">{{ date }}</span>
       <span class="tl-icon">{{ icon }}</span>
-      <span class="tl-text">{{ display | strip }}</span>
+      <span class="tl-text">{{ display }}</span>
     </a>
     {% else %}
     <div class="timeline-item milestone {{ mclass }}">
       <span class="tl-date">{{ date }}</span>
       <span class="tl-icon">{{ icon }}</span>
-      <span class="tl-text">{{ display | strip }}</span>
+      <span class="tl-text">{{ display }}</span>
     </div>
     {% endif %}
   {% endfor %}

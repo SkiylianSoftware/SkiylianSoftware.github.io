@@ -833,17 +833,17 @@ a.timeline-item:hover { background: rgba(45,212,191,0.04); }
 
 /* === SHARED BANNER === */
 .channel-hero {
-  position: relative; width: 100%; min-height: 240px;
+  position: relative; width: 100%;
   background-size: cover; background-repeat: no-repeat;
   background-position: top center; background-color: #0a0a14;
   display: flex; align-items: flex-end; margin-bottom: 1.5rem;
-  border-radius: 10px; overflow: hidden;
+  border-radius: 10px; overflow: hidden; aspect-ratio: 3.3 / 1;
 }
-.channel-hero:not([style*="background-image"]) { min-height: 0; margin: 0; padding: 0; width: auto; border-radius: 0; }
+.channel-hero:not([style*="background-image"]) { min-height: 0; margin: 0; padding: 0; width: auto; border-radius: 0; aspect-ratio: auto; }
 .hero-overlay {
-  width: 100%; min-height: 240px;
+  width: 100%;
   background: linear-gradient(transparent 0%, rgba(10,10,20,0.85) 50%, rgba(10,10,20,0.95) 100%);
-  flex: 1;
+  flex: 1; min-height: 100%;
 }
 
 /* Playlists page */

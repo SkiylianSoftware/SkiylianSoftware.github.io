@@ -461,86 +461,153 @@ def save(filename, data):
     print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
-POWERS_OF_2 = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
-POWERS_OF_3 = [1, 3, 9, 27, 81, 243, 729, 2187, 6561, 19683, 59049, 177147, 531441]
-ROUND_SUBS = [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000]
-ROUND_VIEWS = [1000, 10000, 50000, 100000, 500000, 1000000]
-ROUND_VIDEOS = [10, 25, 50, 100, 250, 500, 1000]
-AGE_DAYS = [3, 9, 27, 81, 243, 729, 2187, 6561]
+MILESTONES: dict = {
+    "subs_p3": {
+        "thresholds": [3**i for i in range(0, 13)],
+        "messages": {
+            1: "The unitary state",
+            3: "Three-body problem solved",
+            9: "Nonary game complete",
+            27: "Cube it!",
+            81: "Trit-trit-trit!",
+            243: "3^5 - Fifth power unlocked",
+            729: "3^6 - One gross in balanced ternary",
+            2187: "3^7 - Lucky sevens",
+            6561: "3^8 - Octotrit",
+            19683: "3^9 - Padovan sequence spotted",
+            59049: "3^10 - Decitrit! Tenfold power!",
+            177147: "3^11 - Ternary galaxy!",
+            531441: "3^12 - Dozenal trit!",
+        },
+    },
+    "subs_p2": {
+        "thresholds": [2**i for i in range(0, 21)],
+        "messages": {
+            1: "First subscriber!",
+            2: "A pair!",
+            4: "Four! Quadbit!",
+            8: "Byte!",
+            16: "Half-word!",
+            32: "Word!",
+            64: "Double-word!",
+            128: "Kilobit!",
+            256: "Byte plural!",
+            512: "Half a K!",
+            1024: "1K! A true kilobyte!",
+            2048: "2K!",
+            4096: "4K! Page boundary!",
+            8192: "8K!",
+            16384: "16K!",
+            32768: "Half of 64K!",
+            65536: "64K! Full address space!",
+            131072: "128K! Expanded memory!",
+            262144: "256K! High memory area!",
+            524288: "512K! Extended memory!",
+            1048576: "1M! Megabyte territory!",
+        },
+    },
+    "subs_rnd": {
+        "thresholds": [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
+        "messages": {
+            10: "First double digits!",
+            50: "Halfway to 100!",
+            100: "Triple digits!",
+            500: "Half a thousand!",
+            1000: "The big 1K!",
+            5000: "5K strong!",
+            10000: "10K! Unreal!",
+            50000: "50K! Halfway to 100K!",
+            100000: "100K!!! Thank you!",
+            500000: "Half a million!",
+            1000000: "1 MILLION! Unbelievable!",
+        },
+    },
+}
+
+# Generate view and video milestones from the same thresholds
+for prefix, thresholds, msgs in [
+    (
+        "views_p3",
+        MILESTONES["subs_p3"]["thresholds"],
+        {
+            1: "1 view! The first peep!",
+            3: "3 views! Trinary initiation!",
+            9: "9 views! Ternary complete!",
+            27: "27 views! Cubic curiosity!",
+            81: "81 views! Nonagon of views!",
+            243: "243 views! 3^5 viewshed!",
+            729: "729 views! 3^6 and counting!",
+            2187: "2187 views! Lucky production!",
+            6561: "6561 views! 3^8 view drought!",
+        },
+    ),
+    ("views_p2", MILESTONES["subs_p2"]["thresholds"], MILESTONES["subs_p2"]["messages"]),
+    (
+        "views_rnd",
+        MILESTONES["subs_rnd"]["thresholds"],
+        {
+            1000: "1K views!",
+            10000: "10K views!",
+            50000: "50K views!",
+            100000: "100K views!",
+            500000: "Half a million views!",
+            1000000: "1M views!",
+        },
+    ),
+    (
+        "videos_p3",
+        MILESTONES["subs_p3"]["thresholds"],
+        {
+            1: "First video uploaded!",
+            3: "3 videos! Trifecta!",
+            9: "9 videos! Nonary upload!",
+            27: "27 videos! Cubed content!",
+            81: "81 videos! 3^4 uploads!",
+        },
+    ),
+    (
+        "videos_p2",
+        [2**i for i in range(0, 11)],
+        {
+            1: "First video!",
+            2: "A pair!",
+            4: "Four!",
+            8: "Byte of videos!",
+            16: "Sweet sixteen!",
+            32: "32 videos!",
+            64: "64 videos!",
+            128: "128 videos!",
+            256: "256 videos!",
+        },
+    ),
+    (
+        "videos_rnd",
+        [10, 25, 50, 100, 250, 500, 1000],
+        {
+            10: "10 videos!",
+            25: "25 videos!",
+            50: "50 videos!",
+            100: "100 videos!",
+            250: "250 videos!",
+        },
+    ),
+    (
+        "views_p3k",
+        MILESTONES["subs_p3"]["thresholds"][4:],
+        {
+            81: "81 views!",
+            243: "243 views!",
+            729: "729 views!",
+            2187: "2187 views!",
+        },
+    ),
+]:
+    MILESTONES[prefix] = {"thresholds": thresholds, "messages": msgs}
 GAME_EPISODES = [1, 3, 9, 27, 81]
 GAME_VIEWS = [27, 81, 243, 729, 2187, 6561]
 GAME_HOURS = [3, 9, 27, 81, 243]
 GAME_RETURN = [27, 81, 243, 729]
 
-POWER2_MSG = {
-    2: "A pair!",
-    4: "Four! Quadbit!",
-    8: "Byte!",
-    16: "Half-word!",
-    32: "Word!",
-    64: "Double-word!",
-    128: "Kilobit!",
-    256: "Byte plural!",
-    512: "Half a K!",
-    1024: "1K! A true kilobyte!",
-    2048: "2K!",
-    4096: "4K! Page boundary!",
-    8192: "8K!",
-    16384: "16K!",
-    32768: "Half of 64K!",
-    65536: "64K! Full address space!",
-}
-POWER3_SUB_MSGS = {
-    1: "The unitary state",
-    3: "Three-body problem solved",
-    9: "Nonary game complete",
-    27: "Cube it!",
-    81: "Trit-trit-trit!",
-    243: "3^5 - Fifth power unlocked",
-    729: "3^6 - One gross in balanced ternary",
-    2187: "3^7 - Lucky sevens",
-    6561: "3^8 - Octotrit",
-    19683: "3^9 - Padovan sequence spotted",
-    59049: "3^10 - Decitrit! Tenfold power!",
-}
-POWER3_VIEW_MSGS = {
-    1: "1 view! The first peep!",
-    3: "3 views! Trinary initiation!",
-    9: "9 views! Ternary complete!",
-    27: "27 views! Cubic curiosity!",
-    81: "81 views! Nonagon of views!",
-    243: "243 views! 3^5 viewshed!",
-    729: "729 views! 3^6 and counting!",
-    2187: "2187 views! Lucky production!",
-    6561: "6561 views! 3^8 view drought!",
-}
-POWER3_VIDEO_MSGS = {
-    1: "First video uploaded!",
-    3: "3 videos! Trifecta!",
-    9: "9 videos! Nonary upload!",
-    27: "27 videos! Cubed content!",
-    81: "81 videos! 3^4 uploads!",
-}
-AGE_DAY_MSGS = {
-    3: "3 days old! The first milestone!",
-    9: "9 days! A week plus two!",
-    27: "27 days! A cubic month!",
-    81: "81 days! One grossly long time!",
-    243: "243 days! 3^5 days online!",
-    729: "729 days! Two years in ternary!",
-    2187: "2187 days! 3^7 days! Six years!",
-    6561: "6561 days! 3^8 days! Nearly 18 years!",
-}
-GAME_FIRST_MSGS = {
-    "Kerbal Space Program": "First launch at KSC!",
-    "Factorio": "First automation started!",
-    "Minecraft": "First block placed!",
-    "Transport Fever": "First route established!",
-    "Transport Fever 2": "First route established!",
-    "Mars First Logistics": "First martian delivery!",
-    "Station Flow": "First passenger processed!",
-    "STATIONflow": "First passenger processed!",
-}
 GAME_EPISODE_MSGS = {
     "Kerbal Space Program": {
         3: "Münar flyby complete!",
@@ -699,56 +766,19 @@ def detect_milestones(
     current = {}
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(days=14)
+    values = {"subs": subs, "views": views, "videos": videos_count}
+    priority_map = {"subs": 4, "views": 3, "videos": 2}
 
-    milestone_sets = [
-        ("subs_p3", subs, POWERS_OF_3, POWER3_SUB_MSGS),
-        ("subs_p2", subs, POWERS_OF_2, POWER2_MSG),
-        (
-            "subs_rnd",
-            subs,
-            ROUND_SUBS,
-            {
-                10: "First double digits!",
-                50: "Halfway to 100!",
-                100: "Triple digits!",
-                500: "Half a thousand!",
-                1000: "The big 1K!",
-                5000: "5K strong!",
-                10000: "10K! Unreal!",
-                50000: "50K! Halfway to 100K!",
-                100000: "100K!!! Thank you!",
-            },
-        ),
-        ("views_p3", views, POWERS_OF_3, POWER3_VIEW_MSGS),
-        ("views_p2", views, POWERS_OF_2, POWER2_MSG),
-        ("views_rnd", views, ROUND_VIEWS, lambda m: f"{m:,} views!"),
-        ("videos_p3", videos_count, POWERS_OF_3, POWER3_VIDEO_MSGS),
-        ("videos_p2", videos_count, POWERS_OF_2, {2: "A pair!", 4: "Four!", 8: "Byte!", 16: "16 videos!"}),
-        ("videos_rnd", videos_count, ROUND_VIDEOS, lambda m: f"{m} videos!"),
-        (
-            "views_p3k",
-            views,
-            [3000, 9000, 27000, 81000, 243000, 729000],
-            {
-                3000: "3K views! Ternary thousand!",
-                9000: "9K views! Nonary thousand!",
-                27000: "27K views! Cubic thousand!",
-                81000: "81K views! 3^4 thousand!",
-                243000: "243K views! 3^5 thousand!",
-                729000: "729K views! 3^6 thousand!",
-            },
-        ),
-    ]
-
-    for label, value, thresholds, msgs in milestone_sets:
-        for m in sorted(thresholds, reverse=True):
+    for key, spec in MILESTONES.items():
+        prefix = key.split("_")[0]
+        value = values.get(prefix, 0)
+        for m in sorted(spec["thresholds"], reverse=True):
             if value >= m:
-                key = f"{label}_{m}"
-                base = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
-                msg = f"{m:,}: {base}" if isinstance(msgs, dict) else base
-                if key not in prev_reached:
-                    prev_reached[key] = now.isoformat()
-                    print(f"New milestone: {msg}")
+                skey = f"{key}_{m}"
+                if skey not in prev_reached:
+                    prev_reached[skey] = now.isoformat()
+                    msg = spec["messages"].get(m, f"{m:,} {prefix}!")
+                    print(f"New milestone: {m:,}: {msg}")
                 break
 
     if first_video_date:
@@ -756,7 +786,7 @@ def detect_milestones(
             fd = _parse_iso_date(first_video_date.replace("Z", "+00:00"))
             if fd:
                 age_days = (now - fd).days
-                for m in sorted(AGE_DAYS, reverse=True):
+                for m in [3, 9, 27, 81, 243, 729, 2187, 6561]:
                     if age_days >= m:
                         key = f"age_{m}"
                         if key not in prev_reached:
@@ -771,42 +801,40 @@ def detect_milestones(
         prev_reached.update(game_reached)
         current.update(game_current)
 
-    for label, value, thresholds, msgs in milestone_sets:
-        for m in sorted(thresholds, reverse=True):
+    for key, spec in MILESTONES.items():
+        prefix = key.split("_")[0]
+        value = values.get(prefix, 0)
+        for m in sorted(spec["thresholds"], reverse=True):
             if value >= m:
-                key = f"{label}_{m}"
-                reached_at = prev_reached.get(key, "")
+                skey = f"{key}_{m}"
+                reached_at = prev_reached.get(skey, "")
                 if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
-                    base = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
-                    msg = f"{m:,}: {base}" if isinstance(msgs, dict) else base
-                    priority = 0
-                    if label.startswith("subs"):
-                        priority = 4
-                    elif label.startswith("views"):
-                        priority = 3
-                    elif label.startswith("videos"):
-                        priority = 2
-                    elif label.startswith("age"):
-                        priority = 1
-                    ckey = f"{key}_{priority}"
-                    current[ckey] = {"type": label, "count": m, "message": msg, "priority": priority}
+                    msg = spec["messages"].get(m, f"{m:,} {prefix}!")
+                    p = priority_map.get(prefix, 0)
+                    current[skey + f"_{p}"] = {"type": key, "count": m, "message": msg, "priority": p}
                 break
 
     if first_video_date:
-        try:
-            fd = _parse_iso_date(first_video_date.replace("Z", "+00:00"))
-            if fd:
-                age_days = (now - fd).days
-                for m in sorted(AGE_DAYS, reverse=True):
-                    if age_days >= m:
-                        key = f"age_{m}"
-                        reached_at = prev_reached.get(key, "")
-                        if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
-                            msg = AGE_DAY_MSGS.get(m, f"{m} days old!")
-                            current[f"age_{m}_0"] = {"type": "age", "count": m, "message": msg, "priority": 0}
-                        break
-        except Exception:
-            pass
+        fd = _parse_iso_date(first_video_date.replace("Z", "+00:00"))
+        if fd:
+            age_days = (now - fd).days
+            for m in [3, 9, 27, 81, 243, 729, 2187, 6561]:
+                if age_days >= m:
+                    key = f"age_{m}"
+                    reached_at = prev_reached.get(key, "")
+                    if reached_at and _parse_iso_date(reached_at) and _parse_iso_date(reached_at) >= cutoff:
+                        msg = {
+                            3: "3 days old!",
+                            9: "9 days!",
+                            27: "27 days! A cubic month!",
+                            81: "81 days!",
+                            243: "243 days old!",
+                            729: "729 days!",
+                            2187: "2187 days!",
+                            6561: "6561 days!",
+                        }.get(m, f"{m} days!")
+                        current[key + "_1"] = {"type": "age", "count": m, "message": msg, "priority": 1}
+                    break
 
     expired = [k for k, v in prev_reached.items() if _parse_iso_date(v) and _parse_iso_date(v) < cutoff]
     for k in expired:
@@ -814,7 +842,6 @@ def detect_milestones(
 
     active = [v for v in current.values() if v.get("priority", 0) > 0]
     best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}
-
     save("milestones.json", {"current": best, "reached": prev_reached})
 
 

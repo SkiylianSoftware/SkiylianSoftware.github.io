@@ -643,6 +643,20 @@ body::after {
 .timeline-empty { margin: 2rem 0; padding: 1.5rem; border-radius: 10px; background: rgba(45,212,191,0.04); border: 1px solid rgba(45,212,191,0.08); }
 .timeline-empty p { font-size: 0.9rem; opacity: 0.7; margin: 0 0 0.5rem; line-height: 1.6; }
 .timeline-empty p:last-child { margin-bottom: 0; }
+.milestones-note { font-size: 0.8rem; opacity: 0.5; margin: -0.5rem 0 1rem; }
+.milestones-note a { color: inherit; text-decoration: underline; text-decoration-style: dotted; }
+.timeline-item.milestone.ms-subs { border-left-color: #2dd4bf; }
+.timeline-item.milestone.ms-views { border-left-color: #ff4444; }
+.timeline-item.milestone.ms-videos { border-left-color: #c084fc; }
+.timeline-item.milestone.ms-game { border-left-color: #a970ff; }
+.timeline-item.milestone.ms-age { border-left-color: #f59e0b; }
+.timeline-item.milestone.ms-subs .tl-text { color: #2dd4bf; }
+.timeline-item.milestone.ms-views .tl-text { color: #ff4444; }
+.timeline-item.milestone.ms-videos .tl-text { color: #c084fc; }
+.timeline-item.milestone.ms-game .tl-text { color: #a970ff; }
+.timeline-item.milestone.ms-age .tl-text { color: #f59e0b; }
+a.timeline-item { text-decoration: none; color: inherit; display: flex; }
+a.timeline-item:hover { background: rgba(45,212,191,0.04); }
 
 /* === PAGE: Support === */
 .support-hero {

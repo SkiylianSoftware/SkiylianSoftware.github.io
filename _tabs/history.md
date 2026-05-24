@@ -139,77 +139,76 @@ function toggleMetric(metric) {
 </script>
 
 <h2 class="milestones-heading">Milestones</h2>
+<p class="milestones-note">&#9881;&#65039; Powers of three (ternary) are my primary counting system. Powers of two (binary) and round numbers also tracked. <a href="/about">Why ternary?</a></p>
+
+{% assign milestones = site.data.milestones %}
+{% assign ms_keys = milestones.reached %}
+{% if ms_keys %}
 <div class="timeline">
-  {% for h in history %}
-    {% assign prev_index = forloop.index0 | minus: 1 %}
-    {% if prev_index >= 0 %}
-      {% assign prev = history[prev_index] %}
-      {% assign crossed = nil %}
+  {% for item in ms_keys %}
+    {% assign key = item[0] %}
+    {% assign date = item[1] | truncate: 10, "" %}
+    {% assign icon = "&#9679;" %}
+    {% assign mclass = "" %}
+    {% assign link = nil %}
 
-      {% assign yt_subs = h.youtube_main.subs | default: 0 %}
-      {% assign prev_yt_subs = prev.youtube_main.subs | default: 0 %}
-      {% assign twitch_followers = h.twitch.followers | default: 0 %}
-      {% assign prev_twitch_followers = prev.twitch.followers | default: 0 %}
-      {% assign yt_views = h.youtube_main.views | default: 0 %}
-      {% assign prev_yt_views = prev.youtube_main.views | default: 0 %}
-      {% assign yt_videos = h.youtube_main.videos | default: 0 %}
-      {% assign prev_yt_videos = prev.youtube_main.videos | default: 0 %}
-      {% assign orders = h.fourthwall.orders | default: 0 %}
-      {% assign prev_orders = prev.fourthwall.orders | default: 0 %}
+    {% if key contains "subs_p3" %}
+      {% assign icon = "&#128293;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+    {% elsif key contains "subs_p2" %}
+      {% assign icon = "&#128187;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+    {% elsif key contains "subs_rnd" %}
+      {% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+    {% elsif key contains "views_p3" or key contains "views_p3k" %}
+      {% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+    {% elsif key contains "views_p2" %}
+      {% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+    {% elsif key contains "views_rnd" %}
+      {% assign icon = "&#128200;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+    {% elsif key contains "videos_p3" %}
+      {% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+    {% elsif key contains "videos_p2" %}
+      {% assign icon = "&#128421;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+    {% elsif key contains "videos_rnd" %}
+      {% assign icon = "&#127910;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+    {% elsif key contains "game_" %}
+      {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}{% assign link = "/games" %}
+    {% elsif key contains "age_" %}
+      {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
+    {% endif %}
 
-      {% assign yt_vods_subs = h.youtube_vods.subs | default: 0 %}
-      {% assign prev_yt_vods_subs = prev.youtube_vods.subs | default: 0 %}
-      {% assign yt_vods_videos = h.youtube_vods.videos | default: 0 %}
-      {% assign prev_yt_vods_videos = prev.youtube_vods.videos | default: 0 %}
-      {% assign tw_views = h.twitch.views | default: 0 %}
-      {% assign prev_tw_views = prev.twitch.views | default: 0 %}
+    {% capture display %}
+      {% if key contains "subs_p3" %}3^{% assign p = key | remove: "subs_p3_" %}{{ p }} subscribers
+      {% elsif key contains "subs_p2" %}2^{% assign p = key | remove: "subs_p2_" %}{{ p }} subscribers
+      {% elsif key contains "subs_rnd" %}{{ key | remove: "subs_rnd_" }} subscribers
+      {% elsif key contains "views_p3" %}3^{% assign p = key | remove: "views_p3_" %}{{ p }} views
+      {% elsif key contains "views_p2" %}2^{% assign p = key | remove: "views_p2_" %}{{ p }} views
+      {% elsif key contains "views_p3k" %}{% assign v = key | remove: "views_p3k_" %}{{ v | append: "" | slice: 0, 1 }}K views
+      {% elsif key contains "views_rnd" %}{{ key | remove: "views_rnd_" }} views
+      {% elsif key contains "videos_p3" %}3^{% assign p = key | remove: "videos_p3_" %}{{ p }} videos
+      {% elsif key contains "videos_p2" %}2^{% assign p = key | remove: "videos_p2_" %}{{ p }} videos
+      {% elsif key contains "videos_rnd" %}{{ key | remove: "videos_rnd_" }} videos
+      {% elsif key contains "game_" %}{{ key | remove: "game_" | replace: "_ep_", " - Episode " | replace: "_views_", " - " | replace: "_hours_", "h - " | replace: "_return_", " return after " | replace: "_", " " }} days
+      {% elsif key contains "age_" %}Channel age: {{ key | remove: "age_" }} days
+      {% else %}{{ key }}{% endif %}
+    {% endcapture %}
 
-      {% assign total_audience = yt_subs | plus: yt_vods_subs | plus: twitch_followers %}
-      {% assign prev_total_audience = prev_yt_subs | plus: prev_yt_vods_subs | plus: prev_twitch_followers %}
-      {% assign total_views = yt_views | plus: tw_views %}
-      {% assign prev_total_views = prev_yt_views | plus: prev_tw_views %}
-      {% assign total_content = yt_videos | plus: yt_vods_videos %}
-      {% assign prev_total_content = prev_yt_videos | plus: prev_yt_vods_videos %}
-
-      {% if total_audience >= 100 and prev_total_audience < 100 %}{% assign crossed = "Reached 100 total followers!" %}
-      {% elsif total_audience >= 500 and prev_total_audience < 500 %}{% assign crossed = "Reached 500 total followers!" %}
-      {% elsif total_audience >= 1000 and prev_total_audience < 1000 %}{% assign crossed = "Reached 1,000 total followers!" %}
-      {% elsif total_views >= 10000 and prev_total_views < 10000 %}{% assign crossed = "Reached 10,000 total views!" %}
-      {% elsif total_views >= 50000 and prev_total_views < 50000 %}{% assign crossed = "Reached 50,000 total views!" %}
-      {% elsif total_content >= 10 and prev_total_content < 10 %}{% assign crossed = "Uploaded 10 videos!" %}
-      {% elsif total_content >= 25 and prev_total_content < 25 %}{% assign crossed = "Uploaded 25 videos!" %}
-      {% elsif total_content >= 50 and prev_total_content < 50 %}{% assign crossed = "Uploaded 50 videos!" %}
-      {% elsif total_content >= 100 and prev_total_content < 100 %}{% assign crossed = "Uploaded 100 videos!" %}
-      {% elsif orders >= 1 and prev_orders < 1 %}{% assign crossed = "First store order!" %}
-      {% elsif orders >= 10 and prev_orders < 10 %}{% assign crossed = "10 store orders!" %}
-      {% endif %}
-
-      {% if crossed %}
-      <div class="timeline-item milestone">
-        <span class="tl-date">{{ h.date }}</span>
-        <span class="tl-icon">&#11088;</span>
-        <span class="tl-text">{{ crossed }}</span>
-      </div>
-      {% else %}
-      <div class="timeline-item">
-        <span class="tl-date">{{ h.date }}</span>
-        <span class="tl-dot"></span>
-        <span class="tl-text">{{ yt_subs }} subs &middot; {{ yt_views }} views &middot; {{ yt_videos }} videos</span>
-      </div>
-      {% endif %}
+    {% if link %}
+    <a href="{{ link }}" class="timeline-item milestone {{ mclass }}">
+      <span class="tl-date">{{ date }}</span>
+      <span class="tl-icon">{{ icon }}</span>
+      <span class="tl-text">{{ display | strip }}</span>
+    </a>
     {% else %}
-      <div class="timeline-item">
-        <span class="tl-date">{{ h.date }}</span>
-        <span class="tl-dot"></span>
-        <span class="tl-text">{{ h.youtube_main.subs | default: 0 }} subs &middot; {{ h.youtube_main.views | default: 0 }} views &middot; {{ h.youtube_main.videos | default: 0 }} videos</span>
-      </div>
+    <div class="timeline-item milestone {{ mclass }}">
+      <span class="tl-date">{{ date }}</span>
+      <span class="tl-icon">{{ icon }}</span>
+      <span class="tl-text">{{ display | strip }}</span>
+    </div>
     {% endif %}
   {% endfor %}
 </div>
-
 {% else %}
 <div class="timeline-empty">
-  <p>No historical data yet. The chart and timeline will populate as the daily tracking pipeline collects data over the coming days.</p>
-  <p>Milestones like subscriber and view thresholds will automatically appear when crossed.</p>
+  <p>No milestone data yet. They'll appear here as thresholds are crossed during the data pipeline runs.</p>
 </div>
 {% endif %}

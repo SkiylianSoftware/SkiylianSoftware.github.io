@@ -461,8 +461,9 @@ def save(filename, data):
     print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
+POWERS_OF_2 = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
 POWERS_OF_3 = [1, 3, 9, 27, 81, 243, 729, 2187, 6561, 19683, 59049, 177147, 531441]
-ROUND_SUBS = [100, 500, 1000, 5000, 10000, 50000, 100000]
+ROUND_SUBS = [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000]
 ROUND_VIEWS = [1000, 10000, 50000, 100000, 500000, 1000000]
 ROUND_VIDEOS = [10, 25, 50, 100, 250, 500, 1000]
 AGE_DAYS = [3, 9, 27, 81, 243, 729, 2187, 6561]
@@ -470,8 +471,25 @@ GAME_EPISODES = [1, 3, 9, 27, 81]
 GAME_VIEWS = [27, 81, 243, 729, 2187, 6561]
 GAME_HOURS = [3, 9, 27, 81, 243]
 GAME_RETURN = [27, 81, 243, 729]
-DAILY_RECORDS = [10, 100, 1000]
 
+POWER2_MSG = {
+    2: "A pair!",
+    4: "Four! Quadbit!",
+    8: "Byte!",
+    16: "Half-word!",
+    32: "Word!",
+    64: "Double-word!",
+    128: "Kilobit!",
+    256: "Byte plural!",
+    512: "Half a K!",
+    1024: "1K! A true kilobyte!",
+    2048: "2K!",
+    4096: "4K! Page boundary!",
+    8192: "8K!",
+    16384: "16K!",
+    32768: "Half of 64K!",
+    65536: "64K! Full address space!",
+}
 POWER3_SUB_MSGS = {
     1: "The unitary state",
     3: "Three-body problem solved",
@@ -484,15 +502,6 @@ POWER3_SUB_MSGS = {
     6561: "3^8 - Octotrit",
     19683: "3^9 - Padovan sequence spotted",
     59049: "3^10 - Decitrit! Tenfold power!",
-}
-ROUND_SUB_MSGS = {
-    100: "Triple digits!",
-    500: "Half a thousand!",
-    1000: "The big 1K!",
-    5000: "5K strong!",
-    10000: "10K! Unreal!",
-    50000: "50K! Halfway to 100K!",
-    100000: "100K!!! Thank you!",
 }
 POWER3_VIEW_MSGS = {
     1: "1 view! The first peep!",
@@ -522,12 +531,6 @@ AGE_DAY_MSGS = {
     2187: "2187 days! 3^7 days! Six years!",
     6561: "6561 days! 3^8 days! Nearly 18 years!",
 }
-DAILY_RECORD_MSGS = {
-    10: "First day with double-digit views!",
-    100: "First 100-view day!",
-    1000: "First 1,000-view day!",
-}
-
 GAME_FIRST_MSGS = {
     "Kerbal Space Program": "First launch at KSC!",
     "Factorio": "First automation started!",
@@ -698,11 +701,29 @@ def detect_milestones(
     cutoff = now - timedelta(days=14)
 
     milestone_sets = [
-        ("subs", subs, POWERS_OF_3, POWER3_SUB_MSGS),
-        ("subs", subs, ROUND_SUBS, ROUND_SUB_MSGS),
-        ("views", views, POWERS_OF_3, POWER3_VIEW_MSGS),
+        ("subs_p3", subs, POWERS_OF_3, POWER3_SUB_MSGS),
+        ("subs_p2", subs, POWERS_OF_2, POWER2_MSG),
+        (
+            "subs_rnd",
+            subs,
+            ROUND_SUBS,
+            {
+                10: "First double digits!",
+                50: "Halfway to 100!",
+                100: "Triple digits!",
+                500: "Half a thousand!",
+                1000: "The big 1K!",
+                5000: "5K strong!",
+                10000: "10K! Unreal!",
+                50000: "50K! Halfway to 100K!",
+                100000: "100K!!! Thank you!",
+            },
+        ),
+        ("views_p3", views, POWERS_OF_3, POWER3_VIEW_MSGS),
+        ("views_p2", views, POWERS_OF_2, POWER2_MSG),
         ("views_rnd", views, ROUND_VIEWS, lambda m: f"{m:,} views!"),
-        ("videos", videos_count, POWERS_OF_3, POWER3_VIDEO_MSGS),
+        ("videos_p3", videos_count, POWERS_OF_3, POWER3_VIDEO_MSGS),
+        ("videos_p2", videos_count, POWERS_OF_2, {2: "A pair!", 4: "Four!", 8: "Byte!", 16: "16 videos!"}),
         ("videos_rnd", videos_count, ROUND_VIDEOS, lambda m: f"{m} videos!"),
         (
             "views_p3k",
@@ -723,11 +744,11 @@ def detect_milestones(
         for m in sorted(thresholds, reverse=True):
             if value >= m:
                 key = f"{label}_{m}"
+                base = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
+                msg = f"{m:,}: {base}" if isinstance(msgs, dict) else base
                 if key not in prev_reached:
                     prev_reached[key] = now.isoformat()
-                    base = msgs.get(m, f"{m:,} {label.split('_')[0]}!") if isinstance(msgs, dict) else msgs(m)
-                    msg = f"{m:,}: {base}" if isinstance(msgs, dict) else base
-                    print(f"New milestone: {m} {label}")
+                    print(f"New milestone: {msg}")
                 break
 
     if first_video_date:

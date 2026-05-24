@@ -835,7 +835,7 @@ a.timeline-item:hover { background: rgba(45,212,191,0.04); }
 .channel-hero {
   position: relative; width: 100%;
   background-size: cover; background-repeat: no-repeat;
-  background-position: center 10%; background-color: #0a0a14;
+  background-position: center 30%; background-color: #0a0a14;
   display: flex; align-items: flex-end; margin-bottom: 1.5rem;
   border-radius: 10px; overflow: hidden; aspect-ratio: 3.3 / 1;
 }

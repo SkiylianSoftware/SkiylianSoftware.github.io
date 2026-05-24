@@ -791,6 +791,20 @@ def detect_milestones(
             prev = {}
 
     prev_reached = prev.get("reached", {})
+
+    # Migrate old key format (subs_10 → subs_rnd_10) to preserve historical timestamps
+    for old_key in list(prev_reached.keys()):
+        parts = old_key.split("_")
+        if len(parts) == 2 and parts[0] in ("subs", "views", "videos"):
+            try:
+                int(parts[1])  # verify second part is a number
+                new_key = f"{parts[0]}_rnd_{parts[1]}"
+                if new_key not in prev_reached:
+                    prev_reached[new_key] = prev_reached[old_key]
+                del prev_reached[old_key]
+            except ValueError:
+                pass
+
     current = {}
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(days=14)

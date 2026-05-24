@@ -535,11 +535,84 @@ MILESTONE_SPECS = [
     ("videos", RND, RND_MSG, FORMAT_MS),
 ]
 
+# All game milestone types use the combined P3 + P2 + RND threshold lists
+# Sorted unique gives a nice spread: 1, 2, 3, 4, 8, 9, 10, 16, 25, 27, 32, 50, 64, 81, 100...
+GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
+# Views and hours filter out very low thresholds
+GAME_VIEW_THRESH = [m for m in sorted(set(P3 + P2 + RND)) if m >= 9]
+GAME_HOUR_THRESH = [m for m in sorted(set(P3 + P2 + RND)) if m >= 3]
+GAME_RETURN_THRESH = [m for m in sorted(set(P3 + P2 + RND)) if m >= 27]
+
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
     "views": "{{count}} views across {game}!",
     "hours": "{{hours}} hours in {game}!",
     "return": "Back to {game} after {{days}} days!",
+}
+GAME_THRESHOLDS = {
+    "ep": GAME_EP_THRESH,
+    "views": GAME_VIEW_THRESH,
+    "hours": GAME_HOUR_THRESH,
+    "return": GAME_RETURN_THRESH,
+}
+GAME_OVERRIDES = {
+    "Kerbal Space Program": {
+        "ep": {
+            1: "First launch at KSC!",
+            2: "Orbit achieved!",
+            3: "Munar flyby complete!",
+            4: "Sub-orbital tourism opened!",
+            8: "Minmus landing!",
+            9: "Duna transfer window!",
+            10: "Duna landing!",
+            16: "Interplanetary fleet assembled!",
+            25: "Jool system arrival!",
+            27: "Jool system fleet deployed!",
+            32: "Eeloo reached!",
+            50: "Kerbals across the solar system!",
+            64: "Space station network established!",
+            81: "Kerbals across the galaxy!",
+            100: "Century of launches!",
+        }
+    },
+    "Factorio": {
+        "ep": {
+            3: "Green science automated!",
+            9: "Blue science online!",
+            27: "Rocket silo constructed!",
+            81: "Mega base operational!",
+        }
+    },
+    "Minecraft": {
+        "ep": {
+            3: "Nether portal activated!",
+            9: "Stronghold located!",
+            27: "Ender Dragon defeated!",
+            81: "Full beacon pyramid!",
+        }
+    },
+    "Transport Fever": {
+        "ep": {
+            3: "Three lines running!",
+            9: "Train network growing!",
+            27: "Maglev network online!",
+            81: "Transcontinental empire!",
+        }
+    },
+    "Transport Fever 2": {
+        "ep": {
+            3: "Three lines running!",
+            9: "Train network growing!",
+            27: "Maglev network online!",
+            81: "Transcontinental empire!",
+        }
+    },
+    "Mars First Logistics": {
+        "ep": {3: "Rover delivered!", 9: "Base camp established!", 27: "Three colonies linked!", 81: "Martian city!"}
+    },
+    "Station Flow": {
+        "ep": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"}
+    },
 }
 GAME_THRESHOLDS = {
     "ep": P3,

@@ -6,6 +6,8 @@ order: 1
 permalink: /about/
 ---
 
+{% include banner.html %}
+
 {% if site.data.site_meta.description %}
   <p class="about-intro">{{ site.data.site_meta.description }}</p>
 {% endif %}

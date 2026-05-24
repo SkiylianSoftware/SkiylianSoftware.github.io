@@ -6,6 +6,8 @@ order: 9
 permalink: /partners/
 ---
 
+{% include banner.html %}
+
 <p class="partner-intro">I make videos about trains, automation, space, and programming -- but the channel's really about cosy vibes, genuine enthusiasm, and the occasional coffee break amidst the shenanigans. If your product or organisation fits that world, I'd love to hear from you.</p>
 
 <div class="partner-section">

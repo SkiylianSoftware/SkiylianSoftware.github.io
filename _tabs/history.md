@@ -153,38 +153,34 @@ function toggleMetric(metric) {
     {% assign link = nil %}
     {% assign display = key %}
 
-    {% if key contains "subs_p3" %}
-      {% assign icon = "&#128293;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
-      {% assign p = key | remove: "subs_p3_" %}{% capture d %}3^{{ p }} subscribers{% endcapture %}{% assign display = d %}
-    {% elsif key contains "subs_p2" %}
-      {% assign icon = "&#128187;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
-      {% assign p = key | remove: "subs_p2_" %}{% capture d %}2^{{ p }} subscribers{% endcapture %}{% assign display = d %}
-    {% elsif key contains "subs_rnd" %}
-      {% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
-      {% assign display = key | remove: "subs_rnd_" | append: " subscribers" %}
-    {% elsif key contains "views_p3" or key contains "views_p3k" %}
-      {% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
-      {% capture d %}3^{{ key | remove: "views_p3_" | remove: "views_p3k_" }} views{% endcapture %}{% assign display = d %}
-    {% elsif key contains "views_p2" %}
-      {% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
-      {% capture d %}2^{{ key | remove: "views_p2_" }} views{% endcapture %}{% assign display = d %}
-    {% elsif key contains "views_rnd" %}
-      {% assign icon = "&#128200;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
-      {% assign display = key | remove: "views_rnd_" | append: " views" %}
-    {% elsif key contains "videos_p3" %}
-      {% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
-      {% capture d %}3^{{ key | remove: "videos_p3_" }} videos{% endcapture %}{% assign display = d %}
-    {% elsif key contains "videos_p2" %}
-      {% assign icon = "&#128421;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
-      {% capture d %}2^{{ key | remove: "videos_p2_" }} videos{% endcapture %}{% assign display = d %}
-    {% elsif key contains "videos_rnd" %}
-      {% assign icon = "&#127910;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
-      {% assign display = key | remove: "videos_rnd_" | append: " videos" %}
-    {% elsif key contains "game_" %}
+    {% if key contains "game_" %}
       {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}{% assign link = "/games" %}
+      {% assign rest = key | remove_first: "game_" %}
+      {% if rest contains "_ep_" %}
+        {% assign parts = rest | split: "_ep_" %}
+        {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_views_" %}
+        {% assign parts = rest | split: "_views_" %}
+        {% capture d %}{{ parts[1] }} views in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_hours_" %}
+        {% assign parts = rest | split: "_hours_" %}
+        {% capture d %}{{ parts[1] }} hours in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_return_" %}
+        {% assign parts = rest | split: "_return_" %}
+        {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
+      {% endif %}
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
       {% assign display = key | remove: "age_" | append: " days old" %}
+    {% else %}
+      {% assign pparts = key | split: "_" %}
+      {% assign val = pparts | last %}
+      {% assign ptype = pparts[0] %}
+      {% if key contains "views" %}{% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
+      {% elsif key contains "videos" %}{% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+      {% else %}{% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
+      {% endif %}
+      {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
     {% endif %}
 
     {% if link %}

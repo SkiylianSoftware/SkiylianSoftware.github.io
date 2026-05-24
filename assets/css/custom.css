@@ -785,7 +785,6 @@ body::after {
 .sidebar-stats-row {
   display: flex;
   gap: 0.5rem;
-  justify-content: center;
   flex-wrap: wrap;
 }
 .sidebar-stat {

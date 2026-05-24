@@ -270,13 +270,17 @@ if (mt) {
 @media (min-width: 1200px) {
   #main-wrapper { position: relative; }
   .channel-hero {
-    position: absolute; left: 0; right: 0; top: 0; margin: 0; border-radius: 0;
-    aspect-ratio: 6.05 / 1;
+    position: absolute; left: 0; right: 0; top: -60px;
+    aspect-ratio: 3.3 / 1;
     background-position: center;
     z-index: -1;
-    mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
   }
+  .channel-hero + * {
+    margin-top: 0 !important;
+  }
+}
   .channel-hero + * {
     margin-top: 0 !important;
   }

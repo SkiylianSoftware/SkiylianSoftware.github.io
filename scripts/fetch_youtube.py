@@ -880,6 +880,34 @@ def detect_milestones(
     for k in expired:
         del prev_reached[k]
 
+    # Backfill milestone timestamps from analytics history
+    try:
+        hist_path = os.path.join(DATA_DIR, "history.json")
+        if os.path.exists(hist_path):
+            with open(hist_path) as f:
+                history = json.load(f)
+            history.sort(key=lambda e: e.get("date", ""))
+            for entry in history:
+                date = entry.get("date", "")
+                ym = entry.get("youtube_main", {}) or {}
+                hist_vals = {"subs": ym.get("subs", 0), "views": ym.get("views", 0), "videos": ym.get("videos", 0)}
+                for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
+                    hv = hist_vals.get(label, 0)
+                    for m in sorted(thresholds, reverse=True):
+                        if hv >= m:
+                            skey = f"{label}_{m}"
+                            if skey in prev_reached:
+                                stored = prev_reached[skey]
+                                if (
+                                    isinstance(stored, str)
+                                    and _parse_iso_date(stored)
+                                    and _parse_iso_date(stored) > _parse_iso_date(date + "T00:00:00")
+                                ):
+                                    prev_reached[skey] = date + "T00:00:00"
+                            break
+    except Exception:
+        pass
+
     active = [v for v in current.values() if v.get("priority", 0) > 0]
     best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}
     save("milestones.json", {"current": best, "reached": prev_reached})

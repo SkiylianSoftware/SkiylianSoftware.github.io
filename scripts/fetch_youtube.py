@@ -888,7 +888,9 @@ def detect_milestones(
                 history = json.load(f)
             history.sort(key=lambda e: e.get("date", ""))
             for entry in history:
-                date = entry.get("date", "")
+                date_str = entry.get("date", "")
+                if not date_str:
+                    continue
                 ym = entry.get("youtube_main", {}) or {}
                 hist_vals = {"subs": ym.get("subs", 0), "views": ym.get("views", 0), "videos": ym.get("videos", 0)}
                 for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
@@ -898,12 +900,17 @@ def detect_milestones(
                             skey = f"{label}_{m}"
                             if skey in prev_reached:
                                 stored = prev_reached[skey]
-                                if (
-                                    isinstance(stored, str)
-                                    and _parse_iso_date(stored)
-                                    and _parse_iso_date(stored) > _parse_iso_date(date + "T00:00:00")
-                                ):
-                                    prev_reached[skey] = date + "T00:00:00"
+                                if isinstance(stored, str):
+                                    try:
+                                        # Normalize timezone: stored via now.isoformat() is UTC-aware
+                                        dt_stored = datetime.fromisoformat(stored)
+                                        dt_candidate = datetime.strptime(date_str, "%Y-%m-%d").replace(
+                                            tzinfo=timezone.utc
+                                        )
+                                        if dt_stored > dt_candidate:
+                                            prev_reached[skey] = dt_candidate.isoformat()
+                                    except Exception:
+                                        pass
                             break
     except Exception:
         pass

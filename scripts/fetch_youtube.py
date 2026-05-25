@@ -937,6 +937,25 @@ def detect_milestones(
     for k in expired:
         del prev_reached[k]
 
+    # Backfill existing milestones that have wrong (today) dates
+    for skey in list(prev_reached.keys()):
+        stored = prev_reached.get(skey, "")
+        stored_dt = _parse_iso_date(stored)
+        if not stored_dt or abs((stored_dt - now).total_seconds()) > 3600 * 24:
+            continue  # already has a historical date
+        # Extract value from key like subs_p3_27, views_rnd_5000, etc.
+        try:
+            m = int(skey.rsplit("_", 1)[1])
+        except (ValueError, IndexError):
+            continue
+        for label in ("subs", "views", "videos"):
+            if skey.startswith(label):
+                better = _first_reached(label, m)
+                if better and better < stored_dt:
+                    prev_reached[skey] = better.isoformat()
+                    print(f"  Backdated {skey} from {stored_dt.date()} to {better.date()}")
+                break
+
     active = [v for v in current.values() if v.get("priority", 0) > 0]
     best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}
     save("milestones.json", {"current": best, "reached": prev_reached})

@@ -1,19 +1,13 @@
 """
 Fetch historical daily YouTube analytics and backfill track_history.py data.
-
 Uses OAuth 2.0 (refresh token) to call the YouTube Analytics API.
-Run daily (included in workflows) after the auth script has been used once.
-
-Requires secrets:
-  YOUTUBE_CLIENT_ID
-  YOUTUBE_CLIENT_SECRET
-  YOUTUBE_REFRESH_TOKEN
+Fetches in 365-day chunks to avoid the 1000-row limit.
 """
 
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -54,10 +48,36 @@ def fetch_report(access_token, start_date, end_date, ids="channel==MINE"):
     headers = {"Authorization": f"Bearer {access_token}"}
     resp = requests.get(url, params=params, headers=headers, timeout=30)
     if resp.status_code == 403:
-        print(f"Analytics API not accessible for {ids} (403). Is the API enabled?", file=sys.stderr)
+        print(f"  Analytics API not accessible for {ids} (403)", file=sys.stderr)
         return None
     resp.raise_for_status()
-    return resp.json()
+    data = resp.json()
+    rows = data.get("rows", [])
+    print(f"  {ids}: {start_date} to {end_date} -> {len(rows)} rows")
+    return data
+
+
+def fetch_all_reports(access_token, start_date, end_date, ids="channel==MINE"):
+    """Fetch analytics in 365-day chunks to avoid the 1000-row API limit."""
+    all_rows = []
+    chunk_end = end_date
+    chunk_num = 0
+    while True:
+        chunk_start = (datetime.strptime(chunk_end, "%Y-%m-%d") - timedelta(days=364)).strftime("%Y-%m-%d")
+        if chunk_start < start_date:
+            chunk_start = start_date
+        chunk_num += 1
+        report = fetch_report(access_token, chunk_start, chunk_end, ids=ids)
+        if report is None:
+            return None
+        rows = report.get("rows", [])
+        print(f"    Chunk {chunk_num}: got {len(rows)} rows ({chunk_start} to {chunk_end})")
+        all_rows = rows + all_rows  # prepend oldest first
+        if len(rows) < 364 or chunk_start <= start_date:
+            break
+        chunk_end = (datetime.strptime(chunk_start, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"  Total: {len(all_rows)} rows across {chunk_num} chunks")
+    return {"rows": all_rows}
 
 
 def build_analytics_map(rows):
@@ -114,7 +134,6 @@ def process_channel_analytics(analytics, history, platform_key):
 
         entry.setdefault("youtube_main", {})
         entry.setdefault("youtube_vods", {})
-        # Only set on first run (analytics) so track_history snapshots override
         if "subs" not in entry[platform_key]:
             entry[platform_key]["subs"] = max(0, running_subs)
         if "views" not in entry[platform_key]:
@@ -143,12 +162,12 @@ def main():
         access_token = refresh_access_token()
     except Exception as e:
         print(f"Failed to refresh token: {e}", file=sys.stderr)
-        print("The refresh token may have expired. Re-run auth_youtube.py.", file=sys.stderr)
         return
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     start = "2010-01-01"
     history = load_history()
+    print(f"Loaded existing history: {len(history)} entries")
     total_new = 0
 
     channels = [
@@ -158,20 +177,19 @@ def main():
 
     for ids, platform_key in channels:
         label = platform_key.replace("youtube_", "")
-        print(f"Fetching analytics for {label} channel ({ids})...")
-        report = fetch_report(access_token, start, today, ids=ids)
+        print(f"\nFetching analytics for {label} channel ({ids})...")
+        report = fetch_all_reports(access_token, start, today, ids=ids)
         if report is None:
             continue
         rows = report.get("rows", [])
         if not rows:
-            print(f"No analytics data for {label}.")
+            print(f"  No analytics data for {label}.")
             continue
         analytics = build_analytics_map(rows)
         n = process_channel_analytics(analytics, history, platform_key)
         total_new += n
-        print(f"  {label}: {len(rows)} days, {n} new entries")
+        print(f"  {label}: {len(rows)} data days, {n} new history entries")
 
-    # Sort history by date
     history.sort(key=lambda e: e["date"])
 
     # Update today's entry with latest snapshots from site_meta
@@ -181,18 +199,14 @@ def main():
             meta = json.load(f)
         for entry in history:
             if entry["date"] == today:
-                if "youtube_main" not in entry:
-                    entry["youtube_main"] = {}
-                entry["youtube_main"].update(
+                entry.setdefault("youtube_main", {}).update(
                     {
                         "subs": meta.get("subscriber_count", 0),
                         "views": meta.get("view_count", 0),
                         "videos": meta.get("video_count", 0),
                     }
                 )
-                if "youtube_vods" not in entry:
-                    entry["youtube_vods"] = {}
-                entry["youtube_vods"].update(
+                entry.setdefault("youtube_vods", {}).update(
                     {
                         "subs": meta.get("vods_subscriber_count", 0),
                         "views": meta.get("vods_view_count", 0),
@@ -202,8 +216,7 @@ def main():
                 break
 
     save_history(history)
-    print(f"Added {total_new} new entries total")
-    print(f"History now has {len(history)} total entries")
+    print(f"\nDone: {total_new} new entries, history now {len(history)} entries")
 
 
 if __name__ == "__main__":

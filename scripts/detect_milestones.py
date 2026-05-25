@@ -58,8 +58,12 @@ RND_MSG = {
     500000: "Half a million!",
     1000000: "1 MILLION! Unbelievable!",
 }
+
+
 def _fmt(m, b):
     return f"{m:,}: {b}" if b else f"{m:,} units!"
+
+
 FMT = _fmt
 
 MILESTONE_SPECS = [

@@ -811,13 +811,36 @@ def detect_milestones(
     values = {"subs": subs, "views": views, "videos": videos_count}
     priority_map = {"subs": 4, "views": 3, "videos": 2, "age": 1}
 
+    # Load history once for accurate milestone dates
+    _history = []
+    try:
+        hist_path = os.path.join(DATA_DIR, "history.json")
+        if os.path.exists(hist_path):
+            with open(hist_path) as f:
+                _history = json.load(f)
+            _history.sort(key=lambda e: e.get("date", ""))
+    except Exception:
+        pass
+
+    def _first_reached(label, threshold):
+        for entry in _history:
+            ym = entry.get("youtube_main", {}) or {}
+            val = ym.get(label, 0)
+            if val >= threshold:
+                try:
+                    return datetime.strptime(entry["date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                except Exception:
+                    break
+        return now
+
     for label, thresholds, msgs, formatter in MILESTONE_SPECS:
         value = values.get(label, 0)
         for m in sorted(thresholds, reverse=True):
             if value >= m:
                 skey = f"{label}_{m}"
                 if skey not in prev_reached:
-                    prev_reached[skey] = now.isoformat()
+                    reached_dt = _first_reached(label, m)
+                    prev_reached[skey] = reached_dt.isoformat()
                     msg = formatter(m, msgs.get(m, ""))
                     print(f"New milestone: {msg}")
                 break
@@ -879,41 +902,6 @@ def detect_milestones(
     expired = [k for k, v in prev_reached.items() if _parse_iso_date(v) and _parse_iso_date(v) < cutoff]
     for k in expired:
         del prev_reached[k]
-
-    # Backfill milestone timestamps from analytics history
-    try:
-        hist_path = os.path.join(DATA_DIR, "history.json")
-        if os.path.exists(hist_path):
-            with open(hist_path) as f:
-                history = json.load(f)
-            history.sort(key=lambda e: e.get("date", ""))
-            for entry in history:
-                date_str = entry.get("date", "")
-                if not date_str:
-                    continue
-                ym = entry.get("youtube_main", {}) or {}
-                hist_vals = {"subs": ym.get("subs", 0), "views": ym.get("views", 0), "videos": ym.get("videos", 0)}
-                for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
-                    hv = hist_vals.get(label, 0)
-                    for m in sorted(thresholds, reverse=True):
-                        if hv >= m:
-                            skey = f"{label}_{m}"
-                            if skey in prev_reached:
-                                stored = prev_reached[skey]
-                                if isinstance(stored, str):
-                                    try:
-                                        # Normalize timezone: stored via now.isoformat() is UTC-aware
-                                        dt_stored = datetime.fromisoformat(stored)
-                                        dt_candidate = datetime.strptime(date_str, "%Y-%m-%d").replace(
-                                            tzinfo=timezone.utc
-                                        )
-                                        if dt_stored > dt_candidate:
-                                            prev_reached[skey] = dt_candidate.isoformat()
-                                    except Exception:
-                                        pass
-                            break
-    except Exception:
-        pass
 
     active = [v for v in current.values() if v.get("priority", 0) > 0]
     best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}

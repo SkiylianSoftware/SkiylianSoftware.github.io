@@ -27,6 +27,9 @@ group: stats
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
 var history = {{ history | jsonify }};
+console.log('Chart debug: entries=' + history.length, 'first=' + history[0].date, 'last=' + history[history.length-1].date);
+console.log('Sample entry:', JSON.stringify(history[Math.floor(history.length/2)]));
+
 var dates = history.map(function(h) { return h.date; });
 
 function pluck(entry, platform, field) {
@@ -94,6 +97,11 @@ var allMetrics = {
   orders: ordersDatasets,
   github: githubDatasets,
 };
+
+console.log('Audience dataset length:', audienceDatasets[0].data.length, 'sample:', audienceDatasets[0].data.slice(0,5));
+console.log('Dates length:', dates.length, 'sample:', dates.slice(0,5));
+console.log('Non-zero subs count:', audienceDatasets[0].data.filter(function(v){return v>0;}).length);
+console.log('Max subs:', Math.max.apply(null, audienceDatasets[0].data));
 
 var ctx = document.getElementById('growthChart').getContext('2d');
 var chart = new Chart(ctx, {

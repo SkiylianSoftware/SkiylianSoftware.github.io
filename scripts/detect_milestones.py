@@ -320,7 +320,9 @@ def main():
 
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)
-    result = {"current": {}, "reached": new_reached}
+    # Sort milestones by date for consistent display
+    sorted_reached = dict(sorted(new_reached.items(), key=lambda x: x[1]))
+    result = {"current": {}, "reached": sorted_reached}
     with open(MILESTONES_FILE, "w") as f:
         json.dump(result, f, indent=2)
     print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones)")

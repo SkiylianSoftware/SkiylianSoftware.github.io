@@ -851,6 +851,8 @@ def detect_milestones(
                 except Exception:
                     break
         # Fallback: estimate from video publish dates for video count
+        nfo = type(all_videos).__name__
+        print(f"  DEBUG fr {label}={threshold}: all_videos type={nfo} len={len(all_videos) if all_videos else 0}")
         if label == "videos" and all_videos and threshold > 0:
             pub_dates = []
             for v in all_videos:

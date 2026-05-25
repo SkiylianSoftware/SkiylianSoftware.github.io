@@ -79,14 +79,10 @@ MILESTONE_SPECS = [
 ]
 
 GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
-GAME_VIEW_THRESH = [m for m in GAME_EP_THRESH if m >= 9]
-GAME_HOUR_THRESH = [m for m in GAME_EP_THRESH if m >= 3]
 GAME_RETURN_THRESH = [m for m in GAME_EP_THRESH if m >= 27]
 
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
-    "views": "{{count}} views across {game}!",
-    "hours": "{{hours}} hours in {game}!",
     "return": "Back to {game} after {{days}} days!",
 }
 GAME_OVERRIDES = {
@@ -227,20 +223,18 @@ def main():
         s = v.get("series", {})
         gname = (s or {}).get("game", "")
         pub = v.get("published", "")[:10]
-        views = v.get("view_count", 0) or 0
-        hours = (v.get("duration_seconds", 0) or 0) // 3600
         if gname and pub:
-            game_cumulative.setdefault(gname, []).append((pub, views, hours))
+            game_cumulative.setdefault(gname, []).append(pub)
 
-    for gname, videos_list in game_cumulative.items():
-        videos_list.sort(key=lambda x: x[0])
-        ep_count = len(videos_list)
+    for gname, video_dates in game_cumulative.items():
+        video_dates.sort()
+        ep_count = len(video_dates)
 
         # Episode milestones (from video publish dates)
         for m in sorted(GAME_EP_THRESH, reverse=True):
             if ep_count >= m:
                 key = f"game_{gname}_ep_{m}"
-                date = videos_list[m - 1][0]
+                date = video_dates[m - 1]
                 override = GAME_OVERRIDES.get(gname, {}).get("ep", {}).get(m)
                 msg = override or GAME_DEFAULT["ep"].replace("{game}", gname).replace("{{m}}", str(m))
                 if key not in prev_reached:
@@ -248,42 +242,10 @@ def main():
                 new_reached[key] = date
                 break
 
-        # View milestones: find first video where cumulative views >= threshold
-        for m in sorted(GAME_VIEW_THRESH, reverse=True):
-            found_date = None
-            running = 0
-            for pub, vv, _ in videos_list:
-                running += vv
-                if running >= m:
-                    found_date = pub
-                    break
-            if found_date:
-                key = f"game_{gname}_views_{m}"
-                msg = GAME_DEFAULT["views"].replace("{game}", gname).replace("{{count}}", str(m))
-                if key not in prev_reached:
-                    print(f"  New game milestone: {msg} (date={found_date})")
-                new_reached[key] = found_date
-
-        # Hour milestones: find first video where cumulative hours >= threshold
-        for m in sorted(GAME_HOUR_THRESH, reverse=True):
-            found_date = None
-            running = 0
-            for pub, _, hh in videos_list:
-                running += hh
-                if running >= m:
-                    found_date = pub
-                    break
-            if found_date:
-                key = f"game_{gname}_hours_{m}"
-                msg = GAME_DEFAULT["hours"].replace("{game}", gname).replace("{{hours}}", str(m))
-                if key not in prev_reached:
-                    print(f"  New game milestone: {msg} (date={found_date})")
-                new_reached[key] = found_date
-
-        # Return milestones
-        if len(videos_list) >= 2:
-            first = videos_list[0][0]
-            latest = videos_list[-1][0]
+        # Return milestones (gap between first and latest video)
+        if len(video_dates) >= 2:
+            first = video_dates[0]
+            latest = video_dates[-1]
             try:
                 fd = datetime.strptime(first, "%Y-%m-%d")
                 ld = datetime.strptime(latest, "%Y-%m-%d")
@@ -291,7 +253,7 @@ def main():
                 for m in sorted(GAME_RETURN_THRESH, reverse=True):
                     if gap >= m:
                         key = f"game_{gname}_return_{m}"
-                        msg = GAME_DEFAULT["return"].replace("{game}", gname).replace("{{days}}", str(m))
+                        msg = GAME_DEFAULT["return"].replace("{game}", gname).replace("{{days}}", str(gap))
                         if key not in prev_reached:
                             print(f"  New game milestone: {msg} (date={latest})")
                         new_reached[key] = latest
@@ -319,17 +281,23 @@ def main():
                 new_reached[key] = age_date
                 break
 
+    # Sort milestones: descending by date, then by threshold descending within same date
+    def sort_key(item):
+        key, date = item
+        parts = key.rsplit("_", 1)
+        threshold = int(parts[-1]) if parts[-1].isdigit() else 0
+        return (date, threshold)
+
     if debug:
         print(f"\n  Milestones detected: {len(new_reached)}")
-        for k, v in sorted(new_reached.items())[:15]:
+        for k, v in sorted(new_reached.items(), key=sort_key, reverse=True)[:15]:
             print(f"    {k}: {v}")
         if len(new_reached) > 15:
             print(f"    ... and {len(new_reached) - 15} more")
 
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)
-    # Sort milestones by date for consistent display
-    sorted_reached = dict(sorted(new_reached.items(), key=lambda x: x[1]))
+    sorted_reached = dict(sorted(new_reached.items(), key=sort_key, reverse=True))
     result = {"current": {}, "reached": sorted_reached}
     with open(MILESTONES_FILE, "w") as f:
         json.dump(result, f, indent=2)

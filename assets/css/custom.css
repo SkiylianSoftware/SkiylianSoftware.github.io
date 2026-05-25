@@ -657,6 +657,16 @@ body::after {
 .timeline-item.milestone.ms-age .tl-text { color: #f59e0b; }
 a.timeline-item { text-decoration: none; color: inherit; display: flex; }
 a.timeline-item:hover { background: rgba(45,212,191,0.04); }
+.month-divider {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2dd4bf;
+  opacity: 0.4;
+  margin: 1.25rem 0 0.25rem;
+  padding: 0 0.6rem;
+}
 
 /* === PAGE: Support === */
 .support-hero {

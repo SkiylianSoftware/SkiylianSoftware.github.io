@@ -27,24 +27,24 @@ group: stats
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
-var history = {{ history | jsonify }};
-console.log('Chart debug: entries=' + history.length, 'first=' + history[0].date, 'last=' + history[history.length-1].date);
-console.log('Sample entry:', JSON.stringify(history[Math.floor(history.length/2)]));
+var histData = {{ history | jsonify }};
+console.log('Chart debug: entries=' + histData.length, 'first=' + histData[0].date, 'last=' + histData[histData.length-1].date);
+console.log('Sample entry:', JSON.stringify(histData[Math.floor(histData.length/2)]));
 
-var dates = history.map(function(h) { return h.date; });
+var dates = histData.map(function(h) { return h.date; });
 
 function pluck(entry, platform, field) {
   return (entry[platform] && entry[platform][field]) || 0;
 }
 
 var audienceDatasets = [
-  { label: 'YouTube', data: history.map(function(h) { return pluck(h, 'youtube_main', 'subs'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs', data: history.map(function(h) { return pluck(h, 'youtube_vods', 'subs'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-  { label: 'Twitch', data: history.map(function(h) { return pluck(h, 'twitch', 'followers'); }), borderColor: '#a970ff', backgroundColor: 'rgba(169,112,255,0.05)' },
+  { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'subs'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
+  { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'subs'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
+  { label: 'Twitch', data: histData.map(function(h) { return pluck(h, 'twitch', 'followers'); }), borderColor: '#a970ff', backgroundColor: 'rgba(169,112,255,0.05)' },
 ];
 audienceDatasets.push({
   label: 'Total',
-  data: history.map(function(h) {
+  data: histData.map(function(h) {
     return (pluck(h, 'youtube_main', 'subs') || 0) + (pluck(h, 'youtube_vods', 'subs') || 0) + (pluck(h, 'twitch', 'followers') || 0);
   }),
   borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
@@ -52,13 +52,13 @@ audienceDatasets.push({
 });
 
 var viewsDatasets = [
-  { label: 'YouTube', data: history.map(function(h) { return pluck(h, 'youtube_main', 'views'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs', data: history.map(function(h) { return pluck(h, 'youtube_vods', 'views'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-  { label: 'Twitch', data: history.map(function(h) { return pluck(h, 'twitch', 'views'); }), borderColor: '#a970ff', backgroundColor: 'rgba(169,112,255,0.05)' },
+  { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'views'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
+  { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'views'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
+  { label: 'Twitch', data: histData.map(function(h) { return pluck(h, 'twitch', 'views'); }), borderColor: '#a970ff', backgroundColor: 'rgba(169,112,255,0.05)' },
 ];
 viewsDatasets.push({
   label: 'Total',
-  data: history.map(function(h) {
+  data: histData.map(function(h) {
     return (pluck(h, 'youtube_main', 'views') || 0) + (pluck(h, 'youtube_vods', 'views') || 0) + (pluck(h, 'twitch', 'views') || 0);
   }),
   borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
@@ -66,12 +66,12 @@ viewsDatasets.push({
 });
 
 var contentDatasets = [
-  { label: 'YouTube', data: history.map(function(h) { return pluck(h, 'youtube_main', 'videos'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs', data: history.map(function(h) { return pluck(h, 'youtube_vods', 'videos'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
+  { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'videos'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
+  { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'videos'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
 ];
 contentDatasets.push({
   label: 'Total',
-  data: history.map(function(h) {
+  data: histData.map(function(h) {
     return (pluck(h, 'youtube_main', 'videos') || 0) + (pluck(h, 'youtube_vods', 'videos') || 0);
   }),
   borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
@@ -79,15 +79,15 @@ contentDatasets.push({
 });
 
 var ordersDatasets = [
-  { label: 'Fourthwall', data: history.map(function(h) { return pluck(h, 'fourthwall', 'orders'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
+  { label: 'Fourthwall', data: histData.map(function(h) { return pluck(h, 'fourthwall', 'orders'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
 ];
 
 var githubDatasets = [];
 {% if history[0].github %}
 githubDatasets = [
-  { label: 'Stars', data: history.map(function(h) { return pluck(h, 'github', 'stars'); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.05)' },
-  { label: 'Followers', data: history.map(function(h) { return pluck(h, 'github', 'followers'); }), borderColor: '#888', backgroundColor: 'rgba(136,136,136,0.05)' },
-  { label: 'Forks', data: history.map(function(h) { return pluck(h, 'github', 'forks'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
+  { label: 'Stars', data: histData.map(function(h) { return pluck(h, 'github', 'stars'); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.05)' },
+  { label: 'Followers', data: histData.map(function(h) { return pluck(h, 'github', 'followers'); }), borderColor: '#888', backgroundColor: 'rgba(136,136,136,0.05)' },
+  { label: 'Forks', data: histData.map(function(h) { return pluck(h, 'github', 'forks'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
 ];
 {% endif %}
 
@@ -154,9 +154,15 @@ function toggleMetric(metric) {
 {% assign ms_keys = milestones.reached %}
 {% if ms_keys %}
 <div class="timeline">
+  {% assign prev_month = "" %}
   {% for item in ms_keys %}
     {% assign key = item[0] %}
     {% assign date = item[1] | truncate: 10, "" %}
+    {% assign month = date | truncate: 7, "" %}
+    {% if month != prev_month %}
+    <div class="month-divider">{{ date | date: "%B %Y" }}</div>
+    {% assign prev_month = month %}
+    {% endif %}
     {% assign icon = "&#9679;" %}
     {% assign mclass = "" %}
     {% assign link = nil %}
@@ -168,12 +174,6 @@ function toggleMetric(metric) {
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
         {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
-      {% elsif rest contains "_views_" %}
-        {% assign parts = rest | split: "_views_" %}
-        {% capture d %}{{ parts[1] }} views in {{ parts[0] }}{% endcapture %}{% assign display = d %}
-      {% elsif rest contains "_hours_" %}
-        {% assign parts = rest | split: "_hours_" %}
-        {% capture d %}{{ parts[1] }} hours in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_return_" %}
         {% assign parts = rest | split: "_return_" %}
         {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}

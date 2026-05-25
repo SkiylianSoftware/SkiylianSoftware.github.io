@@ -719,9 +719,20 @@ def _parse_iso_date(s):
         return None
 
 
-def _detect_game_milestones(games, prev_reached, now, cutoff):
+def _detect_game_milestones(games, prev_reached, now, cutoff, all_videos=None):
     reached = {}
     current = {}
+    # Build a map: game name -> sorted list of video publish dates
+    game_dates = {}
+    if all_videos:
+        for v in all_videos:
+            s = v.get("series", {})
+            gname = (s or {}).get("game", "")
+            pub = v.get("published", "")
+            if gname and pub and len(pub) >= 10:
+                game_dates.setdefault(gname, []).append(pub[:10])
+        for gname in game_dates:
+            game_dates[gname].sort()
     for gname, g in games.items():
         ep = g.get("episode_count", 0)
         gv = g.get("total_views", 0)
@@ -749,7 +760,15 @@ def _detect_game_milestones(games, prev_reached, now, cutoff):
                             .replace("{game}", gname)
                         )
                     if key not in prev_reached:
-                        reached[key] = now.isoformat()
+                        game_pub_dates = game_dates.get(gname, [])
+                        if gtype == "ep" and len(game_pub_dates) >= m:
+                            try:
+                                dt = datetime.strptime(game_pub_dates[m - 1], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                                reached[key] = dt.isoformat()
+                            except Exception:
+                                reached[key] = now.isoformat()
+                        else:
+                            reached[key] = now.isoformat()
                         current[key] = {"type": f"game_{gtype}", "game": gname, "count": m, "message": msg}
                     elif (
                         prev_reached.get(key)
@@ -779,7 +798,7 @@ def _detect_game_milestones(games, prev_reached, now, cutoff):
 
 
 def detect_milestones(
-    subs, views, videos_count, games_data=None, first_video_date=None, gh_data=None, twitch_data=None
+    subs, views, videos_count, games_data=None, first_video_date=None, gh_data=None, twitch_data=None, all_videos=None
 ):
     prev = {}
     prev_path = os.path.join(DATA_DIR, "milestones.json")
@@ -831,6 +850,19 @@ def detect_milestones(
                     return datetime.strptime(entry["date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
                 except Exception:
                     break
+        # Fallback: estimate from video publish dates for video count
+        if label == "videos" and all_videos and threshold > 0:
+            pub_dates = []
+            for v in all_videos:
+                p = v.get("published", "")
+                if p and len(p) >= 10:
+                    pub_dates.append(p[:10])
+            pub_dates.sort()
+            if len(pub_dates) >= threshold:
+                try:
+                    return datetime.strptime(pub_dates[threshold - 1], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                except Exception:
+                    pass
         return now
 
     for label, thresholds, msgs, formatter in MILESTONE_SPECS:
@@ -861,7 +893,9 @@ def detect_milestones(
             pass
 
     if games_data:
-        game_reached, game_current = _detect_game_milestones(games_data, prev_reached, now, cutoff)
+        game_reached, game_current = _detect_game_milestones(
+            games_data, prev_reached, now, cutoff, all_videos=all_videos
+        )
         prev_reached.update(game_reached)
         current.update(game_current)
 
@@ -1230,6 +1264,7 @@ def main():
         info.get("video_count", 0),
         games_data=game_stats.get("games") if all_videos else None,
         first_video_date=first_video_date,
+        all_videos=all_videos,
     )
 
 

@@ -174,6 +174,12 @@ function toggleMetric(metric) {
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
         {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_views_" %}
+        {% assign parts = rest | split: "_views_" %}
+        {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_hours_" %}
+        {% assign parts = rest | split: "_hours_" %}
+        {% capture d %}{{ parts[1] }} hours in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_return_" %}
         {% assign parts = rest | split: "_return_" %}
         {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}

@@ -40,17 +40,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pyyaml Pillow
 
-      - name: Fetch YouTube Analytics (historical daily data)
+      - name: Fetch YouTube data
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python scripts/fetch_youtube.py
+
+      - name: Fetch YouTube Analytics (historical daily + per-video data)
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python scripts/fetch_youtube_analytics.py
-
-      - name: Fetch YouTube data
-        env:
-          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-        run: python scripts/fetch_youtube.py
 
       - name: Fetch Twitch data
         env:

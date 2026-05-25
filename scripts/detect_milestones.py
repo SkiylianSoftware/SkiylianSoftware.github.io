@@ -83,6 +83,8 @@ GAME_RETURN_THRESH = [m for m in GAME_EP_THRESH if m >= 27]
 
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
+    "views": "{{count}} views across {game}!",
+    "hours": "{{hours}} hours in {game}!",
     "return": "Back to {game} after {{days}} days!",
 }
 GAME_OVERRIDES = {
@@ -260,6 +262,81 @@ def main():
                         break
             except Exception:
                 pass
+
+    # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
+    video_history = read_json("video_history.json") or {}
+    if video_history:
+        # Build game -> [video_id] mapping
+        game_videos = {}
+        for v in all_videos:
+            vid = v.get("video_id", "")
+            s = v.get("series", {})
+            gname = (s or {}).get("game", "")
+            if gname and vid and vid in video_history:
+                game_videos.setdefault(gname, []).append(vid)
+            elif gname and vid:
+                # Video in youtube_main but not yet in video_history; seed with current views
+                game_videos.setdefault(gname, [])
+                game_videos[gname].append(vid)
+
+        game_view_thresh = [m for m in GAME_EP_THRESH if m >= 9]
+        game_hour_thresh = [m for m in GAME_EP_THRESH if m >= 3]
+
+        for gname, vids in game_videos.items():
+            # Collect all dates from video_history for this game's videos
+            date_views = {}
+            for vid in vids:
+                vh = video_history.get(vid, {})
+                daily = vh.get("daily", {})
+                for d, dv in daily.items():
+                    date_views.setdefault(d, 0)
+                    date_views[d] += dv.get("views", 0)
+
+            if not date_views:
+                continue
+
+            sorted_dates = sorted(date_views.keys())
+
+            # View milestones
+            for m in sorted(game_view_thresh, reverse=True):
+                found_date = None
+                run_views = 0
+                for d in sorted_dates:
+                    run_views += date_views[d]
+                    if run_views >= m:
+                        found_date = d
+                        break
+                if found_date:
+                    key = f"game_{gname}_views_{m}"
+                    msg = GAME_DEFAULT["views"].replace("{game}", gname).replace("{{count}}", str(m))
+                    if key not in prev_reached:
+                        print(f"  New game milestone: {msg} (date={found_date})")
+                    new_reached[key] = found_date
+
+            # Hour milestones (watch_time is in minutes from analytics; convert to hours)
+            date_watch = {}
+            for d in sorted_dates:
+                total_watch = 0
+                for vid in vids:
+                    vh = video_history.get(vid, {})
+                    dd = vh.get("daily", {}).get(d, {})
+                    total_watch += dd.get("watch_time", 0)
+                date_watch[d] = total_watch // 60  # minutes to hours
+
+            for m in sorted(game_hour_thresh, reverse=True):
+                found_date = None
+                run_hours = 0
+                for d in sorted_dates:
+                    run_hours += date_watch.get(d, 0)
+                    if run_hours >= m:
+                        found_date = d
+                        break
+                if found_date:
+                    key = f"game_{gname}_hours_{m}"
+                    msg = GAME_DEFAULT["hours"].replace("{game}", gname).replace("{{hours}}", str(m))
+                    if key not in prev_reached:
+                        print(f"  New game milestone: {msg} (date={found_date})")
+                    new_reached[key] = found_date
 
     # Age milestone
     first_video_date = None

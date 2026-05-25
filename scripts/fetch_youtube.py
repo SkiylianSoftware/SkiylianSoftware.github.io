@@ -858,6 +858,11 @@ def detect_milestones(
                 if p and len(p) >= 10:
                     pub_dates.append(p[:10])
             pub_dates.sort()
+            if pub_dates:
+                nth = pub_dates[threshold - 1] if len(pub_dates) >= threshold else "N/A"
+                print(f"  fr videos={threshold}: {len(pub_dates)} dates, first={pub_dates[0]}, nth={nth}")
+            else:
+                print(f"  fr videos={threshold}: no dates (all_videos={len(all_videos)})")
             if len(pub_dates) >= threshold:
                 try:
                     return datetime.strptime(pub_dates[threshold - 1], "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -951,6 +956,9 @@ def detect_milestones(
         for label in ("subs", "views", "videos"):
             if skey.startswith(label):
                 better = _first_reached(label, m)
+                if better:
+                    diff = (stored_dt - better).days
+                    print(f"  backfill {skey}: stored={stored_dt.date()}, better={better.date()}, diff={diff}d")
                 if better and better < stored_dt:
                     prev_reached[skey] = better.isoformat()
                     print(f"  Backdated {skey} from {stored_dt.date()} to {better.date()}")

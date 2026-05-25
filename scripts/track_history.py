@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 DATA_DIR = "_data"
 HISTORY_FILE = os.path.join(DATA_DIR, "history.json")
@@ -66,9 +66,107 @@ def build_snapshot():
     return snapshot
 
 
-def seed_initial():
+def backfill_history():
+    """Build a full backfilled history from available data sources."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     snapshot = build_snapshot()
-    return [snapshot]
+
+    # Find earliest date from all available sources
+    earliest = None
+    now_dt = datetime.now(timezone.utc)
+
+    # YouTube videos
+    yt = read_json("youtube_main.json")
+    earliest_video_date = None
+    all_video_dates = set()
+    if yt and yt.get("videos"):
+        for v in yt["videos"]:
+            pub = v.get("published", "")
+            if pub and len(pub) >= 10:
+                d = pub[:10]
+                all_video_dates.add(d)
+                if earliest_video_date is None or d < earliest_video_date:
+                    earliest_video_date = d
+
+    # Load existing analytics history if available
+    analytics = {}
+    hist = load_history()
+    if hist:
+        for entry in hist:
+            d = entry.get("date", "")
+            if d and d < today:
+                ym = entry.get("youtube_main", {}) or {}
+                analytics[d] = {
+                    "subs": ym.get("subs", 0),
+                    "views": ym.get("views", 0),
+                    "videos": ym.get("videos", 0),
+                }
+
+    # Determine start date from earliest video
+    earliest = earliest_video_date
+    if not earliest:
+        return [snapshot]
+
+    # Build weekly entries from earliest to today
+    entries_by_date = {}
+
+    if earliest_video_date:
+        start = datetime.strptime(earliest_video_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        current = start
+        video_dates_sorted = sorted(all_video_dates)
+
+        cum_videos = 0
+        vid_idx = 0
+
+        while current <= now_dt:
+            d = current.strftime("%Y-%m-%d")
+            if d > today:
+                break
+
+            # Count videos published on or before this date
+            while vid_idx < len(video_dates_sorted) and video_dates_sorted[vid_idx] <= d:
+                cum_videos += 1
+                vid_idx += 1
+
+            if d not in entries_by_date:
+                entries_by_date[d] = {
+                    "date": d,
+                    "youtube_main": {"subs": 0, "views": 0, "videos": cum_videos},
+                    "youtube_vods": {},
+                    "twitch": {},
+                    "github": {},
+                    "fourthwall": {},
+                }
+            else:
+                # Fill in video count from analytics if missing
+                e = entries_by_date[d]
+                if e["youtube_main"]["videos"] == 0 and cum_videos > 0:
+                    e["youtube_main"]["videos"] = cum_videos
+
+            current += timedelta(days=7)
+
+    # Sort and fill gaps by carrying forward the last known value
+    sorted_dates = sorted(entries_by_date.keys())
+    result = []
+    last = {
+        "youtube_main": {"subs": 0, "views": 0, "videos": 0},
+        "youtube_vods": {},
+        "twitch": {},
+        "github": {},
+        "fourthwall": {},
+    }
+
+    for d in sorted_dates:
+        entry = entries_by_date[d]
+        # Carry forward fields from last entry if not set
+        for platform in ("youtube_main", "youtube_vods", "twitch", "github", "fourthwall"):
+            if platform not in entry or not entry[platform]:
+                entry[platform] = dict(last.get(platform, {}))
+            else:
+                last[platform] = dict(entry[platform])
+        result.append(entry)
+
+    return result
 
 
 def main():
@@ -81,8 +179,8 @@ def main():
     history = load_history()
 
     if not history:
-        history = seed_initial()
-        print("Seeded initial history from current data")
+        history = backfill_history()
+        print(f"Backfilled {len(history)} entries from video data")
 
     snapshot = build_snapshot()
 
@@ -93,9 +191,10 @@ def main():
         history.append(snapshot)
         print(f"Added new entry for {today}")
 
+    os.makedirs(DATA_DIR, exist_ok=True)
     with open(HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=2)
-    print(f"History: {len(history)} entries")
+    print(f"History: {len(history)} total entries")
 
 
 if __name__ == "__main__":

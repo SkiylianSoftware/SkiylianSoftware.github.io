@@ -29,6 +29,12 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Cache data files between runs
+        uses: actions/cache@v4
+        with:
+          path: _data/
+          key: site-data
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

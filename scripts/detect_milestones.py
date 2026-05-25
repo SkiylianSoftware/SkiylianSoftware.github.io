@@ -298,7 +298,7 @@ def main():
         if pub and (first_video_date is None or pub < first_video_date):
             first_video_date = pub
     if first_video_date:
-        fd = datetime.strptime(first_video_date, "%Y-%m-%d")
+        fd = datetime.strptime(first_video_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         age_days = (now - fd).days
         for m in [3, 9, 27, 81, 243, 729, 2187, 6561]:
             if age_days >= m:

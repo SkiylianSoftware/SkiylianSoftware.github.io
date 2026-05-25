@@ -36,24 +36,29 @@ def main():
     # Build daily entries
     entries = []
     cum_videos = 0
-    cum_views = 0
+    last_subs = 0
+    last_views = 0
     hist_by_date = {e["date"]: e for e in analytics}
 
     for d in all_dates:
         cum_videos += video_dates.get(d, {}).get("videos", 0)
-        cum_views += video_dates.get(d, {}).get("views", 0)
 
         entry = {"date": d, "youtube_main": {"subs": 0, "views": 0, "videos": cum_videos}}
 
-        # Overlay analytics data if available
+        # Overlay analytics data if available; carry forward last known values
         ha = hist_by_date.get(d)
         if ha:
             ym = ha.get("youtube_main", {}) or {}
             an = ha.get("_analytics", {}) or {}
             entry["youtube_main"]["subs"] = ym.get("subs", 0)
             entry["youtube_main"]["views"] = ym.get("views", 0)
+            last_subs = entry["youtube_main"]["subs"]
+            last_views = entry["youtube_main"]["views"]
             if an:
                 entry["_analytics"] = an
+        else:
+            entry["youtube_main"]["subs"] = last_subs
+            entry["youtube_main"]["views"] = last_views
 
         # Always ensure videos count is accurate (analytics has videos=0)
         if entry["youtube_main"]["videos"] == 0 and cum_videos > 0:

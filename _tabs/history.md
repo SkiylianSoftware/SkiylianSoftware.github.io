@@ -9,6 +9,7 @@ group: stats
 
 {% assign history = site.data.history %}
 {% if history and history.size > 0 %}
+{{ history.size | prepend: 'History entries: ' | append: ' (first: ' | append: history.first.date | append: ', last: ' | append: history.last.date | append: ')' }}
 
 <div class="chart-container">
   <canvas id="growthChart"></canvas>

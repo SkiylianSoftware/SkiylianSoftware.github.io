@@ -1,14 +1,6 @@
 name: "Build and Deploy"
 
 on:
-  push:
-    branches: [master]
-    paths-ignore:
-      - .gitignore
-      - README.md
-      - LICENSE
-      - "scripts/**.py"
-      - pyproject.toml
   workflow_dispatch:
 
 permissions:

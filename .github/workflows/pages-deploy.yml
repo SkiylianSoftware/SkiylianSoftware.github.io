@@ -1,6 +1,10 @@
 name: "Build and Deploy"
 
 on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -55,6 +59,9 @@ jobs:
       - name: Track history
         run: python scripts/track_history.py
 
+      - name: Fetch Ko-fi data
+        run: python scripts/fetch_kofi.py
+
       - name: Fetch Fourthwall data
         env:
           FW_USERNAME: ${{ secrets.FW_USERNAME }}
@@ -67,6 +74,9 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python scripts/fetch_youtube_analytics.py
+
+      - name: Generate RSS feed posts
+        run: python scripts/generate_posts.py
 
       - name: Setup Pages
         id: pages

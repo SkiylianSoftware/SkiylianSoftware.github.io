@@ -81,6 +81,19 @@ jobs:
           FW_PASSWORD: ${{ secrets.FW_PASSWORD }}
         run: python scripts/fetch_fourthwall.py
 
+      - name: Build clean history from analytics + video data
+        env:
+          DEBUG: "1"
+        run: python scripts/build_history.py
+
+      - name: Detect milestones with debug
+        env:
+          DEBUG: "1"
+        run: python scripts/detect_milestones.py
+
+      - name: Track history
+        run: python scripts/track_history.py
+
       - name: Generate RSS feed posts
         run: python scripts/generate_posts.py
 

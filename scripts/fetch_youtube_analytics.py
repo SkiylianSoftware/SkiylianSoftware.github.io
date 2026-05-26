@@ -164,7 +164,7 @@ def fetch_per_video_report(access_token, start_date, end_date, ids="channel==MIN
             "ids": ids,
             "startDate": start_date,
             "endDate": end_date,
-            "metrics": "views,estimatedMinutesWatched,averageViewDuration",
+            "metrics": "views,estimatedMinutesWatched",
             "dimensions": "day,video",
             "sort": "day",
             "maxResults": 1000,
@@ -211,18 +211,16 @@ def fetch_per_video_all(access_token, start_date, end_date, ids="channel==MINE")
 
 
 def build_video_daily_map(rows):
-    """Convert per-video rows to {video_id: {date: {views, watch_time, avg_duration}}}."""
+    """Convert per-video rows to {video_id: {date: {views, watch_time}}}."""
     video_daily = {}
     for row in rows:
         date = row[0]
         vid = row[1]
         views = int(row[2]) if row[2] else 0
         watch_time = int(row[3]) if row[3] else 0
-        avg_dur = int(row[4]) if row[4] else 0
         video_daily.setdefault(vid, {})[date] = {
             "views": views,
             "watch_time": watch_time,
-            "avg_duration": avg_dur,
         }
     return video_daily
 

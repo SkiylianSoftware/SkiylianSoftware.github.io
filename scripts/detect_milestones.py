@@ -81,12 +81,15 @@ MILESTONE_SPECS = [
     ("likes", P3, P3_MSG, FMT),
     ("likes", P2, P2_MSG, FMT),
     ("likes", RND, RND_MSG, FMT),
+    ("comments", P3, P3_MSG, FMT),
+    ("comments", P2, P2_MSG, FMT),
+    ("comments", RND, RND_MSG, FMT),
 ]
 
 GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
 STREAK_THRESH = sorted([4, 8, 13, 26, 52, 104])
 HOURS_THRESH = sorted(set(P3 + P2 + RND))
-VIDEO_FIRST_THRESH = sorted([m for m in set(P3 + RND) if m >= 100])
+VIDEO_FIRST_THRESH = sorted([m for m in set(P3 + P2 + RND) if m >= 100])
 
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
@@ -188,6 +191,7 @@ def main():
 
     # Total likes across all videos
     total_likes = sum(v.get("like_count", 0) for v in yt_main.get("videos", []))
+    total_comments = sum(v.get("comment_count", 0) for v in yt_main.get("videos", []))
 
     # Load previous milestones for comparison
     prev = read_json("milestones.json") or {}
@@ -195,7 +199,11 @@ def main():
     new_reached = {}
 
     if debug:
-        print(f"  Current: {subs} subs, {views} views, {videos_count} videos, {total_likes} likes")
+        print(
+            "  Current:"
+            f" {subs} subs, {views} views, {videos_count} videos,"
+            f" {total_likes} likes, {total_comments} comments"
+        )
         print(
             f"  History: {len(history)} entries ({history[0]['date']} to {history[-1]['date']})"
             if history
@@ -204,8 +212,9 @@ def main():
 
     # Process standard milestones (subs, views, videos)
     # Collect ALL thresholds (no break), then collapse same-label same-date later
+    values = {"subs": subs, "views": views, "videos": videos_count, "likes": total_likes, "comments": total_comments}
     for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
-        value = {"subs": subs, "views": views, "videos": videos_count, "likes": total_likes}.get(label, 0)
+        value = values.get(label, 0)
         for m in sorted(thresholds, reverse=True):
             if value >= m:
                 key = f"{label}_{m}"
@@ -315,8 +324,8 @@ def main():
                 game_videos.setdefault(gname, [])
                 game_videos[gname].append(vid)
 
-        game_view_thresh = [m for m in GAME_EP_THRESH if m >= 9]
-        game_hour_thresh = [m for m in GAME_EP_THRESH if m >= 3]
+        game_view_thresh = GAME_EP_THRESH
+        game_hour_thresh = GAME_EP_THRESH
 
         for gname, vids in game_videos.items():
             # Collect all dates from video_history for this game's videos

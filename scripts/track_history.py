@@ -33,34 +33,41 @@ def build_snapshot():
             "videos": meta.get("video_count", 0),
             "duration_seconds": 0,
             "likes": 0,
+            "comments": 0,
         }
         # Compute total duration and likes from youtube_main video data
         yt = read_json("youtube_main.json")
         if yt and yt.get("videos"):
             total_dur = 0
             total_likes = 0
+            total_comments = 0
             for v in yt["videos"]:
                 total_dur += v.get("duration_seconds", 0)
                 total_likes += v.get("like_count", 0)
+                total_comments += v.get("comment_count", 0)
             snapshot["youtube_main"]["duration_seconds"] = total_dur
             snapshot["youtube_main"]["likes"] = total_likes
+            snapshot["youtube_main"]["comments"] = total_comments
         vods_subs = meta.get("vods_subscriber_count", 0)
         vods_views = meta.get("vods_view_count", 0)
         vods_videos = meta.get("vods_video_count", 0)
         if vods_subs or vods_views or vods_videos:
             vods_dur = 0
             vods_likes = 0
+            vods_comments = 0
             vods = read_json("youtube_vods.json")
             if vods and vods.get("videos"):
                 for v in vods["videos"]:
                     vods_dur += v.get("duration_seconds", 0)
                     vods_likes += v.get("like_count", 0)
+                    vods_comments += v.get("comment_count", 0)
             snapshot["youtube_vods"] = {
                 "subs": vods_subs,
                 "views": vods_views,
                 "videos": vods_videos,
                 "duration_seconds": vods_dur,
                 "likes": vods_likes,
+                "comments": vods_comments,
             }
 
     twitch_stats = read_json("twitch_stats.json")
@@ -141,6 +148,7 @@ def backfill_history():
         cum_videos = 0
         cum_duration = 0
         cum_likes = 0
+        cum_comments = 0
         vid_idx = 0
 
         while current <= now_dt:
@@ -156,6 +164,7 @@ def backfill_history():
                     if vd == video_dates_sorted[vid_idx]:
                         cum_duration += v.get("duration_seconds", 0)
                         cum_likes += v.get("like_count", 0)
+                        cum_comments += v.get("comment_count", 0)
                         break
                 cum_videos += 1
                 vid_idx += 1
@@ -169,6 +178,7 @@ def backfill_history():
                         "videos": cum_videos,
                         "duration_seconds": cum_duration,
                         "likes": cum_likes,
+                        "comments": cum_comments,
                     },
                     "youtube_vods": {},
                     "twitch": {},

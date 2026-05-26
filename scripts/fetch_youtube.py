@@ -92,6 +92,7 @@ def fetch_video_details(video_ids):
                 "duration_seconds": parse_duration(duration),
                 "view_count": int(stats.get("viewCount", 0)),
                 "like_count": int(stats.get("likeCount", 0)),
+                "comment_count": int(stats.get("commentCount", 0)),
                 "tags": snippet.get("tags", []),
             }
     return details

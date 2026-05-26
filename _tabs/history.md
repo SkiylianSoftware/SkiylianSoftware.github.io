@@ -31,6 +31,9 @@ group: stats
   {% if history[0].youtube_main contains 'likes' %}
   <button class="chart-btn" onclick="toggleMetric('likes')" id="btn-likes">Likes</button>
   {% endif %}
+  {% if history[0].youtube_main contains 'comments' %}
+  <button class="chart-btn" onclick="toggleMetric('comments')" id="btn-comments">Comments</button>
+  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -122,6 +125,11 @@ var allMetrics = {
     { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'likes'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
     { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'likes') || 0) + (pluck(h, 'youtube_vods', 'likes') || 0); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
   ],
+  comments: [
+    { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'comments'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
+    { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'comments'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
+    { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'comments') || 0) + (pluck(h, 'youtube_vods', 'comments') || 0); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
+  ],
 };
 
 console.log('Audience dataset length:', audienceDatasets[0].data.length, 'sample:', audienceDatasets[0].data.slice(0,5));
@@ -183,6 +191,8 @@ function toggleMetric(metric) {
   <button class="ms-filter-btn" onclick="filterMilestones('game')" data-filter="game">Games</button>
   <button class="ms-filter-btn" onclick="filterMilestones('watch')" data-filter="watch">Watch Time</button>
   <button class="ms-filter-btn" onclick="filterMilestones('content')" data-filter="content">Content</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('content')" data-filter="content">Content</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('comments')" data-filter="comments">Comments</button>
   <button class="ms-filter-btn" onclick="filterMilestones('other')" data-filter="other">Other</button>
 </div>
 
@@ -286,6 +296,7 @@ function filterMilestones(type) {
       {% assign ptype = pparts[0] %}
       {% if key contains "views" %}{% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
       {% elsif key contains "videos" %}{% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+      {% elsif key contains "comments" %}{% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = "/videos" %}
       {% else %}{% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
       {% endif %}
       {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
@@ -299,6 +310,7 @@ function filterMilestones(type) {
     {% elsif mclass == "ms-video-first" %}{% assign dtype = "views" %}
     {% elsif mclass == "ms-hours" %}{% assign dtype = "watch" %}
     {% elsif mclass == "ms-upload" %}{% assign dtype = "content" %}
+    {% elsif mclass == "ms-comments" %}{% assign dtype = "comments" %}
     {% else %}{% assign dtype = "other" %}
     {% endif %}
 

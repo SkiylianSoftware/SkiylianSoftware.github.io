@@ -25,9 +25,6 @@ group: stats
   {% if history[0].github %}
   <button class="chart-btn" onclick="toggleMetric('github')" id="btn-github">GitHub</button>
   {% endif %}
-    {% if history.last.youtube_main.duration_seconds > 0 %}
-  <button class="chart-btn" onclick="toggleMetric('hours')" id="btn-hours">Duration</button>
-  {% endif %}
   {% if history.last.youtube_main.likes > 0 %}
   <button class="chart-btn" onclick="toggleMetric('likes')" id="btn-likes">Likes</button>
   {% endif %}
@@ -115,11 +112,6 @@ var allMetrics = {
   content: contentDatasets,
   orders: ordersDatasets,
   github: githubDatasets,
-  hours: [
-    { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'duration_seconds') / 3600; }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-    { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'duration_seconds') / 3600; }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-    { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'duration_seconds') + pluck(h, 'youtube_vods', 'duration_seconds')) / 3600; }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
-  ],
   likes: [
     { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'likes'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
     { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'likes'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
@@ -205,7 +197,7 @@ function filterMilestones(type) {
     var dtype = item.getAttribute('data-type');
     item.classList.toggle('hidden', dtype !== type);
   });
-  // Hide month dividers with no visible milestones
+  /* Hide month dividers with no visible milestones */
   document.querySelectorAll('.month-divider').forEach(function(div) {
     var sib = div.nextElementSibling;
     var hasVisible = false;

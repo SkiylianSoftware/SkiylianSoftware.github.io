@@ -38,12 +38,25 @@ def main():
     cum_videos = 0
     last_subs = 0
     last_views = 0
+    last_likes = 0
+    last_comments = 0
+    last_duration = 0
     hist_by_date = {e["date"]: e for e in analytics}
 
     for d in all_dates:
         cum_videos += video_dates.get(d, {}).get("videos", 0)
 
-        entry = {"date": d, "youtube_main": {"subs": 0, "views": 0, "videos": cum_videos}}
+        entry = {
+            "date": d,
+            "youtube_main": {
+                "subs": 0,
+                "views": 0,
+                "videos": cum_videos,
+                "likes": 0,
+                "comments": 0,
+                "duration_seconds": 0,
+            },
+        }
 
         # Overlay analytics data if available; carry forward last known values
         ha = hist_by_date.get(d)
@@ -52,13 +65,26 @@ def main():
             an = ha.get("_analytics", {}) or {}
             entry["youtube_main"]["subs"] = ym.get("subs", 0)
             entry["youtube_main"]["views"] = ym.get("views", 0)
+            entry["youtube_main"]["likes"] = ym.get("likes", 0)
+            entry["youtube_main"]["comments"] = ym.get("comments", 0)
+            entry["youtube_main"]["duration_seconds"] = ym.get("duration_seconds", 0)
             last_subs = entry["youtube_main"]["subs"]
             last_views = entry["youtube_main"]["views"]
+            last_likes = entry["youtube_main"]["likes"]
+            last_comments = entry["youtube_main"]["comments"]
+            last_duration = entry["youtube_main"]["duration_seconds"]
             if an:
                 entry["_analytics"] = an
+            # Carry forward other platforms from analytics
+            for pf in ("youtube_vods", "twitch", "github", "fourthwall"):
+                if ha.get(pf):
+                    entry[pf] = ha[pf]
         else:
             entry["youtube_main"]["subs"] = last_subs
             entry["youtube_main"]["views"] = last_views
+            entry["youtube_main"]["likes"] = last_likes
+            entry["youtube_main"]["comments"] = last_comments
+            entry["youtube_main"]["duration_seconds"] = last_duration
 
         # Always ensure videos count is accurate (analytics has videos=0)
         if entry["youtube_main"]["videos"] == 0 and cum_videos > 0:

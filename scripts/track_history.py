@@ -26,28 +26,27 @@ def build_snapshot():
     snapshot = {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d")}
 
     meta = read_json("site_meta.json")
-    if meta:
-        snapshot["youtube_main"] = {
-            "subs": meta.get("subscriber_count", 0),
-            "views": meta.get("view_count", 0),
-            "videos": meta.get("video_count", 0),
-            "duration_seconds": 0,
-            "likes": 0,
-            "comments": 0,
-        }
-        # Compute total duration and likes from youtube_main video data
-        yt = read_json("youtube_main.json")
-        if yt and yt.get("videos"):
-            total_dur = 0
-            total_likes = 0
-            total_comments = 0
-            for v in yt["videos"]:
-                total_dur += v.get("duration_seconds", 0)
-                total_likes += v.get("like_count", 0)
-                total_comments += v.get("comment_count", 0)
-            snapshot["youtube_main"]["duration_seconds"] = total_dur
-            snapshot["youtube_main"]["likes"] = total_likes
-            snapshot["youtube_main"]["comments"] = total_comments
+    snapshot["youtube_main"] = {
+        "subs": meta.get("subscriber_count", 0) if meta else 0,
+        "views": meta.get("view_count", 0) if meta else 0,
+        "videos": meta.get("video_count", 0) if meta else 0,
+        "duration_seconds": 0,
+        "likes": 0,
+        "comments": 0,
+    }
+    # Compute total duration and likes from youtube_main video data
+    yt = read_json("youtube_main.json")
+    if yt and yt.get("videos"):
+        total_dur = 0
+        total_likes = 0
+        total_comments = 0
+        for v in yt["videos"]:
+            total_dur += v.get("duration_seconds", 0)
+            total_likes += v.get("like_count", 0)
+            total_comments += v.get("comment_count", 0)
+        snapshot["youtube_main"]["duration_seconds"] = total_dur
+        snapshot["youtube_main"]["likes"] = total_likes
+        snapshot["youtube_main"]["comments"] = total_comments
         vods_subs = meta.get("vods_subscriber_count", 0)
         vods_views = meta.get("vods_view_count", 0)
         vods_videos = meta.get("vods_video_count", 0)

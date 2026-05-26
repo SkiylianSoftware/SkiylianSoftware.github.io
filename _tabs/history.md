@@ -283,14 +283,26 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_" %}
       {% capture d %}First video to {{ val }} views{% endcapture %}{% assign display = d %}
-    {% elsif key contains "hours_" %}
+    {% elsif key contains "youtube_hours_" %}
       {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
-      {% assign val = key | remove: "hours_" %}
-      {% capture d %}{{ val }} hours watched{% endcapture %}{% assign display = d %}
-    {% elsif key contains "upload_" %}
+      {% assign val = key | remove: "youtube_hours_" %}
+      {% capture d %}{{ val }} hours watched on YouTube{% endcapture %}{% assign display = d %}
+    {% elsif key contains "combined_hours_" %}
+      {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "combined_hours_" %}
+      {% capture d %}{{ val }} hours watched across all channels{% endcapture %}{% assign display = d %}
+    {% elsif key contains "youtube_upload_" %}
       {% assign icon = "&#128221;" %}{% assign mclass = "ms-upload" %}{% assign link = "/videos" %}
-      {% assign val = key | remove: "upload_" %}
-      {% capture d %}{{ val }} hours uploaded{% endcapture %}{% assign display = d %}
+      {% assign val = key | remove: "youtube_upload_" %}
+      {% capture d %}{{ val }} hours uploaded on YouTube{% endcapture %}{% assign display = d %}
+    {% elsif key contains "vods_upload_" %}
+      {% assign icon = "&#128221;" %}{% assign mclass = "ms-upload" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "vods_upload_" %}
+      {% capture d %}{{ val }} hours uploaded on VODs{% endcapture %}{% assign display = d %}
+    {% elsif key contains "combined_upload_" %}
+      {% assign icon = "&#128221;" %}{% assign mclass = "ms-upload" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "combined_upload_" %}
+      {% capture d %}{{ val }} hours uploaded across all channels{% endcapture %}{% assign display = d %}
     {% else %}
       {% assign pparts = key | split: "_" %}
       {% assign val = pparts | last %}
@@ -301,7 +313,29 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% elsif key contains "comments" %}{% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = "/videos" %}
       {% else %}{% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
       {% endif %}
-      {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
+      {% if key contains "likes" %}
+        {% if key contains "youtube_" %}
+          {% capture d %}{{ val }} likes on YouTube{% endcapture %}{% assign display = d %}
+        {% elsif key contains "vods_" %}
+          {% capture d %}{{ val }} likes on VODs{% endcapture %}{% assign display = d %}
+        {% elsif key contains "combined_" %}
+          {% capture d %}{{ val }} likes across all channels{% endcapture %}{% assign display = d %}
+        {% else %}
+          {% capture d %}{{ val }} likes{% endcapture %}{% assign display = d %}
+        {% endif %}
+      {% elsif key contains "comments" %}
+        {% if key contains "youtube_" %}
+          {% capture d %}{{ val }} comments on YouTube{% endcapture %}{% assign display = d %}
+        {% elsif key contains "vods_" %}
+          {% capture d %}{{ val }} comments on VODs{% endcapture %}{% assign display = d %}
+        {% elsif key contains "combined_" %}
+          {% capture d %}{{ val }} comments across all channels{% endcapture %}{% assign display = d %}
+        {% else %}
+          {% capture d %}{{ val }} comments{% endcapture %}{% assign display = d %}
+        {% endif %}
+      {% else %}
+        {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
+      {% endif %}
     {% endif %}
 
     {% if mclass == "ms-subs" %}{% assign dtype = "subs" %}

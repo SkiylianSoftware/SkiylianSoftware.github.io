@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from datetime import datetime, timedelta, timezone
 
 import yaml
@@ -7,10 +8,17 @@ from common import (
     ALIAS_MAP,
     ALL_THRESH,
     DATA_DIR,
+    FMT,
     GAME_EP_THRESH,
     HIATUS_DAYS_THRESH,
     HOURS_THRESH,
     MILESTONE_SPECS,
+    P2,
+    P2_MSG,
+    P3,
+    P3_MSG,
+    RND,
+    RND_MSG,
     VALID_GAMES,
     VIDEO_FIRST_THRESH,
     read_json,
@@ -42,9 +50,14 @@ def main():
     views = site_meta.get("view_count", 0)
     videos_count = site_meta.get("video_count", 0)
 
-    # Total likes across all videos
+    # Total likes/comments across all videos (per platform and combined)
+    yt_vods_data = read_json("youtube_vods.json") or {}
     total_likes = sum(v.get("like_count", 0) for v in yt_main.get("videos", []))
     total_comments = sum(v.get("comment_count", 0) for v in yt_main.get("videos", []))
+    vods_likes = sum(v.get("like_count", 0) for v in yt_vods_data.get("videos", []))
+    vods_comments = sum(v.get("comment_count", 0) for v in yt_vods_data.get("videos", []))
+    combined_likes = total_likes + vods_likes
+    combined_comments = total_comments + vods_comments
 
     # Load previous milestones for comparison
     prev = read_json("milestones.json") or {}
@@ -65,8 +78,10 @@ def main():
 
     # Process standard milestones (subs, views, videos)
     # Collect ALL thresholds (no break), then collapse same-label same-date later
-    values = {"subs": subs, "views": views, "videos": videos_count, "likes": total_likes, "comments": total_comments}
+    values = {"subs": subs, "views": views, "videos": videos_count}
     for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
+        if label in ("likes", "comments"):
+            continue
         value = values.get(label, 0)
         for m in sorted(thresholds, reverse=True):
             if value >= m:
@@ -109,6 +124,53 @@ def main():
         if gname_raw and pub and vid:
             game_video_list.setdefault(gname_raw, []).append((pub, vid, thumb, title))
 
+    # Per-platform and combined likes/comments milestones
+    # Use video publish dates to find when cumulative totals crossed each threshold
+    def _track_like_comment(source, prefix, videos, field):
+        """Generate likes or comments milestones for a specific source."""
+        total = sum(v.get(field, 0) for v in videos)
+        for thresholds, _msgs, _formatter in ((P3, P3_MSG, FMT), (P2, P2_MSG, FMT), (RND, RND_MSG, FMT)):
+            for m in sorted(thresholds, reverse=True):
+                if total >= m:
+                    key = f"{prefix}_{m}"
+                    cum = 0
+                    date = today
+                    for v in sorted(videos, key=lambda x: x.get("published", "")):
+                        cum += v.get(field, 0)
+                        if cum >= m:
+                            date = v.get("published", "")[:10]
+                            break
+                    new_reached[key] = date
+
+    for label, field in (("likes", "like_count"), ("comments", "comment_count")):
+        _track_like_comment(label, f"youtube_{label}", all_videos, field)
+        _track_like_comment(label, f"vods_{label}", yt_vods_data.get("videos", []), field)
+        combined_field = combined_likes if label == "likes" else combined_comments
+        combined_total = combined_field
+        for thresholds, _msgs, _formatter in ((P3, P3_MSG, FMT), (P2, P2_MSG, FMT), (RND, RND_MSG, FMT)):
+            for m in sorted(thresholds, reverse=True):
+                if combined_total >= m:
+                    key = f"combined_{label}_{m}"
+                    # Find first video across both sources that pushed us past threshold
+                    all_sorted = sorted(
+                        all_videos + yt_vods_data.get("videos", []), key=lambda x: x.get("published", "")
+                    )
+                    cum = 0
+                    date = today
+                    for v in all_sorted:
+                        cum += v.get(field, 0)
+                        if cum >= m:
+                            date = v.get("published", "")[:10]
+                            break
+                    new_reached[key] = date
+
+    def _steam_icon_url(steam_url):
+        """Construct Steam store header image URL from store page URL."""
+        m = re.search(r"/app/(\d+)", steam_url)
+        if m:
+            return f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{m.group(1)}/header.jpg"
+        return ""
+
     # Load game icons from game_links.yml
     game_icons = {}
     gl_path = os.path.join(DATA_DIR, "game_links.yml")
@@ -117,8 +179,12 @@ def main():
             with open(gl_path) as f:
                 _gl = yaml.safe_load(f) or {}
             for name, entry in _gl.items():
-                if isinstance(entry, dict) and entry.get("icon"):
-                    game_icons[name] = entry["icon"]
+                if isinstance(entry, dict):
+                    icon = entry.get("icon", "")
+                    if not icon and entry.get("steam"):
+                        icon = _steam_icon_url(entry["steam"])
+                    if icon:
+                        game_icons[name] = icon
         except Exception:
             pass
 
@@ -198,34 +264,34 @@ def main():
         if no_playlist:
             print(f"  Warning: {len(no_playlist)} game(s) have no matching playlist: {', '.join(no_playlist)}")
 
-    for gname, video_dates in game_cumulative.items():  # noqa: B007
+    for gname, video_dates in game_cumulative.items():
         video_dates.sort()
-    ep_count = len(video_dates)
+        ep_count = len(video_dates)
 
-    # Episode milestones (from video publish dates)
-    for m in sorted(GAME_EP_THRESH, reverse=True):
-        if ep_count >= m:
-            key = f"game_{gname}_ep_{m}"
-            date = video_dates[m - 1]
-            new_reached[key] = date
+        # Episode milestones (from video publish dates)
+        for m in sorted(GAME_EP_THRESH, reverse=True):
+            if ep_count >= m:
+                key = f"game_{gname}_ep_{m}"
+                date = video_dates[m - 1]
+                new_reached[key] = date
 
-    # Return milestones (longest gap between consecutive videos)
-    if len(video_dates) >= 2:
-        try:
-            dates_dt = sorted(datetime.strptime(d, "%Y-%m-%d") for d in video_dates)
-            max_gap = 0
-            gap_end_idx = 0
-            for i in range(len(dates_dt) - 1):
-                gap = (dates_dt[i + 1] - dates_dt[i]).days
-                if gap > max_gap:
-                    max_gap = gap
-                    gap_end_idx = i + 1
-            gap = max_gap
-            gap_end = video_dates[gap_end_idx]
-            key = f"game_{gname}_return_{gap}"
-            new_reached[key] = gap_end
-        except Exception:
-            pass
+        # Return milestones (longest gap between consecutive videos)
+        if ep_count >= 2:
+            try:
+                dates_dt = sorted(datetime.strptime(d, "%Y-%m-%d") for d in video_dates)
+                max_gap = 0
+                gap_end_idx = 0
+                for i in range(len(dates_dt) - 1):
+                    gap = (dates_dt[i + 1] - dates_dt[i]).days
+                    if gap > max_gap:
+                        max_gap = gap
+                        gap_end_idx = i + 1
+                gap = max_gap
+                gap_end = video_dates[gap_end_idx]
+                key = f"game_{gname}_return_{gap}"
+                new_reached[key] = gap_end
+            except Exception:
+                pass
 
     # First video per game for "series started" milestone, and ordered video list for episode links
     game_first_series = {}
@@ -269,6 +335,10 @@ def main():
                 # Video in youtube_main but not yet in video_history; seed with current views
                 game_videos.setdefault(gname, [])
                 game_videos[gname].append(vid)
+
+        # Filter out non-game content series (Railway Exhibition Vlogs, etc.)
+        if VALID_GAMES:
+            game_videos = {g: v for g, v in game_videos.items() if g in VALID_GAMES}
 
         game_view_thresh = GAME_EP_THRESH
         game_hour_thresh = GAME_EP_THRESH
@@ -336,6 +406,16 @@ def main():
         if dur:
             channel_duration_secs += dur
 
+    vods_duration_secs = 0
+    for v in yt_vods_data.get("videos", []):
+        dur = v.get("duration_seconds", 0)
+        if dur:
+            vods_duration_secs += dur
+
+    # Filter out non-game content series for upload milestones
+    if VALID_GAMES:
+        game_durations = {g: s for g, s in game_durations.items() if g in VALID_GAMES}
+
     upload_thresh = [m for m in GAME_EP_THRESH if m >= 1]
     for gname, total_secs in game_durations.items():
         upload_hours = total_secs // 3600
@@ -353,18 +433,24 @@ def main():
                             new_reached[key] = date
                             break
 
-    # Channel upload hours (content creation time)
-    channel_upload_hours = channel_duration_secs // 3600
-    for m in sorted(HOURS_THRESH, reverse=True):
-        if channel_upload_hours >= m:
-            key = f"upload_{m}"
-            cum = 0
-            for v in sorted(all_videos, key=lambda x: x.get("published", "")):
-                cum += v.get("duration_seconds", 0)
-                if cum // 3600 >= m:
-                    date = v.get("published", "")[:10]
-                    new_reached[key] = date
-                    break
+    # Per-platform and combined upload hours (content creation time)
+    def _track_upload(prefix, videos):
+        dur = sum(v.get("duration_seconds", 0) for v in videos)
+        upload_hours = dur // 3600
+        for m in sorted(HOURS_THRESH, reverse=True):
+            if upload_hours >= m:
+                key = f"{prefix}_upload_{m}"
+                cum = 0
+                for v in sorted(videos, key=lambda x: x.get("published", "")):
+                    cum += v.get("duration_seconds", 0)
+                    if cum // 3600 >= m:
+                        date = v.get("published", "")[:10]
+                        new_reached[key] = date
+                        break
+
+    _track_upload("youtube", all_videos)
+    _track_upload("vods", yt_vods_data.get("videos", []))
+    _track_upload("combined", all_videos + yt_vods_data.get("videos", []))
 
     # Age milestone
     first_video_date = None
@@ -532,7 +618,7 @@ def main():
             if key not in milestone_links and not key.startswith("game_") and not key.startswith("video_first_"):
                 milestone_links[key] = channel_thumb
 
-    # Total watch time (hours) from video_history.json
+    # Per-platform and combined watch time (hours) from video_history.json
     if video_history:
         daily_hours = {}
         for _vid, vh in video_history.items():
@@ -546,7 +632,9 @@ def main():
                 for d in sorted_dates:
                     cum += daily_hours[d]
                     if cum >= m:
-                        key = f"hours_{m}"
+                        key = f"youtube_hours_{m}"
+                        new_reached[key] = d
+                        key = f"combined_hours_{m}"
                         new_reached[key] = d
                         break
 
@@ -588,8 +676,28 @@ def main():
                 link = milestone_links.get(key, {})
                 title = link.get("text", "")
                 print(f"  New milestone: first video to {m:,} views (date={date}) - {title}")
-            elif key.startswith("hours_"):
-                print(f"  New milestone: {m:,} total channel hours (date={date})")
+            elif key.startswith("youtube_upload_"):
+                print(f"  New milestone: {m:,} content hours on YouTube (date={date})")
+            elif key.startswith("vods_upload_"):
+                print(f"  New milestone: {m:,} content hours on VODs (date={date})")
+            elif key.startswith("combined_upload_"):
+                print(f"  New milestone: {m:,} content hours across all channels (date={date})")
+            elif key.startswith("youtube_hours_"):
+                print(f"  New milestone: {m:,} watch hours on YouTube (date={date})")
+            elif key.startswith("combined_hours_"):
+                print(f"  New milestone: {m:,} watch hours across all channels (date={date})")
+            elif key.startswith("youtube_likes_"):
+                print(f"  New milestone: {m:,} likes on YouTube (date={date})")
+            elif key.startswith("vods_likes_"):
+                print(f"  New milestone: {m:,} likes on VODs (date={date})")
+            elif key.startswith("combined_likes_"):
+                print(f"  New milestone: {m:,} likes across all channels (date={date})")
+            elif key.startswith("youtube_comments_"):
+                print(f"  New milestone: {m:,} comments on YouTube (date={date})")
+            elif key.startswith("vods_comments_"):
+                print(f"  New milestone: {m:,} comments on VODs (date={date})")
+            elif key.startswith("combined_comments_"):
+                print(f"  New milestone: {m:,} comments across all channels (date={date})")
             elif key.startswith("game_"):
                 rest = key[len("game_") :]
                 if "_ep_" in rest:
@@ -610,8 +718,6 @@ def main():
                 elif "_return_" in rest:
                     g, _, n = rest.partition("_return_")
                     print(f"  New milestone: Back to {g} after {n} days (date={date})")
-            elif key.startswith("upload_"):
-                print(f"  New milestone: {m:,} content hours created (date={date})")
             else:
                 print(f"  New milestone: {m:,} {parts[0]} (date={date})")
 
@@ -675,10 +781,28 @@ def main():
             link = milestone_links.get(key, {})
             title = link.get("text", "")
             msg = f"First video to {v} views: {title}" if title else f"First video to {v} views"
-        elif key.startswith("hours_"):
-            msg = f"{key[6:]} hours watched"
-        elif key.startswith("upload_"):
-            msg = f"{key[7:]} hours uploaded"
+        elif key.startswith("youtube_hours_"):
+            msg = f"{key[14:]} hours watched on YouTube"
+        elif key.startswith("combined_hours_"):
+            msg = f"{key[16:]} hours watched across all channels"
+        elif key.startswith("youtube_upload_"):
+            msg = f"{key[15:]} hours uploaded on YouTube"
+        elif key.startswith("vods_upload_"):
+            msg = f"{key[12:]} hours uploaded on VODs"
+        elif key.startswith("combined_upload_"):
+            msg = f"{key[16:]} hours uploaded across all channels"
+        elif key.startswith("youtube_likes_"):
+            msg = f"{key[14:]} likes on YouTube"
+        elif key.startswith("vods_likes_"):
+            msg = f"{key[11:]} likes on VODs"
+        elif key.startswith("combined_likes_"):
+            msg = f"{key[16:]} likes across all channels"
+        elif key.startswith("youtube_comments_"):
+            msg = f"{key[17:]} comments on YouTube"
+        elif key.startswith("vods_comments_"):
+            msg = f"{key[14:]} comments on VODs"
+        elif key.startswith("combined_comments_"):
+            msg = f"{key[19:]} comments across all channels"
         else:
             parts = key.rsplit("_", 1)
             try:

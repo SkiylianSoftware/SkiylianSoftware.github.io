@@ -302,8 +302,21 @@ body::after {
 .modal-content { width: 90vw; max-width: 800px; background: #111; border-radius: 12px; overflow: hidden; }
 #player-wrap { width: 100%; aspect-ratio: 16/9; }
 .modal-close { position: absolute; top: 1rem; right: 1.5rem; font-size: 2rem; color: #fff; background: none; border: none; cursor: pointer; z-index: 10; }
-.modal-title { margin: 0.75rem 1rem; font-size: 1rem; }
-.modal-chapters, .modal-next { margin: 0 1rem 0.75rem; }
+.modal-body { padding: 0.75rem 1rem; max-height: 50vh; overflow-y: auto; }
+.modal-title { margin: 0 0 0.4rem; font-size: 1rem; }
+.modal-meta { font-size: 0.8rem; opacity: 0.7; margin-bottom: 0.5rem; }
+.modal-series-link { margin-bottom: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.series-badge-link, .game-badge-link { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+.series-badge-link { background: rgba(45,212,191,0.12); border: 1px solid rgba(45,212,191,0.25); color: #5eead4; }
+.series-badge-link:hover { background: rgba(45,212,191,0.25); }
+.game-badge-link { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); color: #d8b4fe; }
+.game-badge-link:hover { background: rgba(168,85,247,0.25); }
+.ep-badge { font-size: 0.75rem; opacity: 0.6; }
+.modal-description { margin: 0 0 0.75rem; }
+.desc-label { font-size: 0.8rem; font-weight: 600; margin: 0 0 0.3rem; opacity: 0.7; }
+.desc-text { font-size: 0.82rem; line-height: 1.5; opacity: 0.85; max-height: 200px; overflow-y: auto; }
+.desc-text a { color: #5eead4; text-decoration: underline; }
+.modal-chapters, .modal-next { margin: 0 0 0.75rem; }
 .chapters-label, .next-label { font-size: 0.8rem; font-weight: 600; margin: 0 0 0.4rem; opacity: 0.7; }
 .chapter-chip { display: inline-block; padding: 0.2rem 0.5rem; margin: 0.2rem; border-radius: 4px; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.2); font-size: 0.75rem; cursor: pointer; transition: background 0.15s; }
 .chapter-chip:hover { background: rgba(45,212,191,0.2); }

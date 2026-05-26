@@ -186,7 +186,11 @@ def fetch_uploads(playlist_id, label="uploads"):
             video_ids.append(video_id)
             thumbnails = snippet.get("thumbnails", {})
             thumbnail = (
-                thumbnails.get("maxres", {}) or thumbnails.get("high", {}) or thumbnails.get("medium", {})
+                thumbnails.get("high", {})
+                or thumbnails.get("medium", {})
+                or thumbnails.get("standard", {})
+                or thumbnails.get("maxres", {})
+                or thumbnails.get("default", {})
             ).get("url", "")
             videos.append(
                 {

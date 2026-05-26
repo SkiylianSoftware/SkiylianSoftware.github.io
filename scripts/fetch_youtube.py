@@ -98,19 +98,40 @@ def fetch_video_details(video_ids):
     return details
 
 
-SERIES_RE = re.compile(r"^(?P<game>[^:]+):\s*(?P<series>.+?)#(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$")
+SERIES_RE = re.compile(
+    r"^(?P<game>[^:]+?):\s*(?P<series>[^\s#][^#]*?)\s*#\s*(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$"
+)
+SERIES_NOSUB_RE = re.compile(r"^(?P<game>[^:]+?):\s*(?P<series>[^\s#][^#]*?)\s*#\s*(?P<episode>\d+)\s*$")
+GAME_COLON_EP_SUB_RE = re.compile(r"^(?P<game>[^:]+?):\s*#\s*(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$")
+GAME_COLON_EP_RE = re.compile(r"^(?P<game>[^:]+?):\s*#\s*(?P<episode>\d+)\s*$")
+GAME_EP_SUB_RE = re.compile(r"^(?P<game>[^:#]+?)\s*#\s*(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$")
+GAME_EP_RE = re.compile(r"^(?P<game>[^:#]+?)\s*#\s*(?P<episode>\d+)\s*$")
+GAME_COLON_RE = re.compile(r"^(?P<game>[^:]+?):\s*(?P<title>.+)$")
 CONTENT_SERIES_RE = re.compile(r"^(?P<content_series>[^#]+?)\s*#\d+\s*[-–]\s*(?P<subtitle>.+)$")
 
 
 def parse_series(title):
-    m = SERIES_RE.match(title)
-    if m:
-        return {
-            "game": m.group("game").strip(),
-            "series_name": m.group("series").strip(),
-            "episode_number": int(m.group("episode")),
-            "episode_title": m.group("subtitle").strip(),
-        }
+    for regex, has_series, has_sub in [
+        (SERIES_RE, True, True),
+        (SERIES_NOSUB_RE, True, False),
+        (GAME_COLON_EP_SUB_RE, False, True),
+        (GAME_COLON_EP_RE, False, False),
+        (GAME_EP_SUB_RE, False, True),
+        (GAME_EP_RE, False, False),
+        (GAME_COLON_RE, False, False),
+    ]:
+        m = regex.match(title)
+        if m:
+            result = {
+                "game": m.group("game").strip(),
+                "series_name": m.group("series").strip() if has_series else "",
+                "episode_number": int(m.group("episode")) if "episode" in regex.groupindex else 0,
+                "episode_title": m.group("subtitle").strip() if has_sub else "",
+            }
+            # If GAME_COLON_RE matched and no episode number, use the whole title as episode_title
+            if regex == GAME_COLON_RE:
+                result["episode_title"] = m.group("title").strip()
+            return result
     return None
 
 

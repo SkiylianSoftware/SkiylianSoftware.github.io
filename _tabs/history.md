@@ -191,7 +191,7 @@ function toggleMetric(metric) {
   <button class="ms-filter-btn" onclick="filterMilestones('game')" data-filter="game">Games</button>
   <button class="ms-filter-btn" onclick="filterMilestones('watch')" data-filter="watch">Watch Time</button>
   <button class="ms-filter-btn" onclick="filterMilestones('content')" data-filter="content">Content</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('content')" data-filter="content">Content</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('likes')" data-filter="likes">Likes</button>
   <button class="ms-filter-btn" onclick="filterMilestones('comments')" data-filter="comments">Comments</button>
   <button class="ms-filter-btn" onclick="filterMilestones('other')" data-filter="other">Other</button>
 </div>
@@ -296,6 +296,7 @@ function filterMilestones(type) {
       {% assign ptype = pparts[0] %}
       {% if key contains "views" %}{% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/videos" %}
       {% elsif key contains "videos" %}{% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
+      {% elsif key contains "likes" %}{% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = "/videos" %}
       {% elsif key contains "comments" %}{% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = "/videos" %}
       {% else %}{% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
       {% endif %}
@@ -310,6 +311,7 @@ function filterMilestones(type) {
     {% elsif mclass == "ms-video-first" %}{% assign dtype = "views" %}
     {% elsif mclass == "ms-hours" %}{% assign dtype = "watch" %}
     {% elsif mclass == "ms-upload" %}{% assign dtype = "content" %}
+    {% elsif mclass == "ms-likes" %}{% assign dtype = "likes" %}
     {% elsif mclass == "ms-comments" %}{% assign dtype = "comments" %}
     {% else %}{% assign dtype = "other" %}
     {% endif %}

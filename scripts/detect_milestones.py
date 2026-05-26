@@ -239,6 +239,33 @@ def main():
         if gname and pub:
             game_cumulative.setdefault(gname, []).append(pub)
 
+    # Load game icons and alias map from game_links.yml (needed before milestone loops)
+    game_icons = {}
+    alias_map = {}
+    gl_path = os.path.join(DATA_DIR, "game_links.yml")
+    if os.path.exists(gl_path):
+        try:
+            with open(gl_path) as f:
+                _gl = yaml.safe_load(f) or {}
+            for name, entry in _gl.items():
+                if isinstance(entry, dict):
+                    if entry.get("icon"):
+                        game_icons[name] = entry["icon"]
+                    for alias in entry.get("aliases", []):
+                        alias_map[alias] = name
+        except Exception:
+            pass
+
+    def resolve_gname(raw):
+        return alias_map.get(raw, raw)
+
+    # Resolve game_cumulative aliases so milestone keys use canonical names
+    game_cumulative_resolved = {}
+    for raw_gname, dates in game_cumulative.items():
+        canon = resolve_gname(raw_gname)
+        game_cumulative_resolved.setdefault(canon, []).extend(dates)
+    game_cumulative = game_cumulative_resolved
+
     for gname, video_dates in game_cumulative.items():
         video_dates.sort()
         ep_count = len(video_dates)
@@ -275,7 +302,7 @@ def main():
         s = v.get("series", {})
         if not s:
             continue
-        gname = (s or {}).get("game", "")
+        gname = resolve_gname((s or {}).get("game", ""))
         sname = (s or {}).get("series_name", "")
         pub = v.get("published", "")[:10]
         vid = v.get("video_id", "")
@@ -308,28 +335,15 @@ def main():
                     series_to_playlist[gname] = pl
                 break
 
-    # Load game icons from game_links.yml
-    game_icons = {}
-    gl_path = os.path.join(DATA_DIR, "game_links.yml")
-    if os.path.exists(gl_path):
-        try:
-            with open(gl_path) as f:
-                _gl = yaml.safe_load(f) or {}
-            for name, entry in _gl.items():
-                if isinstance(entry, dict) and entry.get("icon"):
-                    game_icons[name] = entry["icon"]
-        except Exception:
-            pass
-
     # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
     video_history = read_json("video_history.json") or {}
     if video_history:
-        # Build game -> [video_id] mapping
+        # Build game -> [video_id] mapping (resolved names)
         game_videos = {}
         for v in all_videos:
             vid = v.get("video_id", "")
             s = v.get("series", {})
-            gname = (s or {}).get("game", "")
+            gname = resolve_gname((s or {}).get("game", ""))
             if gname and vid and vid in video_history:
                 game_videos.setdefault(gname, []).append(vid)
             elif gname and vid:
@@ -395,7 +409,7 @@ def main():
     channel_duration_secs = 0
     for v in all_videos:
         s = v.get("series", {})
-        gname = (s or {}).get("game", "")
+        gname = resolve_gname((s or {}).get("game", ""))
         dur = v.get("duration_seconds", 0)
         if gname and dur:
             game_durations.setdefault(gname, 0)
@@ -413,7 +427,7 @@ def main():
                 cum = 0
                 for v in sorted(all_videos, key=lambda x: x.get("published", "")):
                     vs = v.get("series", {})
-                    if (vs or {}).get("game", "") == gname:
+                    if resolve_gname((vs or {}).get("game", "")) == gname:
                         cum += v.get("duration_seconds", 0)
                         if cum // 3600 >= m:
                             date = v.get("published", "")[:10]
@@ -535,32 +549,46 @@ def main():
                 if sep in rest:
                     gname = rest.split(sep)[0]
                     entry = None
+                    pl = game_to_playlist.get(gname) or series_to_playlist.get(gname)
+                    game_icon = game_icons.get(gname, "")
 
                     if sep == "_ep_":
-                        # Link episode milestones to the specific video
+                        # Link episode milestones to the specific video; use series/playlist thumbnail
                         try:
                             ep_num = int(rest.split(sep)[1])
                         except ValueError:
                             ep_num = 0
                         vlist = game_video_list.get(gname, [])
                         if 0 < ep_num <= len(vlist):
-                            _, vid, thumb, title = vlist[ep_num - 1]
+                            _, vid, _thumb, title = vlist[ep_num - 1]
                             entry = {"url": f"/videos#vid-{vid}", "text": title}
-                            if thumb:
-                                entry["thumb"] = thumb
+                            # Prefer playlist thumbnail as series thumbnail; fall back to game icon
+                            if pl and pl.get("thumbnail"):
+                                entry["thumb"] = pl["thumbnail"]
+                            elif game_icon:
+                                entry["thumb"] = game_icon
 
-                    if not entry:
-                        # Link to playlist (try game name match first, then series name)
-                        pl = game_to_playlist.get(gname) or series_to_playlist.get(gname)
+                    elif sep == "_started":
+                        # Link to playlist; use game icon + series_name
                         if pl and pl.get("playlist_id"):
                             entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
-                            if pl.get("thumbnail"):
-                                entry["thumb"] = pl["thumbnail"]
-                            if key.endswith("_started"):
-                                if gname in game_first_series:
-                                    entry["series_name"] = game_first_series[gname]
-                                elif gname in game_icons:
-                                    entry["icon"] = game_icons[gname]
+                            if gname in game_first_series:
+                                entry["series_name"] = game_first_series[gname]
+                        else:
+                            entry = {"url": "/games"}
+                        if game_icon:
+                            entry["thumb"] = game_icon
+                        if gname in game_first_series:
+                            entry["series_name"] = game_first_series[gname]
+
+                    else:
+                        # views/hours/return/upload: link to playlist; use game icon as thumb
+                        if pl and pl.get("playlist_id"):
+                            entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
+                        else:
+                            entry = {"url": "/games"}
+                        if game_icon:
+                            entry["thumb"] = game_icon
 
                     if entry:
                         milestone_links[key] = entry

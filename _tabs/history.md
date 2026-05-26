@@ -31,6 +31,9 @@ var histData = {{ history | jsonify }};
 console.log('Chart debug: entries=' + histData.length, 'first=' + histData[0].date, 'last=' + histData[histData.length-1].date);
 console.log('Sample entry:', JSON.stringify(histData[Math.floor(histData.length/2)]));
 
+Chart.defaults.elements.line.tension = 0.3;
+Chart.defaults.elements.point.radius = 0;
+
 var dates = histData.map(function(h) { return h.date; });
 
 function pluck(entry, platform, field) {

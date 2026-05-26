@@ -244,21 +244,26 @@ def main():
                 new_reached[key] = date
                 break
 
-        # Return milestones (gap between first and latest video)
+        # Return milestones (longest gap between consecutive videos)
         if len(video_dates) >= 2:
-            first = video_dates[0]
-            latest = video_dates[-1]
             try:
-                fd = datetime.strptime(first, "%Y-%m-%d")
-                ld = datetime.strptime(latest, "%Y-%m-%d")
-                gap = (ld - fd).days
+                dates_dt = sorted(datetime.strptime(d, "%Y-%m-%d") for d in video_dates)
+                max_gap = 0
+                gap_end_idx = 0
+                for i in range(len(dates_dt) - 1):
+                    gap = (dates_dt[i + 1] - dates_dt[i]).days
+                    if gap > max_gap:
+                        max_gap = gap
+                        gap_end_idx = i + 1
+                gap = max_gap
+                gap_end = video_dates[gap_end_idx]
                 for m in sorted(GAME_RETURN_THRESH, reverse=True):
                     if gap >= m:
                         key = f"game_{gname}_return_{m}"
                         msg = GAME_DEFAULT["return"].replace("{game}", gname).replace("{{days}}", str(gap))
                         if key not in prev_reached:
-                            print(f"  New game milestone: {msg} (date={latest})")
-                        new_reached[key] = latest
+                            print(f"  New game milestone: {msg} (date={gap_end})")
+                        new_reached[key] = gap_end
                         break
             except Exception:
                 pass
@@ -350,13 +355,10 @@ def main():
         for m in [3, 9, 27, 81, 243, 729, 2187, 6561]:
             if age_days >= m:
                 key = f"age_{m}"
-                date = fd.strftime("%Y-%m-%d")  # channel reached m days old on that date
-                # Actually: channel age m = first_video + m days
                 age_date = (fd + timedelta(days=m)).strftime("%Y-%m-%d")
                 if key not in prev_reached:
                     print(f"  New age milestone: {m} days old (date={age_date})")
                 new_reached[key] = age_date
-                break
 
     # Sort milestones: descending by date, then by threshold descending within same date
     def sort_key(item):

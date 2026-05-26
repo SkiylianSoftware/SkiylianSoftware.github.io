@@ -130,6 +130,7 @@ def backfill_history():
                     "videos": ym.get("videos", 0),
                     "duration_seconds": ym.get("duration_seconds", 0),
                     "likes": ym.get("likes", 0),
+                    "comments": ym.get("comments", 0),
                 }
 
     # Determine start date from earliest video
@@ -197,7 +198,7 @@ def backfill_history():
     sorted_dates = sorted(entries_by_date.keys())
     result = []
     last = {
-        "youtube_main": {"subs": 0, "views": 0, "videos": 0, "duration_seconds": 0, "likes": 0},
+        "youtube_main": {"subs": 0, "views": 0, "videos": 0, "duration_seconds": 0, "likes": 0, "comments": 0},
         "youtube_vods": {},
         "twitch": {},
         "github": {},
@@ -229,6 +230,38 @@ def main():
     if not history:
         history = backfill_history()
         print(f"Backfilled {len(history)} entries from video data")
+    else:
+        # Schema migration: patch old entries missing duration_seconds/likes/comments
+        yt = read_json("youtube_main.json")
+        if yt and yt.get("videos"):
+            videos = sorted(yt["videos"], key=lambda v: (v.get("published") or "")[:10])
+            needs_migrate = False
+            for entry in history:
+                ym = entry.get("youtube_main") or {}
+                if "duration_seconds" not in ym or "likes" not in ym or "comments" not in ym:
+                    needs_migrate = True
+                    break
+            if needs_migrate:
+                vid_idx = 0
+                cum_dur = 0
+                cum_likes = 0
+                cum_comments = 0
+                for entry in history:
+                    d = entry.get("date", "")
+                    ym = entry.setdefault("youtube_main", {})
+                    while vid_idx < len(videos):
+                        vd = (videos[vid_idx].get("published") or "")[:10]
+                        if vd <= d:
+                            cum_dur += videos[vid_idx].get("duration_seconds", 0)
+                            cum_likes += videos[vid_idx].get("like_count", 0)
+                            cum_comments += videos[vid_idx].get("comment_count", 0)
+                            vid_idx += 1
+                        else:
+                            break
+                    ym["duration_seconds"] = cum_dur
+                    ym["likes"] = cum_likes
+                    ym["comments"] = cum_comments
+                print(f"Migrated {len(history)} history entries: added duration/likes/comments")
 
     snapshot = build_snapshot()
 

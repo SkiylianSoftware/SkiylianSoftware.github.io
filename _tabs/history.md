@@ -183,24 +183,23 @@ function toggleMetric(metric) {
 <h2 class="milestones-heading">Milestones</h2>
 <p class="milestones-note">&#9881;&#65039; Powers of three (ternary) are my primary counting system. Powers of two (binary) and round numbers also tracked. <a href="/about">Why ternary?</a></p>
 
-<div class="ms-filter-bar">
-  <button class="ms-filter-btn active" onclick="filterMilestones('all')" data-filter="all">All</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('subs')" data-filter="subs">Subs</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('views')" data-filter="views">Views</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('videos')" data-filter="videos">Videos</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('game')" data-filter="game">Games</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('watch')" data-filter="watch">Watch Time</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('content')" data-filter="content">Content</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('likes')" data-filter="likes">Likes</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('comments')" data-filter="comments">Comments</button>
-  <button class="ms-filter-btn" onclick="filterMilestones('other')" data-filter="other">Other</button>
+<div class="ms-filter-bar" id="ms-filter-bar">
+  <button class="ms-filter-btn active" data-filter="all">All</button>
+  <button class="ms-filter-btn" data-filter="subs">Subs</button>
+  <button class="ms-filter-btn" data-filter="views">Views</button>
+  <button class="ms-filter-btn" data-filter="videos">Videos</button>
+  <button class="ms-filter-btn" data-filter="game">Games</button>
+  <button class="ms-filter-btn" data-filter="watch">Watch Time</button>
+  <button class="ms-filter-btn" data-filter="content">Content</button>
+  <button class="ms-filter-btn" data-filter="likes">Likes</button>
+  <button class="ms-filter-btn" data-filter="comments">Comments</button>
+  <button class="ms-filter-btn" data-filter="other">Other</button>
 </div>
 
 <script>
 function filterMilestones(type) {
   document.querySelectorAll('.ms-filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.filter === type); });
   var items = document.querySelectorAll('.timeline-item.milestone');
-  console.log('filterMilestones:', type, 'found', items.length, 'items');
   items.forEach(function(item) {
     if (type === 'all') { item.classList.remove('hidden'); return; }
     var dtype = item.getAttribute('data-type');
@@ -217,6 +216,10 @@ function filterMilestones(type) {
     div.style.display = hasVisible ? '' : 'none';
   });
 }
+document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
+  var btn = e.target.closest('.ms-filter-btn');
+  if (btn) filterMilestones(btn.getAttribute('data-filter'));
+});
 </script>
 
 {% assign milestones = site.data.milestones %}

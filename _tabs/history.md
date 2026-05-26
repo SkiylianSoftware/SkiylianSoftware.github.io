@@ -190,6 +190,10 @@ function toggleMetric(metric) {
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
       {% assign display = key | remove: "age_" | append: " days old" %}
+    {% elsif key contains "hiatus_" %}
+      {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "hiatus_" %}
+      {% capture d %}Returned after hiatus of {{ val }}+ days{% endcapture %}{% assign display = d %}
     {% else %}
       {% assign pparts = key | split: "_" %}
       {% assign val = pparts | last %}

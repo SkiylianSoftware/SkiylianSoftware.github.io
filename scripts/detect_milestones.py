@@ -80,6 +80,7 @@ MILESTONE_SPECS = [
 
 GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
 GAME_RETURN_THRESH = [m for m in GAME_EP_THRESH if m >= 27]
+HIATUS_THRESH = GAME_RETURN_THRESH
 
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
@@ -193,7 +194,8 @@ def main():
         )
 
     # Process standard milestones (subs, views, videos)
-    for label, thresholds, msgs, formatter in MILESTONE_SPECS:
+    # Collect ALL thresholds (no break), then collapse same-label same-date later
+    for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
         value = {"subs": subs, "views": views, "videos": videos_count}.get(label, 0)
         for m in sorted(thresholds, reverse=True):
             if value >= m:
@@ -207,16 +209,7 @@ def main():
                         date = dates[m - 1]
                 if not date:
                     date = today
-
-                if key not in prev_reached:
-                    msg = formatter(m, msgs.get(m, ""))
-                    print(f"  New milestone: {msg} (date={date})")
-                elif prev_reached.get(key, "").startswith(today):
-                    # Was previously set to today - update to real date
-                    pass  # date is already set correctly above
-
                 new_reached[key] = date
-                break
 
     # Process game milestones from per-video cumulative data
     all_videos = yt_main.get("videos", [])
@@ -237,12 +230,7 @@ def main():
             if ep_count >= m:
                 key = f"game_{gname}_ep_{m}"
                 date = video_dates[m - 1]
-                override = GAME_OVERRIDES.get(gname, {}).get("ep", {}).get(m)
-                msg = override or GAME_DEFAULT["ep"].replace("{game}", gname).replace("{{m}}", str(m))
-                if key not in prev_reached:
-                    print(f"  New game milestone: {msg} (date={date})")
                 new_reached[key] = date
-                break
 
         # Return milestones (longest gap between consecutive videos)
         if len(video_dates) >= 2:
@@ -260,11 +248,7 @@ def main():
                 for m in sorted(GAME_RETURN_THRESH, reverse=True):
                     if gap >= m:
                         key = f"game_{gname}_return_{m}"
-                        msg = GAME_DEFAULT["return"].replace("{game}", gname).replace("{{days}}", str(gap))
-                        if key not in prev_reached:
-                            print(f"  New game milestone: {msg} (date={gap_end})")
                         new_reached[key] = gap_end
-                        break
             except Exception:
                 pass
 
@@ -313,9 +297,6 @@ def main():
                         break
                 if found_date:
                     key = f"game_{gname}_views_{m}"
-                    msg = GAME_DEFAULT["views"].replace("{game}", gname).replace("{{count}}", str(m))
-                    if key not in prev_reached:
-                        print(f"  New game milestone: {msg} (date={found_date})")
                     new_reached[key] = found_date
 
             # Hour milestones (watch_time is in minutes from analytics; convert to hours)
@@ -338,9 +319,6 @@ def main():
                         break
                 if found_date:
                     key = f"game_{gname}_hours_{m}"
-                    msg = GAME_DEFAULT["hours"].replace("{game}", gname).replace("{{hours}}", str(m))
-                    if key not in prev_reached:
-                        print(f"  New game milestone: {msg} (date={found_date})")
                     new_reached[key] = found_date
 
     # Age milestone
@@ -356,9 +334,66 @@ def main():
             if age_days >= m:
                 key = f"age_{m}"
                 age_date = (fd + timedelta(days=m)).strftime("%Y-%m-%d")
-                if key not in prev_reached:
-                    print(f"  New age milestone: {m} days old (date={age_date})")
                 new_reached[key] = age_date
+
+    # Channel hiatus milestone (longest gap between any two video uploads)
+    if len(all_videos) >= 2:
+        hiatus_dates = sorted(set(v.get("published", "")[:10] for v in all_videos if v.get("published")))
+        if len(hiatus_dates) >= 2:
+            hiatus_dt = [datetime.strptime(d, "%Y-%m-%d") for d in hiatus_dates]
+            max_gap = 0
+            gap_end = None
+            for i in range(len(hiatus_dt) - 1):
+                gap = (hiatus_dt[i + 1] - hiatus_dt[i]).days
+                if gap > max_gap:
+                    max_gap = gap
+                    gap_end = hiatus_dates[i + 1]
+            if max_gap > 0 and gap_end:
+                for m in sorted(HIATUS_THRESH, reverse=True):
+                    if max_gap >= m:
+                        key = f"hiatus_{m}"
+                        new_reached[key] = gap_end
+
+    # Collapse milestones: for each label, keep only the highest threshold per date
+    def collapse_key(key):
+        return key.rsplit("_", 1)[0]
+
+    def threshold_val(key):
+        return int(key.rsplit("_", 1)[1])
+
+    collapsed = {}
+    groups = {}
+    for key, date in new_reached.items():
+        groups.setdefault((collapse_key(key), date), []).append(key)
+    for (_, date), keys in groups.items():
+        best = max(keys, key=threshold_val)
+        collapsed[best] = date
+    new_reached = collapsed
+
+    for key, date in new_reached.items():
+        if key not in prev_reached:
+            parts = key.rsplit("_", 1)
+            m = int(parts[1])
+            if key.startswith("age_"):
+                print(f"  New milestone: {m} days old (date={date})")
+            elif key.startswith("hiatus_"):
+                print(f"  New milestone: returned after hiatus ({date})")
+            elif key.startswith("game_"):
+                rest = key[len("game_") :]
+                if "_ep_" in rest:
+                    g, _, n = rest.partition("_ep_")
+                    print(f"  New milestone: {n} episodes in {g} (date={date})")
+                elif "_views_" in rest:
+                    g, _, n = rest.partition("_views_")
+                    print(f"  New milestone: {n} views across {g} (date={date})")
+                elif "_hours_" in rest:
+                    g, _, n = rest.partition("_hours_")
+                    print(f"  New milestone: {n} hours in {g} (date={date})")
+                elif "_return_" in rest:
+                    g, _, n = rest.partition("_return_")
+                    print(f"  New milestone: Back to {g} after {n}+ days (date={date})")
+            else:
+                print(f"  New milestone: {m:,} {parts[0]} (date={date})")
 
     # Sort milestones: descending by date, then by threshold descending within same date
     def sort_key(item):

@@ -235,11 +235,6 @@ def main():
                 date = video_dates[m - 1]
                 new_reached[key] = date
 
-        # Series started milestone (first video publish date)
-        key = f"game_{gname}_started"
-        if key not in new_reached:
-            new_reached[key] = video_dates[0]
-
         # Return milestones (longest gap between consecutive videos)
         if len(video_dates) >= 2:
             try:
@@ -257,6 +252,23 @@ def main():
                 new_reached[key] = gap_end
             except Exception:
                 pass
+
+    # First video per game for "series started" milestone (before aliasing, use raw game name)
+    game_first_series = {}
+    for v in sorted(all_videos, key=lambda x: x.get("published", "")):
+        s = v.get("series", {})
+        if not s:
+            continue
+        gname = (s or {}).get("game", "")
+        sname = (s or {}).get("series_name", "")
+        if gname and sname and gname not in game_first_series:
+            game_first_series[gname] = sname
+
+    # Series started milestone per game (use the canonical game name from game_cumulative)
+    for gname in game_cumulative:
+        key = f"game_{gname}_started"
+        if key not in new_reached:
+            new_reached[key] = game_cumulative[gname][0]
 
     # Load playlist data for game milestone links
     game_to_playlist = {}
@@ -481,7 +493,11 @@ def main():
                 new_reached[key] = best_date
                 vi = vid_map.get(best_vid, {})
                 title = vi.get("title", video_history.get(best_vid, {}).get("title", ""))
-                milestone_links[key] = {"url": f"/videos#vid-{best_vid}", "text": title}
+                entry = {"url": f"/videos#vid-{best_vid}", "text": title}
+                thumb = vi.get("thumbnail", "")
+                if thumb:
+                    entry["thumb"] = thumb
+                milestone_links[key] = entry
 
     # Add playlist links for game milestones
     for key in list(new_reached.keys()):
@@ -493,8 +509,13 @@ def main():
                     pl = game_to_playlist.get(gname)
                     if pl and pl.get("playlist_id"):
                         entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
-                        if key.endswith("_started") and gname in game_icons:
-                            entry["icon"] = game_icons[gname]
+                        if pl.get("thumbnail"):
+                            entry["thumb"] = pl["thumbnail"]
+                        if key.endswith("_started"):
+                            if gname in game_first_series:
+                                entry["series_name"] = game_first_series[gname]
+                            elif gname in game_icons:
+                                entry["icon"] = game_icons[gname]
                         milestone_links[key] = entry
                     break
 

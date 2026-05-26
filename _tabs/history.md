@@ -212,8 +212,10 @@ function filterMilestones(type) {
         {% assign g = rest | remove: "_started" %}
         {% assign mclass = "ms-started" %}
         {% assign started_meta = milestones.links[key] %}
-        {% if started_meta.icon %}
-          {% capture d %}<img src="{{ started_meta.icon }}" class="ms-thumb"> {{ g }} series started{% endcapture %}{% assign display = d %}
+        {% if started_meta.series_name %}
+          {% capture d %}{{ started_meta.series_name }} ({{ g }}) started{% endcapture %}{% assign display = d %}
+        {% elsif started_meta.icon %}
+          {% capture d %}{{ g }} series started{% endcapture %}{% assign display = d %}
         {% else %}
           {% capture d %}{{ g }} series started{% endcapture %}{% assign display = d %}
         {% endif %}
@@ -277,19 +279,20 @@ function filterMilestones(type) {
     {% assign link_meta = milestones.links[key] %}
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
-    {% if link %}
-    <a href="{{ link }}" class="timeline-item milestone {{ mclass }}" data-type="{{ dtype }}">
-      <span class="tl-date">{{ date }}</span>
+    {% assign has_thumb = link_meta.thumb %}
+    {% assign tag = "div" %}
+    {% if link %}{% assign tag = "a" %}{% endif %}
+    <{{ tag }} {% if link %}href="{{ link }}"{% endif %} class="timeline-item milestone {{ mclass }}" data-type="{{ dtype }}">
+      {% if has_thumb %}
+      <span class="tl-thumb" style="background-image: url('{{ has_thumb }}')"></span>
+      {% else %}
       <span class="tl-icon">{{ icon }}</span>
-      <span class="tl-text">{{ display }}</span>
-    </a>
-    {% else %}
-    <div class="timeline-item milestone {{ mclass }}" data-type="{{ dtype }}">
-      <span class="tl-date">{{ date }}</span>
-      <span class="tl-icon">{{ icon }}</span>
-      <span class="tl-text">{{ display }}</span>
-    </div>
-    {% endif %}
+      {% endif %}
+      <span class="tl-body">
+        <span class="tl-date">{{ date }}</span>
+        <span class="tl-text">{{ display }}</span>
+      </span>
+    </{{ tag }}>
   {% endfor %}
 </div>
 {% else %}

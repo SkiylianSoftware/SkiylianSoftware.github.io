@@ -649,14 +649,76 @@ body::after {
   border-left: 3px solid transparent;
   background: rgba(45,212,191,0.06);
   transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin: 0.25rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.85rem;
 }
 .timeline-item.milestone.hidden { display: none; }
 .timeline-item.milestone:hover {
   transform: translateX(2px);
 }
-.timeline-item.milestone .tl-icon { font-size: 0.9rem; }
+.timeline-item.milestone .tl-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-/* Milestone type colors */
+/* Thumbnail: 2.5rem square with rounded corners */
+.tl-thumb {
+  width: 2.5rem;
+  min-height: 2.5rem;
+  border-radius: 5px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  align-self: center;
+}
+.tl-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15rem;
+}
+.tl-body .tl-date {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.tl-body .tl-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.3;
+}
+/* Type color overrides for tl-text inside tl-body */
+.timeline-item.milestone.ms-subs .tl-body .tl-text { color: #2dd4bf; }
+.timeline-item.milestone.ms-views .tl-body .tl-text { color: #ff4444; }
+.timeline-item.milestone.ms-videos .tl-body .tl-text { color: #c084fc; }
+.timeline-item.milestone.ms-game .tl-body .tl-text { color: #a970ff; }
+.timeline-item.milestone.ms-started .tl-body .tl-text { color: #fb7185; }
+.timeline-item.milestone.ms-age .tl-body .tl-text { color: #f59e0b; }
+.timeline-item.milestone.ms-hiatus .tl-body .tl-text { color: #f472b6; }
+.timeline-item.milestone.ms-streak .tl-body .tl-text { color: #fb923c; }
+.timeline-item.milestone.ms-video-first .tl-body .tl-text { color: #22d3ee; }
+.timeline-item.milestone.ms-hours .tl-body .tl-text { color: #94a3b8; }
+.timeline-item.milestone.ms-upload .tl-body .tl-text { color: #4ade80; }
+
+/* Hover accent on link items */
+a.timeline-item { text-decoration: none; color: inherit; }
+a.timeline-item:hover { background: rgba(45,212,191,0.04); }
+
+/* Milestone type border+background colors */
 .timeline-item.milestone.ms-subs { border-left-color: #2dd4bf; background: rgba(45,212,191,0.08); }
 .timeline-item.milestone.ms-views { border-left-color: #ff4444; background: rgba(255,68,68,0.06); }
 .timeline-item.milestone.ms-videos { border-left-color: #c084fc; background: rgba(192,132,252,0.06); }
@@ -668,21 +730,6 @@ body::after {
 .timeline-item.milestone.ms-hours { border-left-color: #94a3b8; background: rgba(148,163,184,0.06); }
 .timeline-item.milestone.ms-upload { border-left-color: #4ade80; background: rgba(74,222,128,0.06); }
 .timeline-item.milestone.ms-started { border-left-color: #fb7185; background: rgba(251,113,133,0.06); }
-
-.timeline-item.milestone.ms-subs .tl-text { color: #2dd4bf; }
-.timeline-item.milestone.ms-views .tl-text { color: #ff4444; }
-.timeline-item.milestone.ms-videos .tl-text { color: #c084fc; }
-.timeline-item.milestone.ms-game .tl-text { color: #a970ff; }
-.timeline-item.milestone.ms-age .tl-text { color: #f59e0b; }
-.timeline-item.milestone.ms-hiatus .tl-text { color: #f472b6; }
-.timeline-item.milestone.ms-streak .tl-text { color: #fb923c; }
-.timeline-item.milestone.ms-video-first .tl-text { color: #22d3ee; }
-.timeline-item.milestone.ms-hours .tl-text { color: #94a3b8; }
-.timeline-item.milestone.ms-upload .tl-text { color: #4ade80; }
-.timeline-item.milestone.ms-started .tl-text { color: #fb7185; }
-.ms-thumb { width: 1.1rem; height: 1.1rem; border-radius: 3px; vertical-align: middle; margin-right: 0.3rem; object-fit: cover; }
-a.timeline-item { text-decoration: none; color: inherit; display: flex; }
-a.timeline-item:hover { background: rgba(45,212,191,0.04); }
 .month-divider {
   font-size: 0.75rem;
   font-weight: 600;

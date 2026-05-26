@@ -151,6 +151,7 @@ def main():
                     if gname not in game_to_playlist:
                         series_to_playlist[gname] = pl
                     break
+        return game_to_playlist, series_to_playlist
 
     # Filter out content series that aren't actual games (Railway Exhibition Vlogs, etc.)
     playlist_data = read_json("playlists.json") or {}

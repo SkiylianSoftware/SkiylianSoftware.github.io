@@ -194,6 +194,18 @@ function toggleMetric(metric) {
       {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hiatus_" %}
       {% capture d %}Returned after hiatus of {{ val }}+ days{% endcapture %}{% assign display = d %}
+    {% elsif key contains "streak_" %}
+      {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "streak_" %}
+      {% capture d %}{{ val }}-week upload streak{% endcapture %}{% assign display = d %}
+    {% elsif key contains "video_first_" %}
+      {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
+      {% assign val = key | remove: "video_first_" %}
+      {% capture d %}First video to {{ val }} views{% endcapture %}{% assign display = d %}
+    {% elsif key contains "hours_" %}
+      {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "hours_" %}
+      {% capture d %}{{ val }} total channel hours{% endcapture %}{% assign display = d %}
     {% else %}
       {% assign pparts = key | split: "_" %}
       {% assign val = pparts | last %}
@@ -204,6 +216,9 @@ function toggleMetric(metric) {
       {% endif %}
       {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
     {% endif %}
+
+    {% assign link_meta = milestones.links[key] %}
+    {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
     {% if link %}
     <a href="{{ link }}" class="timeline-item milestone {{ mclass }}">

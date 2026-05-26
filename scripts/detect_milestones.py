@@ -81,6 +81,9 @@ MILESTONE_SPECS = [
 GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
 GAME_RETURN_THRESH = [m for m in GAME_EP_THRESH if m >= 27]
 HIATUS_THRESH = GAME_RETURN_THRESH
+STREAK_THRESH = sorted([4, 8, 13, 26, 52, 104])
+HOURS_THRESH = sorted(set(P3 + P2 + RND))
+VIDEO_FIRST_THRESH = sorted([m for m in set(P3 + RND) if m >= 100])
 
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
@@ -354,6 +357,83 @@ def main():
                         key = f"hiatus_{m}"
                         new_reached[key] = gap_end
 
+    # Weekly upload streak (consecutive calendar weeks with at least one upload)
+    if len(all_videos) >= 2:
+        all_date_set = sorted(set(v.get("published", "")[:10] for v in all_videos if v.get("published")))
+        if len(all_date_set) >= 2:
+            week_dates = {}
+            for d in all_date_set:
+                dt = datetime.strptime(d, "%Y-%m-%d")
+                iso = dt.isocalendar()
+                wk = iso[0] * 100 + iso[1]
+                week_dates.setdefault(wk, []).append(d)
+            sorted_weeks = sorted(week_dates.keys())
+            longest = 0
+            cur = 0
+            streak_end = None
+            for i, wk in enumerate(sorted_weeks):
+                if i == 0 or wk - sorted_weeks[i - 1] != 1:
+                    cur = 1
+                else:
+                    cur += 1
+                if cur > longest:
+                    longest = cur
+                    streak_end = max(week_dates[wk])
+            if longest >= 2:
+                for m in sorted(STREAK_THRESH, reverse=True):
+                    if longest >= m:
+                        key = f"streak_{m}"
+                        new_reached[key] = streak_end
+
+    # Video linking metadata stored alongside milestones
+    milestone_links = {}
+
+    # First video to reach N views (from video_history.json)
+    if video_history and all_videos:
+        vid_map = {}
+        for v in all_videos:
+            vid_map[v.get("video_id", "")] = v
+        for m in sorted(VIDEO_FIRST_THRESH, reverse=True):
+            best_date = None
+            best_vid = None
+            for vid, vh in video_history.items():
+                daily = vh.get("daily", {})
+                if not daily:
+                    continue
+                sd = sorted(daily.keys())
+                cum = 0
+                for d in sd:
+                    cum += daily[d].get("views", 0)
+                    if cum >= m:
+                        if best_date is None or d < best_date:
+                            best_date = d
+                            best_vid = vid
+                        break
+            if best_date and best_vid:
+                key = f"video_first_{m}"
+                new_reached[key] = best_date
+                vi = vid_map.get(best_vid, {})
+                title = vi.get("title", video_history.get(best_vid, {}).get("title", ""))
+                milestone_links[key] = {"url": f"/videos#vid-{best_vid}", "text": title}
+
+    # Total watch time (hours) from video_history.json
+    if video_history:
+        daily_hours = {}
+        for _vid, vh in video_history.items():
+            for d, dv in vh.get("daily", {}).items():
+                daily_hours.setdefault(d, 0)
+                daily_hours[d] += dv.get("watch_time", 0) // 60
+        if daily_hours:
+            sorted_dates = sorted(daily_hours.keys())
+            for m in sorted(HOURS_THRESH, reverse=True):
+                cum = 0
+                for d in sorted_dates:
+                    cum += daily_hours[d]
+                    if cum >= m:
+                        key = f"hours_{m}"
+                        new_reached[key] = d
+                        break
+
     # Collapse milestones: for each label, keep only the highest threshold per date
     def collapse_key(key):
         return key.rsplit("_", 1)[0]
@@ -378,6 +458,14 @@ def main():
                 print(f"  New milestone: {m} days old (date={date})")
             elif key.startswith("hiatus_"):
                 print(f"  New milestone: returned after hiatus ({date})")
+            elif key.startswith("streak_"):
+                print(f"  New milestone: {m} week upload streak (date={date})")
+            elif key.startswith("video_first_"):
+                link = milestone_links.get(key, {})
+                title = link.get("text", "")
+                print(f"  New milestone: first video to {m:,} views (date={date}) - {title}")
+            elif key.startswith("hours_"):
+                print(f"  New milestone: {m:,} total channel hours (date={date})")
             elif key.startswith("game_"):
                 rest = key[len("game_") :]
                 if "_ep_" in rest:
@@ -413,6 +501,8 @@ def main():
     os.makedirs(DATA_DIR, exist_ok=True)
     sorted_reached = dict(sorted(new_reached.items(), key=sort_key, reverse=True))
     result = {"current": {}, "reached": sorted_reached}
+    if milestone_links:
+        result["links"] = milestone_links
     with open(MILESTONES_FILE, "w") as f:
         json.dump(result, f, indent=2)
     print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones)")

@@ -29,6 +29,11 @@ permalink: /partners/
       <p>Partner links in video descriptions, pinned comments, or end screen elements alongside my regular content.</p>
     </div>
     <div class="offer-card">
+      <i class="fas fa-percent"></i>
+      <h3>Affiliate Partnerships</h3>
+      <p>Commission-based placements with tracked links and/or discount codes. Integrated naturally into existing content, no hard selling.</p>
+    </div>
+    <div class="offer-card">
       <i class="fas fa-star"></i>
       <h3>Cross-Promotion</h3>
       <p>Mutual membership or perk promotions. If your audience fits my content, and mine fits yours, that's a conversation worth having.</p>
@@ -73,7 +78,7 @@ permalink: /partners/
     <li><strong>Disclosure first.</strong> I follow UK advertising guidelines. Every sponsorship is announced verbally at the start and contained in a clearly denoted section so viewers can skip if they choose.</li>
     <li><strong>I keep creative control.</strong> I script and present things my way. Your product in my context, not your script in my voice.</li>
     <li><strong>Long-term over one-off.</strong> I'd rather build an ongoing relationship than do a single video that feels disconnected from everything else.</li>
-    <li><strong>Flexible compensation.</strong> Flat fees, product access, affiliate commissions -- whatever makes sense for the specific partnership. I'm open to discussion.</li>
+    <li><strong>Flexible compensation.</strong> Flat fees, product access, affiliate commissions, revenue share -- whatever makes sense. I'm open to discussion.</li>
   </ul>
 </div>
 

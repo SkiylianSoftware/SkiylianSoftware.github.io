@@ -78,6 +78,7 @@ permalink: /partners/media-kit/
       <li>Dedicated video segments; in-context demonstrations within regular uploads</li>
       <li>Stream integrations; on-stream mentions, overlays, sponsored segments during Twitch broadcasts</li>
       <li>Description & end screen placements; links, logos, and call-to-actions</li>
+      <li>Affiliate partnerships; commission-based placements with tracked links and/or discount codes</li>
       <li>Cross-promotion; mutual membership or content collaborations</li>
     </ul>
   </div>

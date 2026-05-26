@@ -25,13 +25,13 @@ group: stats
   {% if history[0].github %}
   <button class="chart-btn" onclick="toggleMetric('github')" id="btn-github">GitHub</button>
   {% endif %}
-  {% if history[0].youtube_main contains 'duration_seconds' %}
+    {% if history.last.youtube_main.duration_seconds > 0 %}
   <button class="chart-btn" onclick="toggleMetric('hours')" id="btn-hours">Duration</button>
   {% endif %}
-  {% if history[0].youtube_main contains 'likes' %}
+  {% if history.last.youtube_main.likes > 0 %}
   <button class="chart-btn" onclick="toggleMetric('likes')" id="btn-likes">Likes</button>
   {% endif %}
-  {% if history[0].youtube_main contains 'comments' %}
+  {% if history.last.youtube_main.comments > 0 %}
   <button class="chart-btn" onclick="toggleMetric('comments')" id="btn-comments">Comments</button>
   {% endif %}
 </div>
@@ -199,9 +199,11 @@ function toggleMetric(metric) {
 <script>
 function filterMilestones(type) {
   document.querySelectorAll('.ms-filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.filter === type); });
-  document.querySelectorAll('.timeline-item.milestone').forEach(function(item) {
+  var items = document.querySelectorAll('.timeline-item.milestone');
+  console.log('filterMilestones:', type, 'found', items.length, 'items');
+  items.forEach(function(item) {
     if (type === 'all') { item.classList.remove('hidden'); return; }
-    var dtype = item.dataset.type;
+    var dtype = item.getAttribute('data-type');
     item.classList.toggle('hidden', dtype !== type);
   });
   // Hide month dividers with no visible milestones

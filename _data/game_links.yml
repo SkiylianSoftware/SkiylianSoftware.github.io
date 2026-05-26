@@ -2,13 +2,20 @@
 # The key is the canonical display name. The `aliases` list maps
 # video-title extracted names to the canonical key.
 # The `color` field sets the hover accent on game cards (hex).
+# The `icon` field sets the banner image for milestones and game cards.
 # Missing entries just won't show a link button.
 Factorio:
   steam: https://store.steampowered.com/app/427520/
   website: https://factorio.com/
+  icon: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/427520/header.jpg
 Transport Fever:
   steam: https://store.steampowered.com/app/1066780/
+  website: https://www.transportfever.com/
+  icon: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1066780/header.jpg
+Transport Fever 2:
+  steam: https://store.steampowered.com/app/1066780/
   website: https://www.transportfever2.com/
+  icon: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1066780/header.jpg
 Minecraft:
   website: https://www.minecraft.net/
   icon: https://minecraft.wiki/images/thumb/MC_key_art_2024.jpg/1200px-MC_key_art_2024.jpg?8bc9c
@@ -16,8 +23,11 @@ Kerbal Space Program:
   steam: https://store.steampowered.com/app/220200/
   website: https://www.kerbalspaceprogram.com/
   aliases: [KSP]
+  icon: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/220200/header.jpg
 Station Flow:
   steam: https://store.steampowered.com/app/1122120/STATIONflow/
   aliases: [StationFlow, STATIONflow]
+  icon: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1122120/header.jpg
 Mars First Logistics:
   steam: https://store.steampowered.com/app/1532200/Mars_First_Logistics/
+  icon: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1532200/header.jpg

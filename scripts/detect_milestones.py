@@ -122,34 +122,6 @@ def main():
         except Exception:
             pass
 
-    # Filter out content series that aren't actual games (Railway Exhibition Vlogs, etc.)
-    if VALID_GAMES:
-        game_cumulative = {g: d for g, d in game_cumulative.items() if g in VALID_GAMES}
-
-    def resolve_gname(raw):
-        return ALIAS_MAP.get(raw, raw)
-
-    # Resolve game_cumulative aliases so milestone keys use canonical names
-    game_cumulative_resolved = {}
-    for raw_gname, dates in game_cumulative.items():
-        canon = resolve_gname(raw_gname)
-        game_cumulative_resolved.setdefault(canon, []).extend(dates)
-    game_cumulative = game_cumulative_resolved
-
-    # Resolve game_first_series and game_video_list aliases
-    game_first_series_resolved = {}
-    for raw_gname, sname in game_first_series.items():
-        canon = resolve_gname(raw_gname)
-        if canon not in game_first_series_resolved:
-            game_first_series_resolved[canon] = sname
-    game_first_series = game_first_series_resolved
-
-    game_video_list_resolved = {}
-    for raw_gname, entries in game_video_list.items():
-        canon = resolve_gname(raw_gname)
-        game_video_list_resolved.setdefault(canon, []).extend(entries)
-    game_video_list = game_video_list_resolved
-
     def _matches_playlist(gname, pl_title):
         """Match game name to playlist title using word-level matching with space-normalized fallback."""
         gl = gname.lower().strip()
@@ -179,10 +151,43 @@ def main():
                     if gname not in game_to_playlist:
                         series_to_playlist[gname] = pl
                     break
-        return game_to_playlist, series_to_playlist
 
-    # Warn about games with no matching playlist (informational only — VALID_GAMES is the authoritative filter)
+    # Filter out content series that aren't actual games (Railway Exhibition Vlogs, etc.)
     playlist_data = read_json("playlists.json") or {}
+    if VALID_GAMES:
+        game_cumulative = {g: d for g, d in game_cumulative.items() if g in VALID_GAMES}
+    elif playlist_data.get("playlists"):
+        game_cumulative = {
+            g: d
+            for g, d in game_cumulative.items()
+            if any(_matches_playlist(g, pl.get("title", "")) for pl in playlist_data["playlists"])
+        }
+
+    def resolve_gname(raw):
+        return ALIAS_MAP.get(raw, raw)
+
+    # Resolve game_cumulative aliases so milestone keys use canonical names
+    game_cumulative_resolved = {}
+    for raw_gname, dates in game_cumulative.items():
+        canon = resolve_gname(raw_gname)
+        game_cumulative_resolved.setdefault(canon, []).extend(dates)
+    game_cumulative = game_cumulative_resolved
+
+    # Resolve game_first_series and game_video_list aliases
+    game_first_series_resolved = {}
+    for raw_gname, sname in game_first_series.items():
+        canon = resolve_gname(raw_gname)
+        if canon not in game_first_series_resolved:
+            game_first_series_resolved[canon] = sname
+    game_first_series = game_first_series_resolved
+
+    game_video_list_resolved = {}
+    for raw_gname, entries in game_video_list.items():
+        canon = resolve_gname(raw_gname)
+        game_video_list_resolved.setdefault(canon, []).extend(entries)
+    game_video_list = game_video_list_resolved
+
+    # Warn about games with no matching playlist
     if playlist_data.get("playlists"):
         no_playlist = [
             g
@@ -502,8 +507,6 @@ def main():
                             entry = {"url": "/games"}
                         if game_icon:
                             entry["thumb"] = game_icon
-                        elif pl and pl.get("thumbnail"):
-                            entry["thumb"] = pl["thumbnail"]
                         if gname in game_first_series:
                             entry["series_name"] = game_first_series[gname]
 
@@ -515,8 +518,6 @@ def main():
                             entry = {"url": "/games"}
                         if game_icon:
                             entry["thumb"] = game_icon
-                        elif pl and pl.get("thumbnail"):
-                            entry["thumb"] = pl["thumbnail"]
 
                     if entry:
                         milestone_links[key] = entry

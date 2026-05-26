@@ -35,7 +35,8 @@ try:
                 for alias in entry.get("aliases", []):
                     ALIAS_MAP[alias] = canonical
                     VALID_GAMES.add(alias)
-except Exception:
+except Exception as e:
+    print(f"Warning: could not load {_VALID_GAMES_PATH}: {e}", file=__import__("sys").stderr)
     ALIAS_MAP = {}
 
 # Keep GAME_EP_THRESH as an alias for backwards compatibility

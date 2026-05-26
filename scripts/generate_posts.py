@@ -90,7 +90,6 @@ def generate_livestream_post(vods):
         date = published[:10]
         filename = f"{date}-vod-{vid}.md"
 
-
         frontmatter = {
             "title": f'"{title}"',
             "date": published,
@@ -157,7 +156,6 @@ def main():
 
             date = published[:10]
             filename = f"{date}-twitch-{vid}.md"
-
 
             frontmatter = {
                 "title": f'"{title}"',

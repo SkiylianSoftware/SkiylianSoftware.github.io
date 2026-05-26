@@ -200,14 +200,14 @@ function filterMilestones(type) {
     {% assign display = key %}
 
     {% if key contains "game_" %}
-      {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}{% assign link = "/games" %}
+      {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}
       {% assign rest = key | remove_first: "game_" %}
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
         {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_upload_" %}
         {% assign parts = rest | split: "_upload_" %}
-        {% capture d %}{{ parts[1] }} content hours in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_started" %}
         {% assign g = rest | remove: "_started" %}
         {% capture d %}{{ g }} series started{% endcapture %}{% assign display = d %}
@@ -216,11 +216,13 @@ function filterMilestones(type) {
         {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_hours_" %}
         {% assign parts = rest | split: "_hours_" %}
-        {% capture d %}{{ parts[1] }} hours in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_return_" %}
         {% assign parts = rest | split: "_return_" %}
         {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
       {% endif %}
+      {% assign game_slug = rest | split: "_" | first | slugify %}
+      {% assign link = "/games#" | append: game_slug %}
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
       {% assign display = key | remove: "age_" | append: " days old" %}
@@ -239,11 +241,11 @@ function filterMilestones(type) {
     {% elsif key contains "hours_" %}
       {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hours_" %}
-      {% capture d %}{{ val }} total channel hours{% endcapture %}{% assign display = d %}
+      {% capture d %}{{ val }} hours watched{% endcapture %}{% assign display = d %}
     {% elsif key contains "upload_" %}
       {% assign icon = "&#128221;" %}{% assign mclass = "ms-upload" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "upload_" %}
-      {% capture d %}{{ val }} hours of content created{% endcapture %}{% assign display = d %}
+      {% capture d %}{{ val }} hours uploaded{% endcapture %}{% assign display = d %}
     {% else %}
       {% assign pparts = key | split: "_" %}
       {% assign val = pparts | last %}

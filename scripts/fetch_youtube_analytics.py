@@ -153,78 +153,6 @@ def process_channel_analytics(analytics, history, platform_key):
     return new_entries
 
 
-def fetch_per_video_report(access_token, start_date, end_date, ids="channel==MINE"):
-    """Fetch per-video daily analytics with pagination."""
-    url = "https://youtubeanalytics.googleapis.com/v2/reports"
-    all_rows = []
-    start_index = 1
-    page_num = 0
-    while True:
-        params = {
-            "ids": ids,
-            "startDate": start_date,
-            "endDate": end_date,
-            "metrics": "views,estimatedMinutesWatched",
-            "dimensions": "day,video",
-            "sort": "day",
-            "maxResults": 1000,
-            "startIndex": start_index,
-        }
-        headers = {"Authorization": f"Bearer {access_token}"}
-        resp = requests.get(url, params=params, headers=headers, timeout=30)
-        if resp.status_code == 403:
-            print(f"  Per-video Analytics not accessible for {ids} (403)", file=sys.stderr)
-            return None
-        resp.raise_for_status()
-        data = resp.json()
-        rows = data.get("rows", [])
-        page_num += 1
-        all_rows.extend(rows)
-        if len(rows) < 1000:
-            break
-        start_index += 1000
-    print(f"  Per-video: {start_date} to {end_date} -> {len(all_rows)} rows ({page_num} pages)")
-    return {"rows": all_rows}
-
-
-def fetch_per_video_all(access_token, start_date, end_date, ids="channel==MINE"):
-    """Fetch per-video analytics in 365-day chunks."""
-    all_rows = []
-    chunk_end = end_date
-    chunk_num = 0
-    while True:
-        chunk_start = (datetime.strptime(chunk_end, "%Y-%m-%d") - timedelta(days=364)).strftime("%Y-%m-%d")
-        if chunk_start < start_date:
-            chunk_start = start_date
-        chunk_num += 1
-        report = fetch_per_video_report(access_token, chunk_start, chunk_end, ids=ids)
-        if report is None:
-            return None
-        rows = report.get("rows", [])
-        print(f"    Chunk {chunk_num}: {len(rows)} rows ({chunk_start} to {chunk_end})")
-        all_rows = rows + all_rows
-        if len(rows) < 364 or chunk_start <= start_date:
-            break
-        chunk_end = (datetime.strptime(chunk_start, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-    print(f"  Per-video total: {len(all_rows)} rows across {chunk_num} chunks")
-    return {"rows": all_rows}
-
-
-def build_video_daily_map(rows):
-    """Convert per-video rows to {video_id: {date: {views, watch_time}}}."""
-    video_daily = {}
-    for row in rows:
-        date = row[0]
-        vid = row[1]
-        views = int(row[2]) if row[2] else 0
-        watch_time = int(row[3]) if row[3] else 0
-        video_daily.setdefault(vid, {})[date] = {
-            "views": views,
-            "watch_time": watch_time,
-        }
-    return video_daily
-
-
 def load_video_history():
     if os.path.exists(VIDEO_HISTORY_FILE):
         with open(VIDEO_HISTORY_FILE) as f:
@@ -258,6 +186,70 @@ def merge_video_metadata(video_history, yt_data):
                 "duration_seconds": v.get("duration_seconds", 0),
             }
         )
+
+
+def fetch_video_history(video_history, access_token, start_date, end_date):
+    """Fetch per-video analytics one video at a time via filters=video==VID."""
+    url = "https://youtubeanalytics.googleapis.com/v2/reports"
+    sd = datetime.strptime(start_date, "%Y-%m-%d")
+    ed = datetime.strptime(end_date, "%Y-%m-%d")
+
+    need_fetch = []
+    for vid, vdata in video_history.items():
+        existing = set(vdata.get("daily", {}).keys())
+        # Check if any date in range is missing
+        cur = sd
+        missing = False
+        while cur <= ed:
+            if cur.strftime("%Y-%m-%d") not in existing:
+                missing = True
+                break
+            cur += timedelta(days=1)
+        if missing:
+            need_fetch.append(vid)
+
+    if not need_fetch:
+        print("  All videos have up-to-date data")
+        return
+
+    fetched = 0
+    for vid in need_fetch:
+        params = {
+            "ids": "channel==MINE",
+            "startDate": start_date,
+            "endDate": end_date,
+            "metrics": "views,estimatedMinutesWatched",
+            "dimensions": "day",
+            "filters": f"video=={vid}",
+            "sort": "day",
+            "maxResults": 1000,
+        }
+        headers = {"Authorization": f"Bearer {access_token}"}
+        try:
+            resp = requests.get(url, params=params, headers=headers, timeout=30)
+            if resp.status_code == 403:
+                continue
+            resp.raise_for_status()
+            data = resp.json()
+            rows = data.get("rows", [])
+            if not rows:
+                continue
+            for row in rows:
+                d = row[0]
+                views = int(row[1]) if row[1] else 0
+                watch_time = int(row[2]) if row[2] else 0
+                if vid not in video_history:
+                    video_history[vid] = {"daily": {}}
+                video_history[vid].setdefault("daily", {})[d] = {
+                    "views": views,
+                    "watch_time": watch_time,
+                }
+            fetched += 1
+            if fetched % 10 == 0:
+                print(f"    Fetched {fetched}/{len(need_fetch)} videos...")
+        except Exception as e:
+            print(f"    Error fetching video {vid}: {e}", file=sys.stderr)
+    print(f"  Fetched per-video data for {fetched}/{len(need_fetch)} videos")
 
 
 def main():
@@ -327,7 +319,7 @@ def main():
     print(f"\nDone channel analytics: {total_new} new entries, history now {len(history)} entries")
 
     # Per-video analytics
-    print("\nFetching per-video analytics (dimensions=day,video)...")
+    print("\nFetching per-video analytics...")
     yt_main = None
     yt_path = os.path.join(DATA_DIR, "youtube_main.json")
     if os.path.exists(yt_path):
@@ -338,27 +330,18 @@ def main():
     if yt_main:
         merge_video_metadata(video_history, yt_main)
 
-    for ids, _ in channels:
-        label = "main" if ids == "channel==MINE" else "vods"
-        existing_dates = set()
-        for _vid, vdata in video_history.items():
-            existing_dates.update(vdata.get("daily", {}).keys())
-        if existing_dates:
-            last_date = max(existing_dates)
-            fetch_start = (datetime.strptime(last_date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-        else:
-            fetch_start = start
-        if fetch_start < today:
-            print(f"\nFetching per-video analytics for {label} channel ({ids})...")
-            report = fetch_per_video_all(access_token, fetch_start, today, ids=ids)
-            if report and report.get("rows"):
-                daily_map = build_video_daily_map(report["rows"])
-                for vid, date_data in daily_map.items():
-                    if vid not in video_history:
-                        video_history[vid] = {"daily": {}}
-                    video_history[vid].setdefault("daily", {}).update(date_data)
-                print(f"  {label}: merged {len(daily_map)} videos' daily data")
-            break  # only fetch for main channel (vods analytics via same token may fail)
+    # Determine fetch range: from last tracked date or channel start up to today
+    existing_dates = set()
+    for vdata in video_history.values():
+        existing_dates.update(vdata.get("daily", {}).keys())
+    if existing_dates:
+        last_date = max(existing_dates)
+        fetch_start = (datetime.strptime(last_date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    else:
+        fetch_start = "2010-01-01"
+    if fetch_start < today:
+        print(f"  Fetching missing per-video data from {fetch_start} to {today}...")
+        fetch_video_history(video_history, access_token, fetch_start, today)
 
     if yt_main:
         merge_video_metadata(video_history, yt_main)

@@ -142,7 +142,7 @@ def fetch_vods(user_id, token):
                     "published": item.get("created_at", ""),
                     "duration_seconds": seconds,
                     "view_count": item.get("view_count", 0),
-                    "description": (item.get("description") or "")[:500],
+                    "description": item.get("description", ""),
                 }
             )
         cursor = data.get("pagination", {}).get("cursor")

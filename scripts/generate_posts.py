@@ -58,8 +58,6 @@ def generate_video_posts(videos, label, channel_url):
         if sname:
             tags.append(sname)
 
-        short_desc = (desc[:200] + "...") if desc and len(desc) > 200 else (desc or "No description available.")
-
         frontmatter = {
             "title": f'"{title}"',
             "date": published,
@@ -67,7 +65,7 @@ def generate_video_posts(videos, label, channel_url):
             "tags": f"[{', '.join(tags)}]" if tags else "",
             "pin": "false",
             "image": "",
-            "description": f'"{short_desc}"',
+            "description": f'"{desc}"',
         }
 
         body = f"[Watch on YouTube]({channel_url}/watch?v={vid})"
@@ -92,7 +90,6 @@ def generate_livestream_post(vods):
         date = published[:10]
         filename = f"{date}-vod-{vid}.md"
 
-        short_desc = (desc[:200] + "...") if desc and len(desc) > 200 else (desc or "Stream archive available.")
 
         frontmatter = {
             "title": f'"{title}"',
@@ -101,7 +98,7 @@ def generate_livestream_post(vods):
             "tags": "[vod, stream]",
             "pin": "false",
             "image": "",
-            "description": f'"{short_desc}"',
+            "description": f'"{desc}"',
         }
 
         body = f"[Watch VOD on YouTube](https://watch.skiylia.dev/watch?v={vid})"
@@ -161,7 +158,6 @@ def main():
             date = published[:10]
             filename = f"{date}-twitch-{vid}.md"
 
-            short_desc = (desc[:200] + "...") if desc and len(desc) > 200 else (desc or "Stream archive available.")
 
             frontmatter = {
                 "title": f'"{title}"',
@@ -170,7 +166,7 @@ def main():
                 "tags": "[twitch, vod]",
                 "pin": "false",
                 "image": "",
-                "description": f'"{short_desc}"',
+                "description": f'"{desc}"',
             }
 
             body = f"[Watch VOD on Twitch]({vod_url})"

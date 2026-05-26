@@ -7,12 +7,14 @@ from datetime import datetime, timedelta, timezone
 import requests
 import yaml
 from common import (
+    ALIAS_MAP,
     DATA_DIR,
     GAME_DEFAULT,
     GAME_OVERRIDES,
     GAME_THRESHOLDS,
     MILESTONE_SPECS,
     SEQUEL_BASE,
+    VALID_GAMES,
 )
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
@@ -33,21 +35,6 @@ try:
 except Exception:
     CURRENT_DAYS = 90
     RECENT_DAYS = 365
-
-GAME_LINKS_PATH = "_data/game_links.yml"
-try:
-    with open(GAME_LINKS_PATH) as f:
-        _gl = yaml.safe_load(f) or {}
-    ALIAS_MAP = {}
-    VALID_GAMES = set()
-    for canonical, entry in _gl.items():
-        VALID_GAMES.add(canonical)
-        if isinstance(entry, dict):
-            for alias in entry.get("aliases", []):
-                ALIAS_MAP[alias] = canonical
-except Exception as e:
-    print(f"Warning: could not load {GAME_LINKS_PATH}: {e}", file=sys.stderr)
-    ALIAS_MAP = {}
 
 CONTENT_TYPES_PATH = "_data/content_types.yml"
 try:
@@ -1015,7 +1002,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
 
     _gl_links = {}
     try:
-        with open(GAME_LINKS_PATH) as f:
+        with open("_data/game_links.yml") as f:
             _gl_links = yaml.safe_load(f) or {}
     except Exception:
         pass

@@ -93,8 +93,8 @@ a:not([class]):hover { color: #5eead4 !important; border-bottom-color: rgba(45, 
 .categories a, .tags a { color: #c084fc !important; }
 .pagination a, .page-link { color: #8888aa !important; }
 .pagination a:hover { color: #2dd4bf !important; }
-#back-to-top { color: #8888aa !important; border-color: rgba(45, 212, 191, 0.15) !important; gap: 0 !important; padding: 0 !important; }
-#back-to-top:hover { color: #2dd4bf !important; }
+#back-to-top { color: #8888aa !important; border-color: #c084fc !important; gap: 0 !important; padding: 0 !important; justify-content: center !important; }
+#back-to-top:hover { color: #2dd4bf !important; border-color: #2dd4bf !important; }
 .site-subtitle { color: #8888aa !important; }
 
 .nav-link i { color: #c084fc !important; }

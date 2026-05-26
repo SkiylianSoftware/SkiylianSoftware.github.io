@@ -4,12 +4,14 @@ from datetime import datetime, timedelta, timezone
 
 import yaml
 from common import (
+    ALIAS_MAP,
     ALL_THRESH,
     DATA_DIR,
     GAME_EP_THRESH,
     HIATUS_DAYS_THRESH,
     HOURS_THRESH,
     MILESTONE_SPECS,
+    VALID_GAMES,
     VIDEO_FIRST_THRESH,
     read_json,
 )
@@ -107,25 +109,25 @@ def main():
         if gname_raw and pub and vid:
             game_video_list.setdefault(gname_raw, []).append((pub, vid, thumb, title))
 
-    # Load game icons and alias map from game_links.yml
+    # Load game icons from game_links.yml
     game_icons = {}
-    alias_map = {}
     gl_path = os.path.join(DATA_DIR, "game_links.yml")
     if os.path.exists(gl_path):
         try:
             with open(gl_path) as f:
                 _gl = yaml.safe_load(f) or {}
             for name, entry in _gl.items():
-                if isinstance(entry, dict):
-                    if entry.get("icon"):
-                        game_icons[name] = entry["icon"]
-                    for alias in entry.get("aliases", []):
-                        alias_map[alias] = name
+                if isinstance(entry, dict) and entry.get("icon"):
+                    game_icons[name] = entry["icon"]
         except Exception:
             pass
 
+    # Filter out content series that aren't actual games (Railway Exhibition Vlogs, etc.)
+    if VALID_GAMES:
+        game_cumulative = {g: d for g, d in game_cumulative.items() if g in VALID_GAMES}
+
     def resolve_gname(raw):
-        return alias_map.get(raw, raw)
+        return ALIAS_MAP.get(raw, raw)
 
     # Resolve game_cumulative aliases so milestone keys use canonical names
     game_cumulative_resolved = {}
@@ -179,19 +181,18 @@ def main():
                     break
         return game_to_playlist, series_to_playlist
 
-    # Filter game_cumulative against actual playlists: discard games with no matching playlist
+    # Warn about games with no matching playlist (informational only — VALID_GAMES is the authoritative filter)
     playlist_data = read_json("playlists.json") or {}
     if playlist_data.get("playlists"):
-        filtered = {}
-        for gname, dates in game_cumulative.items():
-            if any(_matches_playlist(gname, pl.get("title", "")) for pl in playlist_data["playlists"]):
-                filtered[gname] = dates
-        dropped = len(game_cumulative) - len(filtered)
-        if dropped:
-            print(f"  Dropped {dropped} games with no matching playlist")
-        game_cumulative = filtered
+        no_playlist = [
+            g
+            for g in game_cumulative
+            if not any(_matches_playlist(g, pl.get("title", "")) for pl in playlist_data["playlists"])
+        ]
+        if no_playlist:
+            print(f"  Warning: {len(no_playlist)} game(s) have no matching playlist: {', '.join(no_playlist)}")
 
-    for _gname, video_dates in game_cumulative.items():
+    for gname, video_dates in game_cumulative.items():  # noqa: B007
         video_dates.sort()
     ep_count = len(video_dates)
 

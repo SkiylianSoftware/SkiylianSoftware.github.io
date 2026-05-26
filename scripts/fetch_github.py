@@ -54,7 +54,7 @@ def main():
                 "stars": r.get("stargazers_count", 0),
                 "forks": r.get("forks_count", 0),
                 "language": r.get("language", ""),
-                "description": r.get("description", "")[:200] if r.get("description") else "",
+                "description": r.get("description", ""),
                 "updated_at": r.get("updated_at", ""),
             }
             for r in top_repos

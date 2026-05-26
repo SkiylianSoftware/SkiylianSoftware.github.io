@@ -17,6 +17,27 @@ RND = {1, 10} | {10**x * y for x in range(5) for y in (25, 50, 75, 100)}
 # Combined threshold set for ALL milestone types (all scales)
 ALL_THRESH = sorted(P3 | P2 | RND)
 
+# Valid game names — canonical names from game_links.yml, used to distinguish
+# actual games from content series (Railway Exhibition Vlogs, Infrastructure Programming, etc.)
+_VALID_GAMES_PATH = os.path.join(DATA_DIR, "game_links.yml")
+VALID_GAMES = set()
+try:
+    import yaml
+
+    if os.path.exists(_VALID_GAMES_PATH):
+        with open(_VALID_GAMES_PATH) as f:
+            _gl = yaml.safe_load(f) or {}
+        for canonical, _entry in _gl.items():
+            VALID_GAMES.add(canonical)
+        ALIAS_MAP = {}
+        for canonical, entry in _gl.items():
+            if isinstance(entry, dict):
+                for alias in entry.get("aliases", []):
+                    ALIAS_MAP[alias] = canonical
+                    VALID_GAMES.add(alias)
+except Exception:
+    ALIAS_MAP = {}
+
 # Keep GAME_EP_THRESH as an alias for backwards compatibility
 GAME_EP_THRESH = ALL_THRESH
 

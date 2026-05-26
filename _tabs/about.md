@@ -98,7 +98,9 @@ permalink: /about/
       <a href="https://watch.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://live.skiylia.dev" class="btn"><i class="fab fa-twitch"></i> Twitch</a>
       <a href="https://code.skiylia.dev" class="btn"><i class="fab fa-github"></i> GitHub</a>
+      {% if store.products and store.products.size > 0 %}
       <a href="https://store.skiylia.dev" class="btn"><i class="fas fa-store"></i> Merch</a>
+      {% endif %}
       <a href="https://vods.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> VODs</a>
       <a href="https://support.skiylia.dev" class="btn"><i class="fas fa-heart"></i> Support</a>
     </div>

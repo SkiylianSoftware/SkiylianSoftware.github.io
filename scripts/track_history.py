@@ -256,7 +256,7 @@ def main():
                 ym["likes"] = cum_likes
                 ym["comments"] = cum_comments
             print(f"Migrated {len(history)} history entries: added duration/likes/comments")
-        snapshot = build_snapshot()
+    snapshot = build_snapshot()
     if history and history[-1].get("date") == today:
         history[-1] = snapshot
         print(f"Updated today's entry ({today})")

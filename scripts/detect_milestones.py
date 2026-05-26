@@ -498,7 +498,10 @@ def main():
     for key, date in new_reached.items():
         if key not in prev_reached:
             parts = key.rsplit("_", 1)
-            m = int(parts[1])
+            try:
+                m = int(parts[1])
+            except ValueError:
+                m = None
             if key.startswith("age_"):
                 print(f"  New milestone: {m} days old (date={date})")
             elif key.startswith("hiatus_"):

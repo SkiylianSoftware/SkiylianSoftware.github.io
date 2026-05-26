@@ -193,7 +193,7 @@ function toggleMetric(metric) {
     {% elsif key contains "hiatus_" %}
       {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hiatus_" %}
-      {% capture d %}Returned after hiatus of {{ val }}+ days{% endcapture %}{% assign display = d %}
+      {% capture d %}Returned after hiatus of {{ val }} days{% endcapture %}{% assign display = d %}
     {% elsif key contains "streak_" %}
       {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "streak_" %}

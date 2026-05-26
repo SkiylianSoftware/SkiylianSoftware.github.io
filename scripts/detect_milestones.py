@@ -79,8 +79,6 @@ MILESTONE_SPECS = [
 ]
 
 GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
-GAME_RETURN_THRESH = [m for m in GAME_EP_THRESH if m >= 27]
-HIATUS_THRESH = GAME_RETURN_THRESH
 STREAK_THRESH = sorted([4, 8, 13, 26, 52, 104])
 HOURS_THRESH = sorted(set(P3 + P2 + RND))
 VIDEO_FIRST_THRESH = sorted([m for m in set(P3 + RND) if m >= 100])
@@ -248,10 +246,8 @@ def main():
                         gap_end_idx = i + 1
                 gap = max_gap
                 gap_end = video_dates[gap_end_idx]
-                for m in sorted(GAME_RETURN_THRESH, reverse=True):
-                    if gap >= m:
-                        key = f"game_{gname}_return_{m}"
-                        new_reached[key] = gap_end
+                key = f"game_{gname}_return_{gap}"
+                new_reached[key] = gap_end
             except Exception:
                 pass
 
@@ -352,10 +348,8 @@ def main():
                     max_gap = gap
                     gap_end = hiatus_dates[i + 1]
             if max_gap > 0 and gap_end:
-                for m in sorted(HIATUS_THRESH, reverse=True):
-                    if max_gap >= m:
-                        key = f"hiatus_{m}"
-                        new_reached[key] = gap_end
+                key = f"hiatus_{max_gap}"
+                new_reached[key] = gap_end
 
     # Weekly upload streak (consecutive calendar weeks with at least one upload)
     if len(all_videos) >= 2:
@@ -457,7 +451,7 @@ def main():
             if key.startswith("age_"):
                 print(f"  New milestone: {m} days old (date={date})")
             elif key.startswith("hiatus_"):
-                print(f"  New milestone: returned after hiatus ({date})")
+                print(f"  New milestone: returned after hiatus of {m} days (date={date})")
             elif key.startswith("streak_"):
                 print(f"  New milestone: {m} week upload streak (date={date})")
             elif key.startswith("video_first_"):
@@ -479,7 +473,7 @@ def main():
                     print(f"  New milestone: {n} hours in {g} (date={date})")
                 elif "_return_" in rest:
                     g, _, n = rest.partition("_return_")
-                    print(f"  New milestone: Back to {g} after {n}+ days (date={date})")
+                    print(f"  New milestone: Back to {g} after {n} days (date={date})")
             else:
                 print(f"  New milestone: {m:,} {parts[0]} (date={date})")
 

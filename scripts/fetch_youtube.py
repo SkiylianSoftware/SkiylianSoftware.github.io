@@ -6,6 +6,14 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 import yaml
+from common import (
+    DATA_DIR,
+    GAME_DEFAULT,
+    GAME_OVERRIDES,
+    GAME_THRESHOLDS,
+    MILESTONE_SPECS,
+    SEQUEL_BASE,
+)
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
 CHANNEL_ID = "UC4s4eXHuzj7OxwJXgiZgAYw"
@@ -13,7 +21,6 @@ UPLOADS_PLAYLIST_ID = "UU4s4eXHuzj7OxwJXgiZgAYw"
 VODS_CHANNEL_ID = "UCC8qQOj7P2CWEcCDmOq0q7Q"
 VODS_PLAYLIST_ID = "UUC8qQOj7P2CWEcCDmOq0q7Q"
 
-DATA_DIR = "_data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 CONFIG_PATH = "_config.yml"
@@ -201,7 +208,7 @@ def fetch_uploads(playlist_id, label="uploads"):
                     "video_id": video_id,
                     "thumbnail": thumbnail,
                     "published": snippet.get("publishedAt", ""),
-                    "description": snippet.get("description", "")[:500],
+                    "description": snippet.get("description", ""),
                     "series": parse_series(snippet.get("title", "")),
                 }
             )
@@ -485,257 +492,6 @@ def save(filename, data):
     print(f"Written {path} ({len(data)} items)" if isinstance(data, list) else f"Written {path}")
 
 
-P3 = [3**i for i in range(13)]
-P2 = [2**i for i in range(21)]
-RND = [1, 10, 25, 50, 100, 250, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
-
-P3_MSG = {
-    1: "The unitary state",
-    3: "Three-body problem solved",
-    9: "Nonary game complete",
-    27: "Cube it!",
-    81: "Trit-trit-trit!",
-    243: "3^5 - Fifth power unlocked",
-    729: "3^6 - One gross in balanced ternary",
-    2187: "3^7 - Lucky sevens",
-    6561: "3^8 - Octotrit",
-    19683: "3^9 - Padovan sequence spotted",
-    59049: "3^10 - Decitrit! Tenfold power!",
-    177147: "3^11 - Ternary galaxy!",
-    531441: "3^12 - Dozenal trit!",
-}
-P2_MSG = {
-    2: "A pair!",
-    4: "Four! Quadbit!",
-    8: "Byte!",
-    16: "Half-word!",
-    32: "Word!",
-    64: "Double-word!",
-    128: "Kilobit!",
-    256: "Byte plural!",
-    512: "Half a K!",
-    1024: "1K! A true kilobyte!",
-    2048: "2K!",
-    4096: "4K! Page boundary!",
-    8192: "8K!",
-    16384: "16K!",
-    32768: "Half of 64K!",
-    65536: "64K! Full address space!",
-    131072: "128K! Expanded memory!",
-    262144: "256K! High memory area!",
-    524288: "512K! Extended memory!",
-    1048576: "1M! Megabyte territory!",
-}
-RND_MSG = {
-    10: "First double digits!",
-    50: "Halfway to 100!",
-    100: "Triple digits!",
-    500: "Half a thousand!",
-    1000: "The big 1K!",
-    5000: "5K strong!",
-    10000: "10K! Unreal!",
-    50000: "50K! Halfway to 100K!",
-    100000: "100K!!! Thank you!",
-    500000: "Half a million!",
-    1000000: "1 MILLION! Unbelievable!",
-}
-
-
-def _fmt_ms(m, b):
-    return f"{m:,}: {b}" if b else f"{m:,} units!"
-
-
-FORMAT_MS = _fmt_ms
-
-MILESTONE_SPECS = [
-    ("subs", P3, P3_MSG, FORMAT_MS),
-    ("subs", P2, P2_MSG, FORMAT_MS),
-    ("subs", RND, RND_MSG, FORMAT_MS),
-    ("views", P3, P3_MSG, FORMAT_MS),
-    ("views", P2, P2_MSG, FORMAT_MS),
-    ("views", RND, RND_MSG, FORMAT_MS),
-    ("videos", P3, P3_MSG, FORMAT_MS),
-    ("videos", P2, P2_MSG, FORMAT_MS),
-    ("videos", RND, RND_MSG, FORMAT_MS),
-]
-
-# All game milestone types use the combined P3 + P2 + RND threshold lists
-# Sorted unique gives a nice spread: 1, 2, 3, 4, 8, 9, 10, 16, 25, 27, 32, 50, 64, 81, 100...
-GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
-# Views and hours filter out very low thresholds
-GAME_VIEW_THRESH = [m for m in sorted(set(P3 + P2 + RND)) if m >= 9]
-GAME_HOUR_THRESH = [m for m in sorted(set(P3 + P2 + RND)) if m >= 3]
-GAME_RETURN_THRESH = [m for m in sorted(set(P3 + P2 + RND)) if m >= 27]
-
-GAME_DEFAULT = {
-    "ep": "{{m}} episodes in {game}!",
-    "views": "{{count}} views across {game}!",
-    "hours": "{{hours}} hours in {game}!",
-    "return": "Back to {game} after {{days}} days!",
-}
-GAME_THRESHOLDS = {
-    "ep": GAME_EP_THRESH,
-    "views": GAME_VIEW_THRESH,
-    "hours": GAME_HOUR_THRESH,
-    "return": GAME_RETURN_THRESH,
-}
-GAME_OVERRIDES = {
-    "Kerbal Space Program": {
-        "ep": {
-            1: "First launch at KSC!",
-            2: "Orbit achieved!",
-            3: "Munar flyby complete!",
-            4: "Sub-orbital tourism opened!",
-            8: "Minmus landing!",
-            9: "Duna transfer window!",
-            10: "Duna landing!",
-            16: "Interplanetary fleet assembled!",
-            25: "Jool system arrival!",
-            27: "Jool system fleet deployed!",
-            32: "Eeloo reached!",
-            50: "Kerbals across the solar system!",
-            64: "Space station network established!",
-            81: "Kerbals across the galaxy!",
-            100: "Century of launches!",
-        }
-    },
-    "Factorio": {
-        "ep": {
-            3: "Green science automated!",
-            9: "Blue science online!",
-            27: "Rocket silo constructed!",
-            81: "Mega base operational!",
-        }
-    },
-    "Minecraft": {
-        "ep": {
-            3: "Nether portal activated!",
-            9: "Stronghold located!",
-            27: "Ender Dragon defeated!",
-            81: "Full beacon pyramid!",
-        }
-    },
-    "Transport Fever": {
-        "ep": {
-            3: "Three lines running!",
-            9: "Train network growing!",
-            27: "Maglev network online!",
-            81: "Transcontinental empire!",
-        }
-    },
-    "Transport Fever 2": {
-        "ep": {
-            3: "Three lines running!",
-            9: "Train network growing!",
-            27: "Maglev network online!",
-            81: "Transcontinental empire!",
-        }
-    },
-    "Mars First Logistics": {
-        "ep": {3: "Rover delivered!", 9: "Base camp established!", 27: "Three colonies linked!", 81: "Martian city!"}
-    },
-    "Station Flow": {
-        "ep": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"}
-    },
-}
-GAME_THRESHOLDS = {
-    "ep": P3,
-    "views": [27, 81, 243, 729, 2187, 6561],
-    "hours": [3, 9, 27, 81, 243],
-    "return": [27, 81, 243, 729],
-}
-# Per-game per-type overrides. Falls back to GAME_DEFAULT for any missing key.
-GAME_OVERRIDES = {
-    "Kerbal Space Program": {
-        "ep": {
-            3: "Mun flyby complete!",
-            9: "Duna landing!",
-            27: "Jool system fleet deployed!",
-            81: "Kerbals across the galaxy!",
-        }
-    },
-    "Factorio": {
-        "ep": {
-            3: "Green science automated!",
-            9: "Blue science online!",
-            27: "Rocket silo constructed!",
-            81: "Mega base operational!",
-        }
-    },
-    "Minecraft": {
-        "ep": {
-            3: "Nether portal activated!",
-            9: "Stronghold located!",
-            27: "Ender Dragon defeated!",
-            81: "Full beacon pyramid!",
-        }
-    },
-    "Transport Fever": {
-        "ep": {
-            3: "Three lines running!",
-            9: "Train network growing!",
-            27: "Maglev network online!",
-            81: "Transcontinental empire!",
-        }
-    },
-    "Transport Fever 2": {
-        "ep": {
-            3: "Three lines running!",
-            9: "Train network growing!",
-            27: "Maglev network online!",
-            81: "Transcontinental empire!",
-        }
-    },
-    "Mars First Logistics": {
-        "ep": {3: "Rover delivered!", 9: "Base camp established!", 27: "Three colonies linked!", 81: "Martian city!"}
-    },
-    "Station Flow": {
-        "ep": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"}
-    },
-}
-GAME_RETURN_MSG_TMPL = "Back to {game} after {{days}} days!"
-GAME_EP_OVERRIDE = {
-    "Kerbal Space Program": {
-        3: "Mun flyby complete!",
-        9: "Duna landing!",
-        27: "Jool system fleet deployed!",
-        81: "Kerbals across the galaxy!",
-    },
-    "Factorio": {
-        3: "Green science automated!",
-        9: "Blue science online!",
-        27: "Rocket silo constructed!",
-        81: "Mega base operational!",
-    },
-    "Minecraft": {
-        3: "Nether portal activated!",
-        9: "Stronghold located!",
-        27: "Ender Dragon defeated!",
-        81: "Full beacon pyramid!",
-    },
-    "Transport Fever": {
-        3: "Three lines running!",
-        9: "Train network growing!",
-        27: "Maglev network online!",
-        81: "Transcontinental empire!",
-    },
-    "Transport Fever 2": {
-        3: "Three lines running!",
-        9: "Train network growing!",
-        27: "Maglev network online!",
-        81: "Transcontinental empire!",
-    },
-    "Mars First Logistics": {
-        3: "Rover delivered!",
-        9: "Base camp established!",
-        27: "Three colonies linked!",
-        81: "Martian city!",
-    },
-    "Station Flow": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"},
-    "STATIONflow": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"},
-}
-
-
 def _parse_iso_date(s):
     try:
         return datetime.fromisoformat(s)
@@ -773,6 +529,10 @@ def _detect_game_milestones(games, prev_reached, now, cutoff, all_videos=None):
                 if value >= m:
                     key = f"game_{gname}_{key_suffix}_{m}"
                     override = GAME_OVERRIDES.get(gname, {}).get(gtype, {}).get(m)
+                    if not override:
+                        base = SEQUEL_BASE.get(gname)
+                        if base:
+                            override = GAME_OVERRIDES.get(base, {}).get(gtype, {}).get(m)
                     if override:
                         msg = override
                     else:

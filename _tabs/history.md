@@ -267,6 +267,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
       {% assign display = key | remove: "age_" | append: " days old" %}
+    {% elsif key contains "hiatus_vods_" %}
+      {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "hiatus_vods_" %}
+      {% capture d %}VODs hiatus ended after {{ val }} days{% endcapture %}{% assign display = d %}
     {% elsif key contains "hiatus_" %}
       {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hiatus_" %}

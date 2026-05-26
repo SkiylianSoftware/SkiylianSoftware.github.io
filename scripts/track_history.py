@@ -231,48 +231,38 @@ def main():
         history = backfill_history()
         print(f"Backfilled {len(history)} entries from video data")
     else:
-        # Schema migration: patch old entries missing duration_seconds/likes/comments
+        # Schema migration: always recompute cumulative duration_seconds/likes/comments from video data
         yt = read_json("youtube_main.json")
         if yt and yt.get("videos"):
             videos = sorted(yt["videos"], key=lambda v: (v.get("published") or "")[:10])
-            needs_migrate = False
+            history.sort(key=lambda e: e.get("date", ""))
+            vid_idx = 0
+            cum_dur = 0
+            cum_likes = 0
+            cum_comments = 0
             for entry in history:
-                ym = entry.get("youtube_main") or {}
-                if "duration_seconds" not in ym or "likes" not in ym or "comments" not in ym:
-                    needs_migrate = True
-                    break
-            if needs_migrate:
-                history.sort(key=lambda e: e.get("date", ""))
-                vid_idx = 0
-                cum_dur = 0
-                cum_likes = 0
-                cum_comments = 0
-                for entry in history:
-                    d = entry.get("date", "")
-                    ym = entry.setdefault("youtube_main", {})
-                    while vid_idx < len(videos):
-                        vd = (videos[vid_idx].get("published") or "")[:10]
-                        if vd <= d:
-                            cum_dur += videos[vid_idx].get("duration_seconds", 0)
-                            cum_likes += videos[vid_idx].get("like_count", 0)
-                            cum_comments += videos[vid_idx].get("comment_count", 0)
-                            vid_idx += 1
-                        else:
-                            break
-                    ym["duration_seconds"] = cum_dur
-                    ym["likes"] = cum_likes
-                    ym["comments"] = cum_comments
-                print(f"Migrated {len(history)} history entries: added duration/likes/comments")
-
-    snapshot = build_snapshot()
-
+                d = entry.get("date", "")
+                ym = entry.setdefault("youtube_main", {})
+                while vid_idx < len(videos):
+                    vd = (videos[vid_idx].get("published") or "")[:10]
+                    if vd <= d:
+                        cum_dur += videos[vid_idx].get("duration_seconds", 0)
+                        cum_likes += videos[vid_idx].get("like_count", 0)
+                        cum_comments += videos[vid_idx].get("comment_count", 0)
+                        vid_idx += 1
+                    else:
+                        break
+                ym["duration_seconds"] = cum_dur
+                ym["likes"] = cum_likes
+                ym["comments"] = cum_comments
+            print(f"Migrated {len(history)} history entries: added duration/likes/comments")
+        snapshot = build_snapshot()
     if history and history[-1].get("date") == today:
         history[-1] = snapshot
         print(f"Updated today's entry ({today})")
     else:
         history.append(snapshot)
         print(f"Added new entry for {today}")
-
     os.makedirs(DATA_DIR, exist_ok=True)
     with open(HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=2)

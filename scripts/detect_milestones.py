@@ -3,167 +3,18 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import yaml
+from common import (
+    ALL_THRESH,
+    DATA_DIR,
+    GAME_EP_THRESH,
+    HIATUS_DAYS_THRESH,
+    HOURS_THRESH,
+    MILESTONE_SPECS,
+    VIDEO_FIRST_THRESH,
+    read_json,
+)
 
-DATA_DIR = "_data"
 MILESTONES_FILE = os.path.join(DATA_DIR, "milestones.json")
-
-P3 = [3**i for i in range(13)]
-P2 = [2**i for i in range(21)]
-RND = [1, 10, 25, 50, 100, 250, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
-P3_MSG = {
-    1: "The unitary state",
-    3: "Three-body problem solved",
-    9: "Nonary game complete",
-    27: "Cube it!",
-    81: "Trit-trit-trit!",
-    243: "3^5 - Fifth power unlocked",
-    729: "3^6 - One gross in balanced ternary",
-    2187: "3^7 - Lucky sevens",
-    6561: "3^8 - Octotrit",
-    19683: "3^9 - Padovan sequence spotted",
-    59049: "3^10 - Decitrit! Tenfold power!",
-    177147: "3^11 - Ternary galaxy!",
-    531441: "3^12 - Dozenal trit!",
-}
-P2_MSG = {
-    2: "A pair!",
-    4: "Four! Quadbit!",
-    8: "Byte!",
-    16: "Half-word!",
-    32: "Word!",
-    64: "Double-word!",
-    128: "Kilobit!",
-    256: "Byte plural!",
-    512: "Half a K!",
-    1024: "1K! A true kilobyte!",
-    2048: "2K!",
-    4096: "4K! Page boundary!",
-    8192: "8K!",
-    16384: "16K!",
-    32768: "Half of 64K!",
-    65536: "64K! Full address space!",
-    131072: "128K! Expanded memory!",
-    262144: "256K! High memory area!",
-    524288: "512K! Extended memory!",
-    1048576: "1M! Megabyte territory!",
-}
-RND_MSG = {
-    10: "First double digits!",
-    50: "Halfway to 100!",
-    100: "Triple digits!",
-    500: "Half a thousand!",
-    1000: "The big 1K!",
-    5000: "5K strong!",
-    10000: "10K! Unreal!",
-    50000: "50K! Halfway to 100K!",
-    100000: "100K!!! Thank you!",
-    500000: "Half a million!",
-    1000000: "1 MILLION! Unbelievable!",
-}
-
-
-def _fmt(m, b):
-    return f"{m:,}: {b}" if b else f"{m:,} units!"
-
-
-FMT = _fmt
-
-MILESTONE_SPECS = [
-    ("subs", P3, P3_MSG, FMT),
-    ("subs", P2, P2_MSG, FMT),
-    ("subs", RND, RND_MSG, FMT),
-    ("views", P3, P3_MSG, FMT),
-    ("views", P2, P2_MSG, FMT),
-    ("views", RND, RND_MSG, FMT),
-    ("videos", P3, P3_MSG, FMT),
-    ("videos", P2, P2_MSG, FMT),
-    ("videos", RND, RND_MSG, FMT),
-    ("likes", P3, P3_MSG, FMT),
-    ("likes", P2, P2_MSG, FMT),
-    ("likes", RND, RND_MSG, FMT),
-    ("comments", P3, P3_MSG, FMT),
-    ("comments", P2, P2_MSG, FMT),
-    ("comments", RND, RND_MSG, FMT),
-]
-
-GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
-STREAK_THRESH = sorted([4, 8, 13, 26, 52, 104])
-HOURS_THRESH = sorted(set(P3 + P2 + RND))
-VIDEO_FIRST_THRESH = sorted([m for m in set(P3 + P2 + RND) if m >= 100])
-
-GAME_DEFAULT = {
-    "ep": "{{m}} episodes in {game}!",
-    "views": "{{count}} views across {game}!",
-    "hours": "{{hours}} hours in {game}!",
-    "return": "Back to {game} after {{days}} days!",
-}
-GAME_OVERRIDES = {
-    "Kerbal Space Program": {
-        "ep": {
-            1: "First launch at KSC!",
-            2: "Orbit achieved!",
-            3: "Munar flyby complete!",
-            4: "Sub-orbital tourism!",
-            8: "Minmus landing!",
-            9: "Duna transfer!",
-            10: "Duna landing!",
-            16: "Interplanetary fleet!",
-            25: "Jool arrival!",
-            27: "Jool system fleet!",
-            32: "Eeloo reached!",
-            50: "Across the solar system!",
-            64: "Space station network!",
-            81: "Across the galaxy!",
-            100: "Century of launches!",
-        }
-    },
-    "Factorio": {
-        "ep": {
-            3: "Green science automated!",
-            9: "Blue science online!",
-            27: "Rocket silo constructed!",
-            81: "Mega base operational!",
-        }
-    },
-    "Minecraft": {
-        "ep": {
-            3: "Nether portal activated!",
-            9: "Stronghold located!",
-            27: "Ender Dragon defeated!",
-            81: "Full beacon pyramid!",
-        }
-    },
-    "Transport Fever": {
-        "ep": {
-            3: "Three lines running!",
-            9: "Train network growing!",
-            27: "Maglev network online!",
-            81: "Transcontinental empire!",
-        }
-    },
-    "Transport Fever 2": {
-        "ep": {
-            3: "Three lines running!",
-            9: "Train network growing!",
-            27: "Maglev network online!",
-            81: "Transcontinental empire!",
-        }
-    },
-    "Mars First Logistics": {
-        "ep": {3: "Rover delivered!", 9: "Base camp established!", 27: "Three colonies linked!", 81: "Martian city!"}
-    },
-    "Station Flow": {
-        "ep": {3: "Queue managed!", 9: "Station bustling!", 27: "Expansion complete!", 81: "Metroplex achieved!"}
-    },
-}
-
-
-def read_json(name):
-    p = os.path.join(DATA_DIR, name)
-    if not os.path.exists(p):
-        return None
-    with open(p) as f:
-        return json.load(f)
 
 
 def first_date_from_history(history, label, threshold):
@@ -232,14 +83,31 @@ def main():
     # Process game milestones from per-video cumulative data
     all_videos = yt_main.get("videos", [])
     game_cumulative = {}
+    game_first_series = {}
+    game_video_list = {}
     for v in all_videos:
         s = v.get("series", {})
-        gname = (s or {}).get("game", "")
+        gname_raw = (s or {}).get("game", "")
         pub = v.get("published", "")[:10]
-        if gname and pub:
-            game_cumulative.setdefault(gname, []).append(pub)
+        if gname_raw and pub:
+            game_cumulative.setdefault(gname_raw, []).append(pub)
+    # Build game_first_series and game_video_list from sorted videos
+    for v in sorted(all_videos, key=lambda x: x.get("published", "")):
+        s = v.get("series", {})
+        if not s:
+            continue
+        gname_raw = (s or {}).get("game", "")
+        sname = (s or {}).get("series_name", "")
+        pub = v.get("published", "")[:10]
+        vid = v.get("video_id", "")
+        thumb = v.get("thumbnail", "")
+        title = v.get("title", "")
+        if gname_raw and sname and gname_raw not in game_first_series:
+            game_first_series[gname_raw] = sname
+        if gname_raw and pub and vid:
+            game_video_list.setdefault(gname_raw, []).append((pub, vid, thumb, title))
 
-    # Load game icons and alias map from game_links.yml (needed before milestone loops)
+    # Load game icons and alias map from game_links.yml
     game_icons = {}
     alias_map = {}
     gl_path = os.path.join(DATA_DIR, "game_links.yml")
@@ -266,52 +134,91 @@ def main():
         game_cumulative_resolved.setdefault(canon, []).extend(dates)
     game_cumulative = game_cumulative_resolved
 
+    # Resolve game_first_series and game_video_list aliases
+    game_first_series_resolved = {}
+    for raw_gname, sname in game_first_series.items():
+        canon = resolve_gname(raw_gname)
+        if canon not in game_first_series_resolved:
+            game_first_series_resolved[canon] = sname
+    game_first_series = game_first_series_resolved
+
+    game_video_list_resolved = {}
+    for raw_gname, entries in game_video_list.items():
+        canon = resolve_gname(raw_gname)
+        game_video_list_resolved.setdefault(canon, []).extend(entries)
+    game_video_list = game_video_list_resolved
+
+    def _matches_playlist(gname, pl_title):
+        """Match game name to playlist title using word-level matching with space-normalized fallback."""
+        gl = gname.lower().strip()
+        pt = pl_title.lower().strip()
+        if gl == pt:
+            return True
+        gl_words = set(gl.split())
+        pt_words = set(pt.split())
+        if gl_words and pt_words and (gl_words <= pt_words or pt_words <= gl_words):
+            return True
+        gl_ns = gl.replace(" ", "").replace("-", "").replace("_", "").replace(":", "")
+        pt_ns = pt.replace(" ", "").replace("-", "").replace("_", "").replace(":", "")
+        return gl_ns == pt_ns or pt_ns.startswith(gl_ns) or gl_ns.startswith(pt_ns)
+
+    def _build_playlist_index(playlist_data, game_cumulative, game_first_series):
+        """Build game_to_playlist and series_to_playlist mappings with normalized matching."""
+        game_to_playlist = {}
+        series_to_playlist = {}
+        for pl in playlist_data.get("playlists", []):
+            pt = pl.get("title", "")
+            for gname in game_cumulative:
+                if _matches_playlist(gname, pt):
+                    game_to_playlist[gname] = pl
+                    break
+            for gname, sname in game_first_series.items():
+                if sname and (_matches_playlist(sname, pt) or _matches_playlist(gname, pt)):
+                    if gname not in game_to_playlist:
+                        series_to_playlist[gname] = pl
+                    break
+        return game_to_playlist, series_to_playlist
+
     # Filter game_cumulative against actual playlists: discard games with no matching playlist
     playlist_data = read_json("playlists.json") or {}
-    all_playlist_titles = set()
-    for pl in playlist_data.get("playlists", []):
-        t = pl.get("title", "").lower().strip()
-        if t:
-            all_playlist_titles.add(t)
-    if all_playlist_titles:
+    if playlist_data.get("playlists"):
         filtered = {}
         for gname, dates in game_cumulative.items():
-            gl = gname.lower()
-            if any(gl in pt or pt in gl for pt in all_playlist_titles):
+            if any(_matches_playlist(gname, pl.get("title", "")) for pl in playlist_data["playlists"]):
                 filtered[gname] = dates
         dropped = len(game_cumulative) - len(filtered)
         if dropped:
             print(f"  Dropped {dropped} games with no matching playlist")
         game_cumulative = filtered
 
-    for gname, video_dates in game_cumulative.items():
+    for _gname, video_dates in game_cumulative.items():
         video_dates.sort()
-        ep_count = len(video_dates)
+    ep_count = len(video_dates)
 
-        # Episode milestones (from video publish dates)
-        for m in sorted(GAME_EP_THRESH, reverse=True):
-            if ep_count >= m:
-                key = f"game_{gname}_ep_{m}"
-                date = video_dates[m - 1]
-                new_reached[key] = date
+    # Episode milestones (from video publish dates)
+    for m in sorted(GAME_EP_THRESH, reverse=True):
+        if ep_count >= m:
+            key = f"game_{gname}_ep_{m}"
+            date = video_dates[m - 1]
+            new_reached[key] = date
 
-        # Return milestones (longest gap between consecutive videos)
-        if len(video_dates) >= 2:
-            try:
-                dates_dt = sorted(datetime.strptime(d, "%Y-%m-%d") for d in video_dates)
-                max_gap = 0
-                gap_end_idx = 0
-                for i in range(len(dates_dt) - 1):
-                    gap = (dates_dt[i + 1] - dates_dt[i]).days
-                    if gap > max_gap:
-                        max_gap = gap
-                        gap_end_idx = i + 1
-                gap = max_gap
-                gap_end = video_dates[gap_end_idx]
-                key = f"game_{gname}_return_{gap}"
-                new_reached[key] = gap_end
-            except Exception:
-                pass
+    # Return milestones (longest gap between consecutive videos)
+    if len(video_dates) >= 2:
+        try:
+            dates_dt = sorted(datetime.strptime(d, "%Y-%m-%d") for d in video_dates)
+            max_gap = 0
+            gap_end_idx = 0
+            for i in range(len(dates_dt) - 1):
+                gap = (dates_dt[i + 1] - dates_dt[i]).days
+                if gap > max_gap:
+                    max_gap = gap
+                    gap_end_idx = i + 1
+            gap = max_gap
+            gap_end = video_dates[gap_end_idx]
+            key = f"game_{gname}_return_{gap}"
+            new_reached[key] = gap_end
+        except Exception:
+            pass
 
     # First video per game for "series started" milestone, and ordered video list for episode links
     game_first_series = {}
@@ -337,21 +244,8 @@ def main():
         if key not in new_reached:
             new_reached[key] = game_cumulative[gname][0]
 
-    # Build playlist mappings: by game name and by series name
-    game_to_playlist = {}
-    series_to_playlist = {}
-    playlist_data = read_json("playlists.json") or {}
-    for pl in playlist_data.get("playlists", []):
-        pl_title = pl.get("title", "").lower()
-        for gname in game_cumulative:
-            if gname.lower() in pl_title or pl_title in gname.lower():
-                game_to_playlist[gname] = pl
-                break
-        for gname, sname in game_first_series.items():
-            if sname and (sname.lower() in pl_title or pl_title in sname.lower()):
-                if gname not in game_to_playlist:
-                    series_to_playlist[gname] = pl
-                break
+    # Build playlist mappings: by game name and by series name (uses _matches_playlist)
+    game_to_playlist, series_to_playlist = _build_playlist_index(playlist_data, game_cumulative, game_first_series)
 
     # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
     video_history = read_json("video_history.json") or {}
@@ -474,27 +368,40 @@ def main():
     if first_video_date:
         fd = datetime.strptime(first_video_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         age_days = (now - fd).days
-        for m in sorted(set(P3 + P2 + RND), reverse=True):
+        for m in reversed(ALL_THRESH):
             if age_days >= m:
                 key = f"age_{m}"
                 age_date = (fd + timedelta(days=m)).strftime("%Y-%m-%d")
                 new_reached[key] = age_date
 
-    # Channel hiatus milestones (every gap exceeding a threshold)
-    if len(all_videos) >= 2:
-        hiatus_dates = sorted(set(v.get("published", "")[:10] for v in all_videos if v.get("published")))
-        if len(hiatus_dates) >= 2:
-            hiatus_dt = [datetime.strptime(d, "%Y-%m-%d") for d in hiatus_dates]
-            hiatus_thresh = sorted(set(P3 + P2 + RND))
-            for i in range(len(hiatus_dt) - 1):
-                gap = (hiatus_dt[i + 1] - hiatus_dt[i]).days
-                gap_end = hiatus_dates[i + 1]
-                for m in sorted(hiatus_thresh, reverse=True):
-                    if gap >= m:
-                        key = f"hiatus_{m}"
-                        if key not in new_reached or gap_end < new_reached[key]:
-                            new_reached[key] = gap_end
-                        break
+    # Channel hiatus milestones (every gap exceeding HIATUS_DAYS_THRESH)
+    hiatus_thresh = ALL_THRESH
+
+    def _track_hiatus(dates, prefix):
+        if len(dates) < 2:
+            return
+        dt_list = [datetime.strptime(d, "%Y-%m-%d") for d in dates]
+        for i in range(len(dt_list) - 1):
+            gap = (dt_list[i + 1] - dt_list[i]).days
+            if gap < HIATUS_DAYS_THRESH:
+                continue
+            gap_end = dates[i + 1]
+            for m in sorted(hiatus_thresh, reverse=True):
+                if gap >= m:
+                    key = f"hiatus_{prefix}{m}" if prefix else f"hiatus_{m}"
+                    if key not in new_reached or gap_end < new_reached[key]:
+                        new_reached[key] = gap_end
+                    break
+
+    main_dates = sorted(set(v.get("published", "")[:10] for v in all_videos if v.get("published")))
+    _track_hiatus(main_dates, "")
+
+    # VODs hiatus
+    yt_vods = read_json("youtube_vods.json") or {}
+    vods_videos = yt_vods.get("videos", [])
+    if vods_videos:
+        vods_dates = sorted(set(v.get("published", "")[:10] for v in vods_videos if v.get("published")))
+        _track_hiatus(vods_dates, "vods_")
 
     # Weekly upload streak (consecutive calendar weeks with at least one upload)
     if len(all_videos) >= 2:
@@ -519,10 +426,8 @@ def main():
                     longest = cur
                     streak_end = max(week_dates[wk])
             if longest >= 2:
-                for m in sorted(STREAK_THRESH, reverse=True):
-                    if longest >= m:
-                        key = f"streak_{m}"
-                        new_reached[key] = streak_end
+                key = f"streak_{longest}"
+                new_reached[key] = streak_end
 
     # Video linking metadata stored alongside milestones
     milestone_links = {}
@@ -596,6 +501,8 @@ def main():
                             entry = {"url": "/games"}
                         if game_icon:
                             entry["thumb"] = game_icon
+                        elif pl and pl.get("thumbnail"):
+                            entry["thumb"] = pl["thumbnail"]
                         if gname in game_first_series:
                             entry["series_name"] = game_first_series[gname]
 
@@ -607,6 +514,8 @@ def main():
                             entry = {"url": "/games"}
                         if game_icon:
                             entry["thumb"] = game_icon
+                        elif pl and pl.get("thumbnail"):
+                            entry["thumb"] = pl["thumbnail"]
 
                     if entry:
                         milestone_links[key] = entry
@@ -666,6 +575,8 @@ def main():
                 m = None
             if key.startswith("age_"):
                 print(f"  New milestone: {m} days old (date={date})")
+            elif key.startswith("hiatus_vods_"):
+                print(f"  New milestone: VODs hiatus ended after {m} days (date={date})")
             elif key.startswith("hiatus_"):
                 print(f"  New milestone: returned after hiatus of {m} days (date={date})")
             elif key.startswith("streak_"):
@@ -750,6 +661,8 @@ def main():
                 msg = key
         elif key.startswith("age_"):
             msg = f"{key[4:]} days old"
+        elif key.startswith("hiatus_vods_"):
+            msg = f"VODs hiatus ended after {key[12:]} days"
         elif key.startswith("hiatus_"):
             msg = f"Returned after hiatus of {key[7:]} days"
         elif key.startswith("streak_"):

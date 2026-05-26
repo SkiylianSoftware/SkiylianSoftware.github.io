@@ -31,15 +31,36 @@ def build_snapshot():
             "subs": meta.get("subscriber_count", 0),
             "views": meta.get("view_count", 0),
             "videos": meta.get("video_count", 0),
+            "duration_seconds": 0,
+            "likes": 0,
         }
+        # Compute total duration and likes from youtube_main video data
+        yt = read_json("youtube_main.json")
+        if yt and yt.get("videos"):
+            total_dur = 0
+            total_likes = 0
+            for v in yt["videos"]:
+                total_dur += v.get("duration_seconds", 0)
+                total_likes += v.get("like_count", 0)
+            snapshot["youtube_main"]["duration_seconds"] = total_dur
+            snapshot["youtube_main"]["likes"] = total_likes
         vods_subs = meta.get("vods_subscriber_count", 0)
         vods_views = meta.get("vods_view_count", 0)
         vods_videos = meta.get("vods_video_count", 0)
         if vods_subs or vods_views or vods_videos:
+            vods_dur = 0
+            vods_likes = 0
+            vods = read_json("youtube_vods.json")
+            if vods and vods.get("videos"):
+                for v in vods["videos"]:
+                    vods_dur += v.get("duration_seconds", 0)
+                    vods_likes += v.get("like_count", 0)
             snapshot["youtube_vods"] = {
                 "subs": vods_subs,
                 "views": vods_views,
                 "videos": vods_videos,
+                "duration_seconds": vods_dur,
+                "likes": vods_likes,
             }
 
     twitch_stats = read_json("twitch_stats.json")
@@ -100,6 +121,8 @@ def backfill_history():
                     "subs": ym.get("subs", 0),
                     "views": ym.get("views", 0),
                     "videos": ym.get("videos", 0),
+                    "duration_seconds": ym.get("duration_seconds", 0),
+                    "likes": ym.get("likes", 0),
                 }
 
     # Determine start date from earliest video
@@ -116,6 +139,8 @@ def backfill_history():
         video_dates_sorted = sorted(all_video_dates)
 
         cum_videos = 0
+        cum_duration = 0
+        cum_likes = 0
         vid_idx = 0
 
         while current <= now_dt:
@@ -125,13 +150,26 @@ def backfill_history():
 
             # Count videos published on or before this date
             while vid_idx < len(video_dates_sorted) and video_dates_sorted[vid_idx] <= d:
+                # Find the matching video for duration/likes
+                for v in yt.get("videos", []):
+                    vd = (v.get("published") or "")[:10]
+                    if vd == video_dates_sorted[vid_idx]:
+                        cum_duration += v.get("duration_seconds", 0)
+                        cum_likes += v.get("like_count", 0)
+                        break
                 cum_videos += 1
                 vid_idx += 1
 
             if d not in entries_by_date:
                 entries_by_date[d] = {
                     "date": d,
-                    "youtube_main": {"subs": 0, "views": 0, "videos": cum_videos},
+                    "youtube_main": {
+                        "subs": 0,
+                        "views": 0,
+                        "videos": cum_videos,
+                        "duration_seconds": cum_duration,
+                        "likes": cum_likes,
+                    },
                     "youtube_vods": {},
                     "twitch": {},
                     "github": {},
@@ -149,7 +187,7 @@ def backfill_history():
     sorted_dates = sorted(entries_by_date.keys())
     result = []
     last = {
-        "youtube_main": {"subs": 0, "views": 0, "videos": 0},
+        "youtube_main": {"subs": 0, "views": 0, "videos": 0, "duration_seconds": 0, "likes": 0},
         "youtube_vods": {},
         "twitch": {},
         "github": {},

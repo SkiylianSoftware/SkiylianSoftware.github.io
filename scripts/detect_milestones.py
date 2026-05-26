@@ -78,6 +78,9 @@ MILESTONE_SPECS = [
     ("videos", P3, P3_MSG, FMT),
     ("videos", P2, P2_MSG, FMT),
     ("videos", RND, RND_MSG, FMT),
+    ("likes", P3, P3_MSG, FMT),
+    ("likes", P2, P2_MSG, FMT),
+    ("likes", RND, RND_MSG, FMT),
 ]
 
 GAME_EP_THRESH = sorted(set(P3 + P2 + RND))
@@ -183,13 +186,16 @@ def main():
     views = site_meta.get("view_count", 0)
     videos_count = site_meta.get("video_count", 0)
 
+    # Total likes across all videos
+    total_likes = sum(v.get("like_count", 0) for v in yt_main.get("videos", []))
+
     # Load previous milestones for comparison
     prev = read_json("milestones.json") or {}
     prev_reached = prev.get("reached", {})
     new_reached = {}
 
     if debug:
-        print(f"  Current: {subs} subs, {views} views, {videos_count} videos")
+        print(f"  Current: {subs} subs, {views} views, {videos_count} videos, {total_likes} likes")
         print(
             f"  History: {len(history)} entries ({history[0]['date']} to {history[-1]['date']})"
             if history
@@ -199,7 +205,7 @@ def main():
     # Process standard milestones (subs, views, videos)
     # Collect ALL thresholds (no break), then collapse same-label same-date later
     for label, thresholds, _msgs, _formatter in MILESTONE_SPECS:
-        value = {"subs": subs, "views": views, "videos": videos_count}.get(label, 0)
+        value = {"subs": subs, "views": views, "videos": videos_count, "likes": total_likes}.get(label, 0)
         for m in sorted(thresholds, reverse=True):
             if value >= m:
                 key = f"{label}_{m}"
@@ -614,15 +620,73 @@ def main():
         if len(new_reached) > 15:
             print(f"    ... and {len(new_reached) - 15} more")
 
+    # Build current milestone list for marquee (all milestones within cutoff)
+    cutoff_dt = now - timedelta(days=14)
+    current_list = []
+    for key, date in sorted(new_reached.items(), key=sort_key, reverse=True):
+        try:
+            d = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except Exception:
+            continue
+        if d < cutoff_dt:
+            continue
+
+        if key.startswith("game_"):
+            rest = key[5:]
+            if "_ep_" in rest:
+                g, _, n = rest.partition("_ep_")
+                msg = f"{n} episodes in {g}"
+            elif "_upload_" in rest:
+                g, _, n = rest.partition("_upload_")
+                msg = f"{n} hours uploaded in {g}"
+            elif "_started" in rest:
+                g = rest.replace("_started", "")
+                msg = f"{g} series started"
+            elif "_views_" in rest:
+                g, _, n = rest.partition("_views_")
+                msg = f"{n} views across {g}"
+            elif "_hours_" in rest:
+                g, _, n = rest.partition("_hours_")
+                msg = f"{n} hours watched in {g}"
+            elif "_return_" in rest:
+                g, _, n = rest.partition("_return_")
+                msg = f"Back to {g} after {n} days"
+            else:
+                msg = key
+        elif key.startswith("age_"):
+            msg = f"{key[4:]} days old"
+        elif key.startswith("hiatus_"):
+            msg = f"Returned after hiatus of {key[7:]} days"
+        elif key.startswith("streak_"):
+            msg = f"{key[7:]}-week upload streak"
+        elif key.startswith("video_first_"):
+            v = key[12:]
+            link = milestone_links.get(key, {})
+            title = link.get("text", "")
+            msg = f"First video to {v} views: {title}" if title else f"First video to {v} views"
+        elif key.startswith("hours_"):
+            msg = f"{key[6:]} hours watched"
+        elif key.startswith("upload_"):
+            msg = f"{key[7:]} hours uploaded"
+        else:
+            parts = key.rsplit("_", 1)
+            try:
+                m = int(parts[1])
+            except ValueError:
+                continue
+            msg = f"{m:,} {parts[0]}"
+
+        current_list.append({"message": msg})
+
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)
     sorted_reached = dict(sorted(new_reached.items(), key=sort_key, reverse=True))
-    result = {"current": {}, "reached": sorted_reached}
+    result = {"current": current_list, "reached": sorted_reached}
     if milestone_links:
         result["links"] = milestone_links
     with open(MILESTONES_FILE, "w") as f:
         json.dump(result, f, indent=2)
-    print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones)")
+    print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones, {len(current_list)} current)")
 
 
 if __name__ == "__main__":

@@ -25,6 +25,12 @@ group: stats
   {% if history[0].github %}
   <button class="chart-btn" onclick="toggleMetric('github')" id="btn-github">GitHub</button>
   {% endif %}
+  {% if history[0].youtube_main contains 'duration_seconds' %}
+  <button class="chart-btn" onclick="toggleMetric('hours')" id="btn-hours">Duration</button>
+  {% endif %}
+  {% if history[0].youtube_main contains 'likes' %}
+  <button class="chart-btn" onclick="toggleMetric('likes')" id="btn-likes">Likes</button>
+  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -106,6 +112,16 @@ var allMetrics = {
   content: contentDatasets,
   orders: ordersDatasets,
   github: githubDatasets,
+  hours: [
+    { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'duration_seconds') / 3600; }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
+    { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'duration_seconds') / 3600; }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
+    { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'duration_seconds') + pluck(h, 'youtube_vods', 'duration_seconds')) / 3600; }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
+  ],
+  likes: [
+    { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'likes'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
+    { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'likes'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
+    { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'likes') || 0) + (pluck(h, 'youtube_vods', 'likes') || 0); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
+  ],
 };
 
 console.log('Audience dataset length:', audienceDatasets[0].data.length, 'sample:', audienceDatasets[0].data.slice(0,5));
@@ -177,6 +193,16 @@ function filterMilestones(type) {
     if (type === 'all') { item.classList.remove('hidden'); return; }
     var dtype = item.dataset.type;
     item.classList.toggle('hidden', dtype !== type);
+  });
+  // Hide month dividers with no visible milestones
+  document.querySelectorAll('.month-divider').forEach(function(div) {
+    var sib = div.nextElementSibling;
+    var hasVisible = false;
+    while (sib && !sib.classList.contains('month-divider')) {
+      if (!sib.classList.contains('hidden')) { hasVisible = true; break; }
+      sib = sib.nextElementSibling;
+    }
+    div.style.display = hasVisible ? '' : 'none';
   });
 }
 </script>
@@ -278,6 +304,10 @@ function filterMilestones(type) {
 
     {% assign link_meta = milestones.links[key] %}
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
+
+    {% if key contains "video_first_" and link_meta.text %}
+      {% capture d %}First video to {{ val }} views: {{ link_meta.text }}{% endcapture %}{% assign display = d %}
+    {% endif %}
 
     {% assign has_thumb = link_meta.thumb %}
     {% assign tag = "div" %}

@@ -6,11 +6,15 @@ layout: default
 
     {% include banner.html %}
 
-    {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.message %}
+    {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.size > 0 %}
     <div class="milestone-marquee">
         <div class="milestone-track" id="milestone-track">
-            <span class="milestone-item">&#11088; {{ site.data.milestones.current.message }}</span>
-            <span class="milestone-item" aria-hidden="true">&#11088; {{ site.data.milestones.current.message }}</span>
+            {% for m in site.data.milestones.current %}
+            <span class="milestone-item">&#11088; {{ m.message }}</span>
+            {% endfor %}
+            {% for m in site.data.milestones.current %}
+            <span class="milestone-item" aria-hidden="true">&#11088; {{ m.message }}</span>
+            {% endfor %}
         </div>
     </div>
     {% endif %}

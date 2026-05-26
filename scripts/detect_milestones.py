@@ -233,6 +233,11 @@ def main():
                 date = video_dates[m - 1]
                 new_reached[key] = date
 
+        # Series started milestone (first video publish date)
+        key = f"game_{gname}_started"
+        if key not in new_reached:
+            new_reached[key] = video_dates[0]
+
         # Return milestones (longest gap between consecutive videos)
         if len(video_dates) >= 2:
             try:
@@ -319,6 +324,49 @@ def main():
                 if found_date:
                     key = f"game_{gname}_hours_{m}"
                     new_reached[key] = found_date
+
+    # Per-game upload hours (content creation time from video duration_seconds)
+    game_durations = {}  # gname -> total seconds
+    channel_duration_secs = 0
+    for v in all_videos:
+        s = v.get("series", {})
+        gname = (s or {}).get("game", "")
+        dur = v.get("duration_seconds", 0)
+        if gname and dur:
+            game_durations.setdefault(gname, 0)
+            game_durations[gname] += dur
+        if dur:
+            channel_duration_secs += dur
+
+    upload_thresh = [m for m in GAME_EP_THRESH if m >= 1]
+    for gname, total_secs in game_durations.items():
+        upload_hours = total_secs // 3600
+        for m in sorted(upload_thresh, reverse=True):
+            if upload_hours >= m:
+                key = f"game_{gname}_upload_{m}"
+                # Use the publish date of the video that pushed us over the threshold
+                cum = 0
+                for v in sorted(all_videos, key=lambda x: x.get("published", "")):
+                    vs = v.get("series", {})
+                    if (vs or {}).get("game", "") == gname:
+                        cum += v.get("duration_seconds", 0)
+                        if cum // 3600 >= m:
+                            date = v.get("published", "")[:10]
+                            new_reached[key] = date
+                            break
+
+    # Channel upload hours (content creation time)
+    channel_upload_hours = channel_duration_secs // 3600
+    for m in sorted(HOURS_THRESH, reverse=True):
+        if channel_upload_hours >= m:
+            key = f"upload_{m}"
+            cum = 0
+            for v in sorted(all_videos, key=lambda x: x.get("published", "")):
+                cum += v.get("duration_seconds", 0)
+                if cum // 3600 >= m:
+                    date = v.get("published", "")[:10]
+                    new_reached[key] = date
+                    break
 
     # Age milestone
     first_video_date = None
@@ -433,7 +481,10 @@ def main():
         return key.rsplit("_", 1)[0]
 
     def threshold_val(key):
-        return int(key.rsplit("_", 1)[1])
+        try:
+            return int(key.rsplit("_", 1)[1])
+        except ValueError:
+            return -1
 
     collapsed = {}
     groups = {}
@@ -465,6 +516,12 @@ def main():
                 if "_ep_" in rest:
                     g, _, n = rest.partition("_ep_")
                     print(f"  New milestone: {n} episodes in {g} (date={date})")
+                elif "_upload_" in rest:
+                    g, _, n = rest.partition("_upload_")
+                    print(f"  New milestone: {n} content hours in {g} (date={date})")
+                elif "_started" in rest:
+                    g = rest.replace("_started", "")
+                    print(f"  New milestone: {g} series started (date={date})")
                 elif "_views_" in rest:
                     g, _, n = rest.partition("_views_")
                     print(f"  New milestone: {n} views across {g} (date={date})")
@@ -474,6 +531,8 @@ def main():
                 elif "_return_" in rest:
                     g, _, n = rest.partition("_return_")
                     print(f"  New milestone: Back to {g} after {n} days (date={date})")
+            elif key.startswith("upload_"):
+                print(f"  New milestone: {m:,} content hours created (date={date})")
             else:
                 print(f"  New milestone: {m:,} {parts[0]} (date={date})")
 

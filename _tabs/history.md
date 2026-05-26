@@ -19,7 +19,9 @@ group: stats
   <button class="chart-btn active" onclick="toggleMetric('audience')" id="btn-audience">Audience</button>
   <button class="chart-btn" onclick="toggleMetric('views')" id="btn-views">Views</button>
   <button class="chart-btn" onclick="toggleMetric('content')" id="btn-content">Content</button>
+  {% if site.data.fourthwall.products.size > 0 %}
   <button class="chart-btn" onclick="toggleMetric('orders')" id="btn-orders">Orders</button>
+  {% endif %}
   {% if history[0].github %}
   <button class="chart-btn" onclick="toggleMetric('github')" id="btn-github">GitHub</button>
   {% endif %}
@@ -81,9 +83,13 @@ contentDatasets.push({
   borderWidth: 3, pointRadius: 0,
 });
 
+{% if site.data.fourthwall.products.size > 0 %}
 var ordersDatasets = [
   { label: 'Fourthwall', data: histData.map(function(h) { return pluck(h, 'fourthwall', 'orders'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
 ];
+{% else %}
+var ordersDatasets = [];
+{% endif %}
 
 var githubDatasets = [];
 {% if history[0].github %}
@@ -153,6 +159,28 @@ function toggleMetric(metric) {
 <h2 class="milestones-heading">Milestones</h2>
 <p class="milestones-note">&#9881;&#65039; Powers of three (ternary) are my primary counting system. Powers of two (binary) and round numbers also tracked. <a href="/about">Why ternary?</a></p>
 
+<div class="ms-filter-bar">
+  <button class="ms-filter-btn active" onclick="filterMilestones('all')" data-filter="all">All</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('subs')" data-filter="subs">Subs</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('views')" data-filter="views">Views</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('videos')" data-filter="videos">Videos</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('game')" data-filter="game">Games</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('watch')" data-filter="watch">Watch Time</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('content')" data-filter="content">Content</button>
+  <button class="ms-filter-btn" onclick="filterMilestones('other')" data-filter="other">Other</button>
+</div>
+
+<script>
+function filterMilestones(type) {
+  document.querySelectorAll('.ms-filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.filter === type); });
+  document.querySelectorAll('.timeline-item.milestone').forEach(function(item) {
+    if (type === 'all') { item.classList.remove('hidden'); return; }
+    var dtype = item.dataset.type;
+    item.classList.toggle('hidden', dtype !== type);
+  });
+}
+</script>
+
 {% assign milestones = site.data.milestones %}
 {% assign ms_keys = milestones.reached %}
 {% if ms_keys %}
@@ -177,6 +205,12 @@ function toggleMetric(metric) {
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
         {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_upload_" %}
+        {% assign parts = rest | split: "_upload_" %}
+        {% capture d %}{{ parts[1] }} content hours in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_started" %}
+        {% assign g = rest | remove: "_started" %}
+        {% capture d %}{{ g }} series started{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
         {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
@@ -206,6 +240,10 @@ function toggleMetric(metric) {
       {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hours_" %}
       {% capture d %}{{ val }} total channel hours{% endcapture %}{% assign display = d %}
+    {% elsif key contains "upload_" %}
+      {% assign icon = "&#128221;" %}{% assign mclass = "ms-upload" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "upload_" %}
+      {% capture d %}{{ val }} hours of content created{% endcapture %}{% assign display = d %}
     {% else %}
       {% assign pparts = key | split: "_" %}
       {% assign val = pparts | last %}
@@ -217,17 +255,28 @@ function toggleMetric(metric) {
       {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
     {% endif %}
 
+    {% if mclass == "ms-subs" %}{% assign dtype = "subs" %}
+    {% elsif mclass == "ms-views" %}{% assign dtype = "views" %}
+    {% elsif mclass == "ms-videos" %}{% assign dtype = "videos" %}
+    {% elsif mclass == "ms-game" or mclass == "ms-started" %}{% assign dtype = "game" %}
+    {% elsif mclass == "ms-age" or mclass == "ms-hiatus" or mclass == "ms-streak" %}{% assign dtype = "other" %}
+    {% elsif mclass == "ms-video-first" %}{% assign dtype = "views" %}
+    {% elsif mclass == "ms-hours" %}{% assign dtype = "watch" %}
+    {% elsif mclass == "ms-upload" %}{% assign dtype = "content" %}
+    {% else %}{% assign dtype = "other" %}
+    {% endif %}
+
     {% assign link_meta = milestones.links[key] %}
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
     {% if link %}
-    <a href="{{ link }}" class="timeline-item milestone {{ mclass }}">
+    <a href="{{ link }}" class="timeline-item milestone {{ mclass }}" data-type="{{ dtype }}">
       <span class="tl-date">{{ date }}</span>
       <span class="tl-icon">{{ icon }}</span>
       <span class="tl-text">{{ display }}</span>
     </a>
     {% else %}
-    <div class="timeline-item milestone {{ mclass }}">
+    <div class="timeline-item milestone {{ mclass }}" data-type="{{ dtype }}">
       <span class="tl-date">{{ date }}</span>
       <span class="tl-icon">{{ icon }}</span>
       <span class="tl-text">{{ display }}</span>

@@ -210,7 +210,13 @@ function filterMilestones(type) {
         {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_started" %}
         {% assign g = rest | remove: "_started" %}
-        {% capture d %}{{ g }} series started{% endcapture %}{% assign display = d %}
+        {% assign mclass = "ms-started" %}
+        {% assign started_meta = milestones.links[key] %}
+        {% if started_meta.icon %}
+          {% capture d %}<img src="{{ started_meta.icon }}" class="ms-thumb"> {{ g }} series started{% endcapture %}{% assign display = d %}
+        {% else %}
+          {% capture d %}{{ g }} series started{% endcapture %}{% assign display = d %}
+        {% endif %}
       {% elsif rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
         {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}

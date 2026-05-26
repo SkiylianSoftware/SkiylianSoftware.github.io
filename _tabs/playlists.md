@@ -47,7 +47,7 @@ group: media
     {% endif %}
     {% if recency == "historical" %}{% assign recency = nil %}{% endif %}
   {% endif %}
-  <a href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}"
+  <a id="pl-{{ pl.playlist_id }}" href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}"
      data-published="{{ pl.published | default: '' }}"
      data-views="{{ pl.total_views | default: 0 }}"
      data-duration="{{ pl.total_duration_seconds | default: 0 }}"

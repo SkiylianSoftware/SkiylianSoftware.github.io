@@ -2,6 +2,8 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 
+import yaml
+
 DATA_DIR = "_data"
 MILESTONES_FILE = os.path.join(DATA_DIR, "milestones.json")
 
@@ -256,6 +258,29 @@ def main():
             except Exception:
                 pass
 
+    # Load playlist data for game milestone links
+    game_to_playlist = {}
+    playlist_data = read_json("playlists.json") or {}
+    for pl in playlist_data.get("playlists", []):
+        pl_title = pl.get("title", "").lower()
+        for gname in game_cumulative:
+            if gname.lower() in pl_title or pl_title in gname.lower():
+                game_to_playlist[gname] = pl
+                break
+
+    # Load game icons from game_links.yml
+    game_icons = {}
+    gl_path = os.path.join(DATA_DIR, "game_links.yml")
+    if os.path.exists(gl_path):
+        try:
+            with open(gl_path) as f:
+                _gl = yaml.safe_load(f) or {}
+            for name, entry in _gl.items():
+                if isinstance(entry, dict) and entry.get("icon"):
+                    game_icons[name] = entry["icon"]
+        except Exception:
+            pass
+
     # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
     video_history = read_json("video_history.json") or {}
     if video_history:
@@ -457,6 +482,21 @@ def main():
                 vi = vid_map.get(best_vid, {})
                 title = vi.get("title", video_history.get(best_vid, {}).get("title", ""))
                 milestone_links[key] = {"url": f"/videos#vid-{best_vid}", "text": title}
+
+    # Add playlist links for game milestones
+    for key in list(new_reached.keys()):
+        if key.startswith("game_"):
+            rest = key[len("game_") :]
+            for sep in ["_ep_", "_views_", "_hours_", "_return_", "_upload_", "_started"]:
+                if sep in rest:
+                    gname = rest.split(sep)[0]
+                    pl = game_to_playlist.get(gname)
+                    if pl and pl.get("playlist_id"):
+                        entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
+                        if key.endswith("_started") and gname in game_icons:
+                            entry["icon"] = game_icons[gname]
+                        milestone_links[key] = entry
+                    break
 
     # Total watch time (hours) from video_history.json
     if video_history:

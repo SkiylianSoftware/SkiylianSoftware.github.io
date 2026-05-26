@@ -680,6 +680,7 @@ body::after {
 .timeline-item.milestone.ms-hours .tl-text { color: #94a3b8; }
 .timeline-item.milestone.ms-upload .tl-text { color: #4ade80; }
 .timeline-item.milestone.ms-started .tl-text { color: #fb7185; }
+.ms-thumb { width: 1.1rem; height: 1.1rem; border-radius: 3px; vertical-align: middle; margin-right: 0.3rem; object-fit: cover; }
 a.timeline-item { text-decoration: none; color: inherit; display: flex; }
 a.timeline-item:hover { background: rgba(45,212,191,0.04); }
 .month-divider {

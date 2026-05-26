@@ -32,7 +32,9 @@ try:
     with open(GAME_LINKS_PATH) as f:
         _gl = yaml.safe_load(f) or {}
     ALIAS_MAP = {}
+    VALID_GAMES = set()
     for canonical, entry in _gl.items():
+        VALID_GAMES.add(canonical)
         if isinstance(entry, dict):
             for alias in entry.get("aliases", []):
                 ALIAS_MAP[alias] = canonical
@@ -1081,7 +1083,7 @@ def _categorize_non_game(video, content_types):
     return "Misc"
 
 
-def compute_game_stats(videos, alias_map=None, content_types=None):
+def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=None):
     games = {}
     non_game_total = {
         "episode_count": 0,
@@ -1092,6 +1094,39 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
         "latest_video": None,
     }
     non_game_categories = {}
+
+    def _add_to_non_game(v, cat_name):
+        non_game_total["episode_count"] += 1
+        non_game_total["total_duration_seconds"] += v.get("duration_seconds", 0)
+        non_game_total["total_views"] += v.get("view_count", 0)
+        non_game_total["total_likes"] += v.get("like_count", 0)
+        published = v.get("published", "")
+        if published:
+            if non_game_total["first_video"] is None or published < non_game_total["first_video"]:
+                non_game_total["first_video"] = published
+            if non_game_total["latest_video"] is None or published > non_game_total["latest_video"]:
+                non_game_total["latest_video"] = published
+        if cat_name not in non_game_categories:
+            non_game_categories[cat_name] = {
+                "episode_count": 0,
+                "total_duration_seconds": 0,
+                "total_views": 0,
+                "total_likes": 0,
+                "first_video": None,
+                "latest_video": None,
+                "series_data": {},
+            }
+        cat = non_game_categories[cat_name]
+        cat["episode_count"] += 1
+        cat["total_duration_seconds"] += v.get("duration_seconds", 0)
+        cat["total_views"] += v.get("view_count", 0)
+        cat["total_likes"] += v.get("like_count", 0)
+        if published:
+            if cat["first_video"] is None or published < cat["first_video"]:
+                cat["first_video"] = published
+            if cat["latest_video"] is None or published > cat["latest_video"]:
+                cat["latest_video"] = published
+
     for v in videos:
         s = v.get("series")
         published = v.get("published", "")
@@ -1099,6 +1134,30 @@ def compute_game_stats(videos, alias_map=None, content_types=None):
             game = s["game"]
             if alias_map and game in alias_map:
                 game = alias_map[game]
+            # Skip videos whose game name isn't in valid_games (non-game content falsely detected as game)
+            if valid_games and game not in valid_games:
+                cat_name = "Misc"
+                if content_types:
+                    for ct in content_types:
+                        if ct.get("catch_all"):
+                            continue
+                        title = v.get("title", "")
+                        for pattern in ct.get("patterns", []):
+                            if re.search(pattern, title, re.IGNORECASE):
+                                cat_name = ct["name"]
+                                break
+                        if cat_name != "Misc":
+                            break
+                        if not cat_name or cat_name == "Misc":
+                            for tag_pattern in ct.get("tags", []):
+                                tag_lower = tag_pattern.lower()
+                                if tag_lower in [t.lower() for t in v.get("tags", [])]:
+                                    cat_name = ct["name"]
+                                    break
+                        if cat_name != "Misc":
+                            break
+                _add_to_non_game(v, cat_name)
+                continue
             if game not in games:
                 games[game] = {
                     "episode_count": 0,
@@ -1274,7 +1333,9 @@ def main():
     all_videos = (videos or []) + (vods or [])
     game_stats = None
     if all_videos:
-        game_stats = compute_game_stats(all_videos, alias_map=ALIAS_MAP, content_types=CONTENT_TYPES)
+        game_stats = compute_game_stats(
+            all_videos, alias_map=ALIAS_MAP, content_types=CONTENT_TYPES, valid_games=VALID_GAMES
+        )
         save("games.json", game_stats)
 
     print("Fetching YouTube playlists...")

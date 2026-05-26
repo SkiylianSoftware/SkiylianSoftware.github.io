@@ -280,15 +280,7 @@ layout: default
 
     var mt = document.getElementById('milestone-track');
     if (mt) {
-        mt.style.transform = 'translateX(100vw)';
-        requestAnimationFrame(function () {
-            mt.style.transition = 'transform 0.6s ease-out';
-            mt.style.transform = 'translateX(0)';
-            mt.addEventListener('transitionend', function () {
-                mt.style.transition = 'none';
-                mt.style.animation = 'marquee 30s linear infinite';
-            }, { once: true });
-        });
+        mt.classList.add('animating');
     }
 </script>
 

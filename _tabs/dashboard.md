@@ -219,7 +219,7 @@ group: stats
 </div>
 
 <!-- Store -->
-{% if store %}
+{% if store.products and store.products.size > 0 %}
   <h2 class="stats-subtitle">Store</h2>
   <div class="stats-grid">
     <div class="stat-card">

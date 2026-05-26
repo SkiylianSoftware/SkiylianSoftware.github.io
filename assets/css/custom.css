@@ -202,6 +202,7 @@ body::after {
 .preview-img img { opacity: 1 !important; }
 
 .video-card {
+  flex: 1 1 300px;
   border: 1px solid rgba(45, 212, 191, 0.08) !important;
 }
 .video-card:hover {
@@ -226,8 +227,9 @@ body::after {
 
 /* === SHARED GRID COMPONENTS === */
 .video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
   margin: 1rem 0;
 }
@@ -413,11 +415,13 @@ body::after {
   padding-bottom: 0.4rem;
 }
 .offer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
 }
 .offer-card {
+  flex: 1 1 300px;
   background: var(--clr-card-bg);
   border: 1px solid rgba(45, 212, 191, 0.08);
   border-radius: 10px;
@@ -1063,12 +1067,15 @@ a.timeline-item:hover { background: rgba(45,212,191,0.04); }
 
 /* === PAGE: Games === */
 .games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
   margin: 1.25rem 0;
 }
 .game-card {
+  flex: 1 1 320px;
+  max-width: 450px;
   position: relative;
   background: var(--clr-card-bg);
   border: 1px solid color-mix(in srgb, var(--game-accent, #2dd4bf) 15%, var(--clr-card-bg));

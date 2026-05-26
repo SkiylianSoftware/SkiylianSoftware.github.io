@@ -242,6 +242,7 @@ def main():
                     needs_migrate = True
                     break
             if needs_migrate:
+                history.sort(key=lambda e: e.get("date", ""))
                 vid_idx = 0
                 cum_dur = 0
                 cum_likes = 0

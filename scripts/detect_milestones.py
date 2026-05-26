@@ -266,6 +266,24 @@ def main():
         game_cumulative_resolved.setdefault(canon, []).extend(dates)
     game_cumulative = game_cumulative_resolved
 
+    # Filter game_cumulative against actual playlists: discard games with no matching playlist
+    playlist_data = read_json("playlists.json") or {}
+    all_playlist_titles = set()
+    for pl in playlist_data.get("playlists", []):
+        t = pl.get("title", "").lower().strip()
+        if t:
+            all_playlist_titles.add(t)
+    if all_playlist_titles:
+        filtered = {}
+        for gname, dates in game_cumulative.items():
+            gl = gname.lower()
+            if any(gl in pt or pt in gl for pt in all_playlist_titles):
+                filtered[gname] = dates
+        dropped = len(game_cumulative) - len(filtered)
+        if dropped:
+            print(f"  Dropped {dropped} games with no matching playlist")
+        game_cumulative = filtered
+
     for gname, video_dates in game_cumulative.items():
         video_dates.sort()
         ep_count = len(video_dates)
@@ -456,27 +474,27 @@ def main():
     if first_video_date:
         fd = datetime.strptime(first_video_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         age_days = (now - fd).days
-        for m in [3, 9, 27, 81, 243, 729, 2187, 6561]:
+        for m in sorted(set(P3 + P2 + RND), reverse=True):
             if age_days >= m:
                 key = f"age_{m}"
                 age_date = (fd + timedelta(days=m)).strftime("%Y-%m-%d")
                 new_reached[key] = age_date
 
-    # Channel hiatus milestone (longest gap between any two video uploads)
+    # Channel hiatus milestones (every gap exceeding a threshold)
     if len(all_videos) >= 2:
         hiatus_dates = sorted(set(v.get("published", "")[:10] for v in all_videos if v.get("published")))
         if len(hiatus_dates) >= 2:
             hiatus_dt = [datetime.strptime(d, "%Y-%m-%d") for d in hiatus_dates]
-            max_gap = 0
-            gap_end = None
+            hiatus_thresh = sorted(set(P3 + P2 + RND))
             for i in range(len(hiatus_dt) - 1):
                 gap = (hiatus_dt[i + 1] - hiatus_dt[i]).days
-                if gap > max_gap:
-                    max_gap = gap
-                    gap_end = hiatus_dates[i + 1]
-            if max_gap > 0 and gap_end:
-                key = f"hiatus_{max_gap}"
-                new_reached[key] = gap_end
+                gap_end = hiatus_dates[i + 1]
+                for m in sorted(hiatus_thresh, reverse=True):
+                    if gap >= m:
+                        key = f"hiatus_{m}"
+                        if key not in new_reached or gap_end < new_reached[key]:
+                            new_reached[key] = gap_end
+                        break
 
     # Weekly upload streak (consecutive calendar weeks with at least one upload)
     if len(all_videos) >= 2:
@@ -594,13 +612,21 @@ def main():
                         milestone_links[key] = entry
                     break
 
+    # Channel-level milestone thumbnails (use channel avatar)
+    channel_avatar = site_meta.get("avatar_url", "")
+    if channel_avatar:
+        channel_thumb = {"thumb": channel_avatar}
+        for key in list(new_reached.keys()):
+            if key not in milestone_links and not key.startswith("game_") and not key.startswith("video_first_"):
+                milestone_links[key] = channel_thumb
+
     # Total watch time (hours) from video_history.json
     if video_history:
         daily_hours = {}
         for _vid, vh in video_history.items():
             for d, dv in vh.get("daily", {}).items():
                 daily_hours.setdefault(d, 0)
-                daily_hours[d] += dv.get("watch_time", 0) // 60
+                daily_hours[d] += dv.get("watch_time", 0) / 60.0
         if daily_hours:
             sorted_dates = sorted(daily_hours.keys())
             for m in sorted(HOURS_THRESH, reverse=True):

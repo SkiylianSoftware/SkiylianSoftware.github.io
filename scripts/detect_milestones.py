@@ -665,10 +665,14 @@ def main():
         category_entries = {}
         for md_entry in milestone_dates:
             md_label = md_entry.get("label", "")
-            md_date = md_entry.get("date", "")
+            raw_date = md_entry.get("date", "")
             category = md_entry.get("category", "")
-            if not md_label or not md_date or not category:
+            if not md_label or not raw_date or not category:
                 continue
+            if isinstance(raw_date, datetime.date) and not isinstance(raw_date, datetime.datetime):
+                md_date = raw_date.strftime("%Y-%m-%d")
+            else:
+                md_date = str(raw_date)[:10]
             slug = md_label.lower().replace(" ", "_").replace("(", "").replace(")", "").replace(",", "")
             category_entries.setdefault(category, []).append((md_date, slug))
         for _category, entries in category_entries.items():
@@ -677,10 +681,14 @@ def main():
                 if i + 1 < len(sorted_entries):
                     caps[slug] = sorted_entries[i + 1][0]
         for md_entry in milestone_dates:
-            md_date = md_entry.get("date", "")
+            raw_date = md_entry.get("date", "")
             md_label = md_entry.get("label", "")
-            if not md_date or not md_label:
+            if not raw_date or not md_label:
                 continue
+            if isinstance(raw_date, datetime.date) and not isinstance(raw_date, datetime.datetime):
+                md_date = raw_date.strftime("%Y-%m-%d")
+            else:
+                md_date = str(raw_date)[:10]
             try:
                 base_dt = datetime.strptime(md_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             except ValueError:
@@ -692,8 +700,13 @@ def main():
             # Compute cap date if this slug is superseeded by a later entry in its category
             cap_at = None
             if slug in caps:
+                cap_raw = caps[slug]
+                if isinstance(cap_raw, datetime.date) and not isinstance(cap_raw, datetime.datetime):
+                    cap_str = cap_raw.strftime("%Y-%m-%d")
+                else:
+                    cap_str = str(cap_raw)[:10]
                 with contextlib.suppress(ValueError):
-                    cap_at = datetime.strptime(caps[slug], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                    cap_at = datetime.strptime(cap_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             for m in reversed(ANNIVERSARY_THRESH):
                 ann = base_dt + relativedelta(years=+m)
                 if ann.month == 2 and ann.day == 29:

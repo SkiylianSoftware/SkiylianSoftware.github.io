@@ -697,12 +697,16 @@ body::after {
   justify-content: center;
 }
 
-/* Thumbnail: fixed height, natural aspect ratio via <img> */
+/* Thumbnail: fixed height, contain via background-image (avoids Chirpy refactor-content nesting) */
 .tl-thumb {
+  display: inline-block;
   height: 2.5rem;
-  width: auto;
+  width: 5rem;
+  min-width: 2.5rem;
   border-radius: 5px;
-  object-fit: contain;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   flex-shrink: 0;
   align-self: center;
 }

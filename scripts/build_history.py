@@ -68,16 +68,17 @@ def main():
         if ha:
             ym = ha.get("youtube_main", {}) or {}
             an = ha.get("_analytics", {}) or {}
-            entry["youtube_main"]["subs"] = ym.get("subs", 0)
-            entry["youtube_main"]["views"] = ym.get("views", 0)
+            # Subs and views are monotonic (never decrease); guard against bad snapshot data
+            entry["youtube_main"]["subs"] = max(ym.get("subs", 0), last_subs)
+            entry["youtube_main"]["views"] = max(ym.get("views", 0), last_views)
             entry["youtube_main"]["likes"] = ym.get("likes", 0)
             entry["youtube_main"]["comments"] = ym.get("comments", 0)
             entry["youtube_main"]["duration_seconds"] = ym.get("duration_seconds", 0)
             last_subs = entry["youtube_main"]["subs"]
             last_views = entry["youtube_main"]["views"]
-            last_likes = entry["youtube_main"]["likes"]
-            last_comments = entry["youtube_main"]["comments"]
-            last_duration = entry["youtube_main"]["duration_seconds"]
+            last_likes = ym.get("likes", 0)
+            last_comments = ym.get("comments", 0)
+            last_duration = ym.get("duration_seconds", 0)
             if an:
                 entry["_analytics"] = an
             # Carry forward other platforms from analytics

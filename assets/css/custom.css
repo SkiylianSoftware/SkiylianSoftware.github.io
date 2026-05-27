@@ -697,13 +697,14 @@ body::after {
   justify-content: center;
 }
 
-/* Thumbnail: 2.5rem square with rounded corners */
+/* Thumbnail: fixed height, natural aspect ratio */
 .tl-thumb {
-  width: 2.5rem;
-  min-height: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
   border-radius: 5px;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
   flex-shrink: 0;
   align-self: center;
 }

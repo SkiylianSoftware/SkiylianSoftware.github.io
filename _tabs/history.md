@@ -230,6 +230,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% assign icon = "&#9679;" %}
     {% assign mclass = "" %}
     {% assign link = nil %}
+    {% assign link_meta = milestones.links[key] %}
     {% assign display = key %}
 
     {% if key contains "game_" %}
@@ -237,10 +238,12 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign rest = key | remove_first: "game_" %}
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
-        {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+        {% assign gname = link_meta.series_name | default: parts[0] %}
+        {% capture d %}{{ parts[1] }} episodes in {{ gname }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_upload_" %}
         {% assign parts = rest | split: "_upload_" %}
-        {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+        {% assign gname = link_meta.series_name | default: parts[0] %}
+        {% capture d %}{{ parts[1] }} hours uploaded in {{ gname }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_started" %}
         {% assign g = rest | remove: "_started" %}
         {% assign mclass = "ms-started" %}
@@ -254,13 +257,16 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
         {% endif %}
       {% elsif rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
-        {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
+        {% assign gname = link_meta.series_name | default: parts[0] %}
+        {% capture d %}{{ parts[1] }} views across {{ gname }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_hours_" %}
         {% assign parts = rest | split: "_hours_" %}
-        {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+        {% assign gname = link_meta.series_name | default: parts[0] %}
+        {% capture d %}{{ parts[1] }} hours watched in {{ gname }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_return_" %}
         {% assign parts = rest | split: "_return_" %}
-        {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
+        {% assign gname = link_meta.series_name | default: parts[0] %}
+        {% capture d %}Back to {{ gname }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
       {% endif %}
       {% assign game_slug = rest | split: "_" | first | slugify %}
       {% assign link = "/games#" | append: game_slug %}
@@ -351,7 +357,6 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% else %}{% assign dtype = "other" %}
     {% endif %}
 
-    {% assign link_meta = milestones.links[key] %}
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
     {% if key contains "video_first_" and link_meta.text %}

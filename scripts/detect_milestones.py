@@ -583,13 +583,13 @@ def main():
                                 entry["thumb"] = pl["thumbnail"]
                             elif game_icon:
                                 entry["thumb"] = game_icon
+                            if gname in game_first_series:
+                                entry["series_name"] = game_first_series[gname]
 
                     elif sep == "_started":
                         # Link to playlist; use game icon + series_name
                         if pl and pl.get("playlist_id"):
                             entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
-                            if gname in game_first_series:
-                                entry["series_name"] = game_first_series[gname]
                         else:
                             entry = {"url": "/games"}
                         if game_icon:
@@ -598,13 +598,15 @@ def main():
                             entry["series_name"] = game_first_series[gname]
 
                     else:
-                        # views/hours/return/upload: link to playlist; use game icon as thumb
+                        # views/hours/return/upload: link to playlist; use game icon + series_name as thumb
                         if pl and pl.get("playlist_id"):
                             entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
                         else:
                             entry = {"url": "/games"}
                         if game_icon:
                             entry["thumb"] = game_icon
+                        if gname in game_first_series:
+                            entry["series_name"] = game_first_series[gname]
 
                     if entry:
                         milestone_links[key] = entry

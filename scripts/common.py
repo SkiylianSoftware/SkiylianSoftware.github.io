@@ -42,7 +42,7 @@ except Exception as e:
 # Keep GAME_EP_THRESH as an alias for backwards compatibility
 GAME_EP_THRESH = ALL_THRESH
 
-# Default milestone message templates for games
+# Default milestone message templates for games (used by fetch_youtube.py legacy detector)
 GAME_DEFAULT = {
     "ep": "{{m}} episodes in {game}!",
     "views": "{{count}} views across {game}!",
@@ -50,7 +50,7 @@ GAME_DEFAULT = {
     "return": "Back to {game} after {{days}} days!",
 }
 
-# Per-type threshold lists for game milestones — ALL use the full combined set
+# per-type threshold lists for game milestones — ALL use the full combined set
 GAME_THRESHOLDS = {
     "ep": ALL_THRESH,
     "views": ALL_THRESH,

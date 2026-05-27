@@ -270,6 +270,19 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% endif %}
       {% assign game_slug = rest | split: "_" | first | slugify %}
       {% assign link = "/games#" | append: game_slug %}
+    {% elsif key contains "series_" %}
+      {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}
+      {% assign rest = key | remove_first: "series_" %}
+      {% if rest contains "_views_" %}
+        {% assign parts = rest | split: "_views_" %}
+        {% capture d %}{{ parts[1] }} views in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_hours_" %}
+        {% assign parts = rest | split: "_hours_" %}
+        {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_upload_" %}
+        {% assign parts = rest | split: "_upload_" %}
+        {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% endif %}
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
       {% assign display = key | remove: "age_" | append: " days old" %}
@@ -285,6 +298,14 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "streak_" %}
       {% capture d %}{{ val }}-week upload streak{% endcapture %}{% assign display = d %}
+    {% elsif key contains "video_first_likes_" %}
+      {% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = nil %}
+      {% assign val = key | remove: "video_first_likes_" %}
+      {% capture d %}First video to {{ val }} likes{% endcapture %}{% assign display = d %}
+    {% elsif key contains "video_first_comments_" %}
+      {% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = nil %}
+      {% assign val = key | remove: "video_first_comments_" %}
+      {% capture d %}First video to {{ val }} comments{% endcapture %}{% assign display = d %}
     {% elsif key contains "video_first_" %}
       {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_" %}
@@ -317,6 +338,9 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% elsif key contains "videos" %}{% assign icon = "&#127916;" %}{% assign mclass = "ms-videos" %}{% assign link = "/videos" %}
       {% elsif key contains "likes" %}{% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = "/videos" %}
       {% elsif key contains "comments" %}{% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = "/videos" %}
+      {% elsif key contains "twitch_followers" %}{% assign icon = "&#127987;" %}{% assign mclass = "ms-subs" %}{% assign link = "/streams" %}
+      {% elsif key contains "twitch_views" %}{% assign icon = "&#128065;" %}{% assign mclass = "ms-views" %}{% assign link = "/streams" %}
+      {% elsif key contains "store_orders" %}{% assign icon = "&#128092;" %}{% assign mclass = "ms-subs" %}{% assign link = "/support" %}
       {% else %}{% assign icon = "&#11088;" %}{% assign mclass = "ms-subs" %}{% assign link = "/about" %}
       {% endif %}
       {% if key contains "likes" %}
@@ -339,6 +363,12 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
         {% else %}
           {% capture d %}{{ val }} comments{% endcapture %}{% assign display = d %}
         {% endif %}
+      {% elsif key contains "twitch_followers" %}
+        {% capture d %}{{ val }} Twitch followers{% endcapture %}{% assign display = d %}
+      {% elsif key contains "twitch_views" %}
+        {% capture d %}{{ val }} Twitch views{% endcapture %}{% assign display = d %}
+      {% elsif key contains "store_orders" %}
+        {% capture d %}{{ val }} store orders{% endcapture %}{% assign display = d %}
       {% else %}
         {% capture d %}{{ val }} {{ ptype }}{% endcapture %}{% assign display = d %}
       {% endif %}
@@ -361,6 +391,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 
     {% if key contains "video_first_" and link_meta.text %}
       {% capture d %}First video to {{ val }} views: {{ link_meta.text }}{% endcapture %}{% assign display = d %}
+    {% elsif key contains "_ep_" and link_meta.override %}
+      {% assign display = link_meta.override %}
+    {% elsif link_meta.msg %}
+      {% assign display = link_meta.msg %}
     {% endif %}
 
     {% assign has_thumb = link_meta.thumb %}

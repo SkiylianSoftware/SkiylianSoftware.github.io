@@ -104,6 +104,7 @@ def main():
     # Process game milestones from per-video cumulative data
     all_videos = yt_main.get("videos", [])
     game_cumulative = {}
+    series_cumulative = {}
     game_first_series = {}
     game_video_list = {}
     for v in all_videos:
@@ -112,6 +113,9 @@ def main():
         pub = v.get("published", "")[:10]
         if gname_raw and pub:
             game_cumulative.setdefault(gname_raw, []).append(pub)
+            sname = (s or {}).get("series_name", "")
+            if sname:
+                series_cumulative.setdefault(sname, []).append(pub)
     # Build game_first_series and game_video_list from sorted videos
     for v in sorted(all_videos, key=lambda x: x.get("published", "")):
         s = v.get("series", {})
@@ -307,23 +311,24 @@ def main():
             except Exception:
                 pass
 
-    # First video per game for "series started" milestone, and ordered video list for episode links
-    game_first_series = {}
-    game_video_list = {}  # gname -> [(date, video_id, thumbnail, title), ...]
-    for v in sorted(all_videos, key=lambda x: x.get("published", "")):
-        s = v.get("series", {})
-        if not s:
-            continue
-        gname = resolve_gname((s or {}).get("game", ""))
-        sname = (s or {}).get("series_name", "")
-        pub = v.get("published", "")[:10]
-        vid = v.get("video_id", "")
-        thumb = v.get("thumbnail", "")
-        title = v.get("title", "")
-        if gname and sname and gname not in game_first_series:
-            game_first_series[gname] = sname
-        if gname and pub and vid:
-            game_video_list.setdefault(gname, []).append((pub, vid, thumb, title))
+    # Series return milestones (longest gap between consecutive videos in a series)
+    for sname, svideo_dates in series_cumulative.items():
+        if len(svideo_dates) >= 2:
+            try:
+                svideo_dates.sort()
+                s_dates_dt = [datetime.strptime(d, "%Y-%m-%d") for d in svideo_dates]
+                s_max_gap = 0
+                s_gap_end_idx = 0
+                for i in range(len(s_dates_dt) - 1):
+                    s_gap = (s_dates_dt[i + 1] - s_dates_dt[i]).days
+                    if s_gap > s_max_gap:
+                        s_max_gap = s_gap
+                        s_gap_end_idx = i + 1
+                if s_max_gap >= HIATUS_DAYS_THRESH:
+                    skey = f"series_{sname}_return_{s_max_gap}"
+                    new_reached[skey] = svideo_dates[s_gap_end_idx]
+            except Exception:
+                pass
 
     # Series started milestone per game
     for gname in game_cumulative:
@@ -616,6 +621,32 @@ def main():
                 key = f"streak_{longest}"
                 new_reached[key] = streak_end
 
+    # VODs weekly upload streak
+    if len(vods_videos) >= 2:
+        vods_date_set = sorted(set(v.get("published", "")[:10] for v in vods_videos if v.get("published")))
+        if len(vods_date_set) >= 2:
+            vods_week_dates = {}
+            for d in vods_date_set:
+                dt = datetime.strptime(d, "%Y-%m-%d")
+                iso = dt.isocalendar()
+                wk = iso[0] * 100 + iso[1]
+                vods_week_dates.setdefault(wk, []).append(d)
+            vods_sorted_weeks = sorted(vods_week_dates.keys())
+            vods_longest = 0
+            vods_cur = 0
+            vods_streak_end = None
+            for i, wk in enumerate(vods_sorted_weeks):
+                if i == 0 or wk - vods_sorted_weeks[i - 1] != 1:
+                    vods_cur = 1
+                else:
+                    vods_cur += 1
+                if vods_cur > vods_longest:
+                    vods_longest = vods_cur
+                    vods_streak_end = max(vods_week_dates[wk])
+            if vods_longest >= 2:
+                key = f"streak_vods_{vods_longest}"
+                new_reached[key] = vods_streak_end
+
     # Video linking metadata stored alongside milestones
     milestone_links = {}
 
@@ -737,7 +768,7 @@ def main():
     for key in list(new_reached.keys()):
         if key.startswith("series_"):
             rest = key[7:]
-            for sep in ("_views_", "_hours_", "_upload_"):
+            for sep in ("_views_", "_hours_", "_upload_", "_return_"):
                 if sep in rest:
                     sname = rest.split(sep)[0]
                     gname = series_first_game.get(sname, "")
@@ -840,6 +871,8 @@ def main():
                 print(f"  New milestone: VODs hiatus ended after {m} days (date={date})")
             elif key.startswith("hiatus_"):
                 print(f"  New milestone: returned after hiatus of {m} days (date={date})")
+            elif key.startswith("streak_vods_"):
+                print(f"  New milestone: vods {m}-week upload streak (date={date})")
             elif key.startswith("streak_"):
                 print(f"  New milestone: {m} week upload streak (date={date})")
             elif key.startswith("video_first_"):
@@ -951,6 +984,8 @@ def main():
             msg = f"VODs hiatus ended after {key[12:]} days"
         elif key.startswith("hiatus_"):
             msg = f"Returned after hiatus of {key[7:]} days"
+        elif key.startswith("streak_vods_"):
+            msg = f"{key[12:]}-week VODs upload streak"
         elif key.startswith("streak_"):
             msg = f"{key[7:]}-week upload streak"
         elif key.startswith("video_first_likes_"):
@@ -979,6 +1014,9 @@ def main():
             elif "_upload_" in rest:
                 sname, _, n = rest.partition("_upload_")
                 msg = f"{n} hours uploaded in {sname}"
+            elif "_return_" in rest:
+                sname, _, n = rest.partition("_return_")
+                msg = f"Back to {sname} after {n} days"
             else:
                 msg = key
         elif key.startswith("twitch_followers_"):

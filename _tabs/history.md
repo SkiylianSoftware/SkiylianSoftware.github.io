@@ -282,6 +282,9 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% elsif rest contains "_upload_" %}
         {% assign parts = rest | split: "_upload_" %}
         {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
+      {% elsif rest contains "_return_" %}
+        {% assign parts = rest | split: "_return_" %}
+        {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
       {% endif %}
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
@@ -294,6 +297,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hiatus_" %}
       {% capture d %}Returned after hiatus of {{ val }} days{% endcapture %}{% assign display = d %}
+    {% elsif key contains "streak_vods_" %}
+      {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
+      {% assign val = key | remove: "streak_vods_" %}
+      {% capture d %}{{ val }}-week VODs upload streak{% endcapture %}{% assign display = d %}
     {% elsif key contains "streak_" %}
       {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "streak_" %}

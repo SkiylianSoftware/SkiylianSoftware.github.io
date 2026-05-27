@@ -38,9 +38,20 @@ def main():
     if analytics_dates:
         all_dates = [d for d in all_dates if d >= analytics_dates[0]]
 
+    # Find the first analytics entry with a valid Data API snapshot as anchor
+    anchor = None
+    for e in analytics:
+        ym = e.get("youtube_main", {}) or {}
+        an = e.get("_analytics", {}) or {}
+        if ym.get("subs", 0) > 0 and an:
+            anchor = {"date": e["date"], "subs": ym["subs"], "views": ym["views"]}
+            break
+
     # Build daily entries
     entries = []
     cum_videos = 0
+    cum_subs = None  # running cumulative from Analytics API deltas
+    cum_views = None
     last_subs = 0
     last_views = 0
     last_likes = 0
@@ -63,16 +74,31 @@ def main():
             },
         }
 
-        # Overlay analytics data if available; carry forward last known values
         ha = hist_by_date.get(d)
         if ha:
             ym = ha.get("youtube_main", {}) or {}
             an = ha.get("_analytics", {}) or {}
-            entry["youtube_main"]["subs"] = ym.get("subs", 0)
-            entry["youtube_main"]["views"] = ym.get("views", 0)
             entry["youtube_main"]["likes"] = ym.get("likes", 0)
             entry["youtube_main"]["comments"] = ym.get("comments", 0)
             entry["youtube_main"]["duration_seconds"] = ym.get("duration_seconds", 0)
+
+            # Use Analytics API daily deltas anchored to Data API snapshot for subs/views
+            if an and anchor and d >= anchor["date"]:
+                if cum_subs is None:
+                    # First entry at anchor date: Data API value already includes that day's deltas
+                    cum_subs = anchor["subs"]
+                    cum_views = anchor["views"]
+                else:
+                    # Subsequent days: accumulate from Analytics API daily deltas
+                    cum_subs += an.get("subs_gained", 0) - an.get("subs_lost", 0)
+                    cum_views += an.get("views_gained", 0)
+                entry["youtube_main"]["subs"] = cum_subs
+                entry["youtube_main"]["views"] = cum_views
+            else:
+                # No analytics deltas available; use raw snapshot or carry forward
+                entry["youtube_main"]["subs"] = ym.get("subs", 0) or last_subs
+                entry["youtube_main"]["views"] = ym.get("views", 0) or last_views
+
             last_subs = entry["youtube_main"]["subs"]
             last_views = entry["youtube_main"]["views"]
             last_likes = ym.get("likes", 0)
@@ -80,7 +106,6 @@ def main():
             last_duration = ym.get("duration_seconds", 0)
             if an:
                 entry["_analytics"] = an
-            # Carry forward other platforms from analytics
             for pf in ("youtube_vods", "twitch", "github", "fourthwall"):
                 if ha.get(pf):
                     entry[pf] = ha[pf]
@@ -91,48 +116,10 @@ def main():
             entry["youtube_main"]["comments"] = last_comments
             entry["youtube_main"]["duration_seconds"] = last_duration
 
-        # Always ensure videos count is accurate (analytics has videos=0)
         if entry["youtube_main"]["videos"] == 0 and cum_videos > 0:
             entry["youtube_main"]["videos"] = cum_videos
 
         entries.append(entry)
-
-    # Outlier detection on day-over-day deltas: large negative followed by large positive that cancel
-    def fix_outliers(entries, platform, field):
-        vals = [e.get(platform, {}).get(field, 0) for e in entries]
-        if len(vals) < 3:
-            return 0
-        deltas = [vals[i] - vals[i - 1] for i in range(1, len(vals))]
-        if not deltas:
-            return 0
-        mean = sum(deltas) / len(deltas)
-        var_ = sum((d - mean) ** 2 for d in deltas) / len(deltas)
-        std = var_**0.5
-        if std == 0:
-            return 0
-        threshold = 2.0 * std
-        fixed = 0
-        i = 0
-        while i < len(deltas) - 1:
-            nd, pd = deltas[i], deltas[i + 1]
-            # Outlier pair: large drop then recovery, or spike then drop, that cancel
-            neg_drop = nd < 0 < pd and abs(nd) > threshold and pd > threshold
-            pos_spike = nd > 0 > pd and nd > threshold and abs(pd) > threshold
-            if neg_drop or pos_spike:
-                cancel = abs(nd + pd) / max(abs(nd), abs(pd))
-                if cancel < 0.15:
-                    entries[i + 1][platform][field] = round((vals[i] + vals[i + 2]) / 2)
-                    vals[i + 1] = entries[i + 1][platform][field]
-                    fixed += 1
-                    i += 1
-            i += 1
-        return fixed
-
-    for pf in ("youtube_main", "youtube_vods"):
-        for field in ("subs", "views"):
-            count = fix_outliers(entries, pf, field)
-            if count:
-                print(f"  Fixed {count} {pf}.{field} outlier(s) via interpolation")
 
     if debug:
         print(f"  History built: {len(entries)} entries")

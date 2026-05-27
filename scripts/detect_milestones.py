@@ -10,7 +10,6 @@ from common import (
     DATA_DIR,
     FMT,
     GAME_EP_THRESH,
-    GAME_OVERRIDES,
     HIATUS_DAYS_THRESH,
     HOURS_THRESH,
     MILESTONE_SPECS,
@@ -726,9 +725,7 @@ def main():
                         if 0 < ep_num <= len(vlist):
                             _, vid, _thumb, title = vlist[ep_num - 1]
                             entry = {"url": f"/videos#vid-{vid}", "text": title}
-                            override_text = GAME_OVERRIDES.get(gname, {}).get("ep", {}).get(ep_num, "")
-                            if override_text:
-                                entry["override"] = override_text
+
                             if pl and pl.get("thumbnail"):
                                 entry["thumb"] = pl["thumbnail"]
                             elif game_icon:
@@ -858,6 +855,13 @@ def main():
         collapsed[best] = date
     new_reached = collapsed
 
+    # Remove combined_likes/comments if they duplicate youtube likes/comments (same date)
+    for key in list(new_reached.keys()):
+        if key.startswith("youtube_likes_") or key.startswith("youtube_comments_"):
+            combined_key = "combined_" + key[len("youtube_") :]
+            if combined_key in new_reached and new_reached[combined_key] == new_reached[key]:
+                del new_reached[combined_key]
+
     for key, date in new_reached.items():
         if key not in prev_reached:
             parts = key.rsplit("_", 1)
@@ -954,8 +958,7 @@ def main():
             if "_ep_" in rest:
                 g, _, n = rest.partition("_ep_")
                 sname = game_first_series.get(g, "")
-                override_text = GAME_OVERRIDES.get(g, {}).get("ep", {}).get(int(n), "")
-                msg = override_text or (f"{n} episodes in {sname}" if sname else f"{n} episodes in {g}")
+                msg = f"{n} episodes in {sname}" if sname else f"{n} episodes in {g}"
             elif "_upload_" in rest:
                 g, _, n = rest.partition("_upload_")
                 sname = game_first_series.get(g, "")

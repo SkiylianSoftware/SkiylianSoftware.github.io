@@ -238,12 +238,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign rest = key | remove_first: "game_" %}
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
-        {% assign gname = link_meta.series_name | default: parts[0] %}
-        {% capture d %}{{ parts[1] }} episodes in {{ gname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_upload_" %}
         {% assign parts = rest | split: "_upload_" %}
-        {% assign gname = link_meta.series_name | default: parts[0] %}
-        {% capture d %}{{ parts[1] }} hours uploaded in {{ gname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_started" %}
         {% assign g = rest | remove: "_started" %}
         {% assign mclass = "ms-started" %}
@@ -257,16 +255,13 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
         {% endif %}
       {% elsif rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
-        {% assign gname = link_meta.series_name | default: parts[0] %}
-        {% capture d %}{{ parts[1] }} views across {{ gname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_hours_" %}
         {% assign parts = rest | split: "_hours_" %}
-        {% assign gname = link_meta.series_name | default: parts[0] %}
-        {% capture d %}{{ parts[1] }} hours watched in {{ gname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_return_" %}
         {% assign parts = rest | split: "_return_" %}
-        {% assign gname = link_meta.series_name | default: parts[0] %}
-        {% capture d %}Back to {{ gname }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
+        {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
       {% endif %}
       {% assign game_slug = rest | split: "_" | first | slugify %}
       {% assign link = "/games#" | append: game_slug %}
@@ -288,7 +283,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% endif %}
     {% elsif key contains "age_" %}
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
-      {% assign display = key | remove: "age_" | append: " days old" %}
+      {% assign display = key | remove: "age_" | append: " days old (main)" %}
     {% elsif key contains "hiatus_vods_" %}
       {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hiatus_vods_" %}
@@ -304,7 +299,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% elsif key contains "streak_" %}
       {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "streak_" %}
-      {% capture d %}{{ val }}-week upload streak{% endcapture %}{% assign display = d %}
+      {% capture d %}{{ val }}-week upload streak (main){% endcapture %}{% assign display = d %}
     {% elsif key contains "video_first_likes_" %}
       {% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_likes_" %}
@@ -398,10 +393,13 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 
     {% if key contains "video_first_" and link_meta.text %}
       {% capture d %}First video to {{ val }} views: {{ link_meta.text }}{% endcapture %}{% assign display = d %}
-    {% elsif key contains "_ep_" and link_meta.override %}
-      {% assign display = link_meta.override %}
     {% elsif link_meta.msg %}
-      {% assign display = link_meta.msg %}
+      {% if link_meta.msg contains ": " %}
+        {% assign phrase = link_meta.msg | split: ": " | last %}
+        {% assign display = display | append: " (" | append: phrase | append: ")" %}
+      {% else %}
+        {% assign display = link_meta.msg %}
+      {% endif %}
     {% endif %}
 
     {% assign has_thumb = link_meta.thumb %}

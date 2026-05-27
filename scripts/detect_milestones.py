@@ -24,6 +24,7 @@ from common import (
     VIDEO_FIRST_THRESH,
     read_json,
 )
+from dateutil.relativedelta import relativedelta
 
 MILESTONES_FILE = os.path.join(DATA_DIR, "milestones.json")
 
@@ -649,6 +650,36 @@ def main():
     # Video linking metadata stored alongside milestones
     milestone_links = {}
 
+    # Anniversary milestones from custom milestone dates
+    md_file = os.path.join(DATA_DIR, "..", "_data", "milestone_dates.yml")
+    if os.path.exists(md_file):
+        with open(md_file) as f:
+            milestone_dates = yaml.safe_load(f) or []
+        for md_entry in milestone_dates:
+            md_date = md_entry.get("date", "")
+            md_label = md_entry.get("label", "")
+            if not md_date or not md_label:
+                continue
+            try:
+                base_dt = datetime.strptime(md_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+            if (now - base_dt).days < 0:
+                continue  # future date, skip
+            slug = md_label.lower().replace(" ", "_").replace("(", "").replace(")", "").replace(",", "")
+            link_text = md_label
+            for m in reversed(ALL_THRESH):
+                ann = base_dt + relativedelta(years=+m)
+                if ann.month == 2 and ann.day == 29:
+                    ann = ann.replace(month=3, day=1)
+                ann_str = ann.strftime("%Y-%m-%d")
+                if ann_str > today:
+                    continue  # anniversary hasn't happened yet
+                key = f"anniversary_{slug}_{m}"
+                new_reached[key] = ann_str
+                if key not in milestone_links:
+                    milestone_links[key] = {"label": link_text}
+
     # First video to reach N views (from video_history.json)
     if video_history and all_videos:
         vid_map = {}
@@ -817,6 +848,18 @@ def main():
                 if key in custom_msgs:
                     entry["msg"] = custom_msgs[key]
                 milestone_links[key] = entry
+
+    # Add channel avatar and text to anniversary milestones
+    for key in list(milestone_links.keys()):
+        if key.startswith("anniversary_") and "thumb" not in milestone_links[key]:
+            milestone_links[key]["thumb"] = channel_avatar
+            parts = key.split("_")
+            m = parts[-1]
+            label = milestone_links[key].get("label", "unknown")
+            if m == "1":
+                milestone_links[key]["text"] = f"1 year since {label}"
+            else:
+                milestone_links[key]["text"] = f"{m} years since {label}"
 
     # Per-platform and combined watch time (hours) from video_history.json
     if video_history:

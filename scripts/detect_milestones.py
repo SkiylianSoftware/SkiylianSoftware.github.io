@@ -656,22 +656,24 @@ def main():
     if os.path.exists(md_file):
         with open(md_file) as f:
             milestone_dates = yaml.safe_load(f) or []
-        # Build slug index and replaces map
-        slug_index = {}
-        for i, md_entry in enumerate(milestone_dates):
+        # Build caps map by category: each entry's milestones are capped at the
+        # next entry's date in the same category (sorted chronologically).
+        # Uncategorized entries are unaffected.
+        caps = {}
+        category_entries = {}
+        for md_entry in milestone_dates:
             md_label = md_entry.get("label", "")
-            if not md_label:
+            md_date = md_entry.get("date", "")
+            category = md_entry.get("category", "")
+            if not md_label or not md_date or not category:
                 continue
             slug = md_label.lower().replace(" ", "_").replace("(", "").replace(")", "").replace(",", "")
-            slug_index[slug] = i
-        replaces_map = {}
-        for md_entry in milestone_dates:
-            replaces = md_entry.get("replaces", "")
-            if not replaces or replaces not in slug_index:
-                continue
-            replacer_date = md_entry.get("date", "")
-            if replacer_date and (replaces not in replaces_map or replacer_date > replaces_map[replaces]):
-                replaces_map[replaces] = replacer_date
+            category_entries.setdefault(category, []).append((md_date, slug))
+        for _category, entries in category_entries.items():
+            sorted_entries = sorted(entries, key=lambda x: x[0])
+            for i, (_entry_date, slug) in enumerate(sorted_entries):
+                if i + 1 < len(sorted_entries):
+                    caps[slug] = sorted_entries[i + 1][0]
         for md_entry in milestone_dates:
             md_date = md_entry.get("date", "")
             md_label = md_entry.get("label", "")
@@ -685,11 +687,11 @@ def main():
                 continue  # future date, skip
             slug = md_label.lower().replace(" ", "_").replace("(", "").replace(")", "").replace(",", "")
             link_text = md_label
-            # Compute cap date if this slug is replaced by a later entry
-            replace_after = None
-            if slug in replaces_map:
+            # Compute cap date if this slug is superseeded by a later entry in its category
+            cap_at = None
+            if slug in caps:
                 with contextlib.suppress(ValueError):
-                    replace_after = datetime.strptime(replaces_map[slug], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                    cap_at = datetime.strptime(caps[slug], "%Y-%m-%d").replace(tzinfo=timezone.utc)
             for m in reversed(ALL_THRESH):
                 ann = base_dt + relativedelta(years=+m)
                 if ann.month == 2 and ann.day == 29:
@@ -697,8 +699,9 @@ def main():
                 ann_str = ann.strftime("%Y-%m-%d")
                 if ann_str > today:
                     continue  # anniversary hasn't happened yet
-                # If this entry is replaced, suppress milestones on or after the replacement date
-                if replace_after and ann >= replace_after:
+                # If this entry belongs to a category, suppress milestones on or after
+                # the next entry's date in that category
+                if cap_at and ann >= cap_at:
                     continue
                 key = f"anniversary_{slug}_{m}"
                 new_reached[key] = ann_str

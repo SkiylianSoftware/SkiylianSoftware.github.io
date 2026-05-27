@@ -3,9 +3,12 @@
 
 - date: 2025-01-22
   label: Channel refresh (trailer)
+  category: era
 
 - date: 2025-02-01
   label: Content reboot
+  category: era
 
 # - date: 2026-06-XX
 #   label: Channel relaunch
+#   category: era

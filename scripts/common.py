@@ -39,9 +39,6 @@ except Exception as e:
     print(f"Warning: could not load {_VALID_GAMES_PATH}: {e}", file=__import__("sys").stderr)
     ALIAS_MAP = {}
 
-# Keep GAME_EP_THRESH as an alias for backwards compatibility
-GAME_EP_THRESH = ALL_THRESH
-
 # per-type threshold lists for game milestones — ALL use the full combined set
 GAME_THRESHOLDS = {
     "ep": ALL_THRESH,
@@ -55,9 +52,6 @@ SEQUEL_BASE = {
     "Transport Fever 2": "Transport Fever",
     "Transport Fever 3": "Transport Fever",
 }
-
-# Anniversary milestone year thresholds
-ANNIVERSARY_THRESH = ALL_THRESH
 
 
 def _fmt(m, b):
@@ -146,8 +140,11 @@ MILESTONE_SPECS = [
 ]
 
 HOURS_THRESH = ALL_THRESH
+GAME_EP_THRESH = ALL_THRESH
 VIDEO_FIRST_THRESH = [m for m in ALL_THRESH if m >= 100]
 HIATUS_DAYS_THRESH = 60
+ANNIVERSARY_THRESH = ALL_THRESH
+AGE_DAYS_THRESH = [m for m in ALL_THRESH if m >= 30]
 
 
 def read_json(filename):

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 import yaml
 from common import (
+    AGE_DAYS_THRESH,
     ALIAS_MAP,
     ALL_THRESH,
     ANNIVERSARY_THRESH,
@@ -562,7 +563,7 @@ def main():
     if first_video_date:
         fd = datetime.strptime(first_video_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         age_days = (now - fd).days
-        for m in reversed(ALL_THRESH):
+        for m in reversed(AGE_DAYS_THRESH):
             if age_days >= m:
                 key = f"age_{m}"
                 age_date = (fd + timedelta(days=m)).strftime("%Y-%m-%d")

@@ -228,17 +228,26 @@ P2_MSG = {
     1048576: "1M! Megabyte territory!",
 }
 RND_MSG = {
+    1: "Just getting started",
     10: "First double digits!",
+    25: "Quarter of a century!",
     50: "Halfway to 100!",
+    75: "Three-quarters and thriving!",
     100: "Triple digits!",
+    250: "Quarter thousand!",
     500: "Half a thousand!",
-    1000: "The big 1K!",
-    5000: "5K strong!",
-    10000: "10K! Unreal!",
-    50000: "50K! Halfway to 100K!",
-    100000: "100K!!! Thank you!",
+    750: "Three-quarters of a grand!",
+    1000: "The big 1 Thousand!",
+    2500: "Two and a half grand!",
+    5000: "5 Thousand strong!",
+    7500: "Seven and a half thousand!",
+    10000: "10 Thousand! Unreal!",
+    25000: "25 Thousand! Quarter of a hundred thousand!",
+    50000: "50 Thousand! Halfway to 100 Thousand!",
+    75000: "75 Thousand! Three-quarters there!",
+    100000: "100 Thousand!!! Thank you!",
     500000: "Half a million!",
-    1000000: "1 MILLION! Unbelievable!",
+    1000000: "1 Million! Unbelievable!",
 }
 
 MILESTONE_SPECS = [

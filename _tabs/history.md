@@ -363,7 +363,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% if link %}{% assign tag = "a" %}{% endif %}
     <{{ tag }} {% if link %}href="{{ link }}"{% endif %} class="timeline-item milestone {{ mclass }}" data-type="{{ dtype }}">
       {% if has_thumb %}
-      <span class="tl-thumb" style="background-image: url('{{ has_thumb }}')"></span>
+      <img class="tl-thumb" src="{{ has_thumb }}" alt="" loading="lazy">
       {% else %}
       <span class="tl-icon">{{ icon }}</span>
       {% endif %}

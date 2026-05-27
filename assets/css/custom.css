@@ -697,14 +697,12 @@ body::after {
   justify-content: center;
 }
 
-/* Thumbnail: fixed height, natural aspect ratio */
+/* Thumbnail: fixed height, natural aspect ratio via <img> */
 .tl-thumb {
   height: 2.5rem;
-  min-width: 2.5rem;
+  width: auto;
   border-radius: 5px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
+  object-fit: contain;
   flex-shrink: 0;
   align-self: center;
 }

@@ -97,16 +97,35 @@ def main():
 
         entries.append(entry)
 
-    # Outlier detection: replace V-shaped dips with lerped values
-    def fix_outliers(entries, platform, field, threshold=0.5):
+    # Outlier detection on day-over-day deltas: large negative followed by large positive that cancel
+    def fix_outliers(entries, platform, field):
         vals = [e.get(platform, {}).get(field, 0) for e in entries]
+        if len(vals) < 3:
+            return 0
+        deltas = [vals[i] - vals[i - 1] for i in range(1, len(vals))]
+        if not deltas:
+            return 0
+        mean = sum(deltas) / len(deltas)
+        var_ = sum((d - mean) ** 2 for d in deltas) / len(deltas)
+        std = var_**0.5
+        if std == 0:
+            return 0
+        threshold = 2.0 * std
         fixed = 0
-        for i in range(1, len(vals) - 1):
-            p, c, n = vals[i - 1], vals[i], vals[i + 1]
-            if p > 0 and c > 0 and n > 0 and c < p * threshold and c < n * threshold:
-                entries[i][platform][field] = round((p + n) / 2)
-                vals[i] = entries[i][platform][field]
-                fixed += 1
+        i = 0
+        while i < len(deltas) - 1:
+            nd, pd = deltas[i], deltas[i + 1]
+            # Outlier pair: large drop then recovery, or spike then drop, that cancel
+            neg_drop = nd < 0 < pd and abs(nd) > threshold and pd > threshold
+            pos_spike = nd > 0 > pd and nd > threshold and abs(pd) > threshold
+            if neg_drop or pos_spike:
+                cancel = abs(nd + pd) / max(abs(nd), abs(pd))
+                if cancel < 0.15:
+                    entries[i + 1][platform][field] = round((vals[i] + vals[i + 2]) / 2)
+                    vals[i + 1] = entries[i + 1][platform][field]
+                    fixed += 1
+                    i += 1
+            i += 1
         return fixed
 
     for pf in ("youtube_main", "youtube_vods"):

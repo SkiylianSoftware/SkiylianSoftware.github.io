@@ -123,5 +123,6 @@ permalink: /about/
 {% endif %}
 
 <p class="about-intro" style="margin-top: 2rem;">
-  I count in balanced ternary. Negatives are natural (just invert + and -), radix economy peaks at three, and 3<sup>n</sup> thresholds create a beautiful spread: 1, 3, 9, 27, 81, 243, 729&hellip; where each milestone feels earned. Powers of two are for software; round numbers are for growing up in Britain. Powers of three are my own little corner of the universe.
+  I count in balanced ternary. Negatives are natural (just invert + and -), radix economy peaks at three, and 3<sup>n</sup> thresholds create a beautiful spread: 1, 3, 9, 27, 81, 243, 729&hellip; where each milestone feels earned. Powers of two are for software; round numbers are for growing up in Britain. Powers of three are my own little corner of the universe.</p>
+  <p>The Setun &mdash; a Soviet ternary computer built in 1958 &mdash; proved the concept works in hardware too. Balanced ternary on vacuum tubes, with magnetic drum memory and a beautifully minimal instruction set. It was reliable, economical, and decades ahead of its time. An elegant design, and I love that the same numeric system powers my milestone tracking.
 </p>

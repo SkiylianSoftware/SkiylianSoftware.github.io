@@ -9,11 +9,8 @@ import yaml
 from common import (
     ALIAS_MAP,
     DATA_DIR,
-    GAME_DEFAULT,
-    GAME_OVERRIDES,
     GAME_THRESHOLDS,
     MILESTONE_SPECS,
-    SEQUEL_BASE,
     VALID_GAMES,
 )
 
@@ -519,21 +516,17 @@ def _detect_game_milestones(games, prev_reached, now, cutoff, all_videos=None):
             for m in sorted(thresholds, reverse=True):
                 if value >= m:
                     key = f"game_{gname}_{key_suffix}_{m}"
-                    override = GAME_OVERRIDES.get(gname, {}).get(gtype, {}).get(m)
-                    if not override:
-                        base = SEQUEL_BASE.get(gname)
-                        if base:
-                            override = GAME_OVERRIDES.get(base, {}).get(gtype, {}).get(m)
-                    if override:
-                        msg = override
-                    else:
-                        tmpl = GAME_DEFAULT[gtype]
-                        msg = (
-                            tmpl.replace("{{m}}", str(m))
-                            .replace("{{count}}", str(m))
-                            .replace("{{hours}}", str(m))
-                            .replace("{game}", gname)
-                        )
+                    tmpl = {
+                        "ep": "{{m}} episodes in {game}",
+                        "views": "{{count}} views across {game}",
+                        "hours": "{{hours}} hours in {game}",
+                    }[gtype]
+                    msg = (
+                        tmpl.replace("{{m}}", str(m))
+                        .replace("{{count}}", str(m))
+                        .replace("{{hours}}", str(m))
+                        .replace("{game}", gname)
+                    )
                     if key not in prev_reached:
                         game_pub_dates = game_dates.get(gname, [])
                         if gtype == "ep" and len(game_pub_dates) >= m:
@@ -561,7 +554,7 @@ def _detect_game_milestones(games, prev_reached, now, cutoff, all_videos=None):
                 for m in sorted(GAME_THRESHOLDS["return"], reverse=True):
                     if gap_days >= m:
                         key = f"game_{gname}_return_{m}"
-                        msg = GAME_DEFAULT["return"].replace("{game}", gname).replace("{{days}}", str(m))
+                        msg = f"Back to {gname} after {m} days"
                         if key not in prev_reached:
                             reached[key] = now.isoformat()
                             current[key] = {"type": "game_return", "game": gname, "count": m, "message": msg}

@@ -67,12 +67,18 @@ group: media
 <div id="video-modal" class="modal" onclick="if(event.target==this)closePlayer()">
   <div class="modal-content">
     <button class="modal-close" onclick="closePlayer()">&times;</button>
-    <div id="player-wrap"></div>
-    <div class="modal-body">
-      <p id="modal-title" class="modal-title"></p>
+    <div class="modal-top">
+      <div class="modal-video-col">
+        <div id="player-wrap"></div>
+      </div>
+      <div class="modal-info-col">
+        <p id="modal-title" class="modal-title"></p>
+        <div id="modal-series-link" class="modal-series-link"></div>
+        <div id="modal-description" class="modal-description"></div>
+      </div>
+    </div>
+    <div class="modal-bottom">
       <div id="modal-meta" class="modal-meta"></div>
-      <div id="modal-series-link" class="modal-series-link"></div>
-      <div id="modal-description" class="modal-description"></div>
       <div id="modal-chapters" class="modal-chapters"></div>
       <div id="modal-next" class="modal-next"></div>
       <a id="modal-link" href="#" target="_blank" class="btn">Watch on YouTube</a>
@@ -125,8 +131,7 @@ function openPlayer(el) {
     descBox.style.display = 'none';
   }
 
-  var truncatedDesc = desc.length > 200 ? desc.substring(0, 200) : desc;
-  var chaps = parseChapters(truncatedDesc);
+  var chaps = parseChapters(desc);
   var chapBox = document.getElementById('modal-chapters');
   if (chaps.length) {
     chapBox.innerHTML = '<p class="chapters-label">Chapters</p>' + chaps.map(function(c){return '<span class="chapter-chip" onclick="document.getElementById(\'player-wrap\').querySelector(\'iframe\').src=\'https://www.youtube.com/embed/' + id + '?start=' + c.time + '&autoplay=1\'">' + c.label + '</span>';}).join('');

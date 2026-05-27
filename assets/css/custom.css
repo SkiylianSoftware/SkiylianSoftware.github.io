@@ -299,10 +299,13 @@ body::after {
 /* === SHARED MODAL === */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
 .modal.open { display: flex; }
-.modal-content { width: 90vw; max-width: 800px; background: #111; border-radius: 12px; overflow: hidden; }
-#player-wrap { width: 100%; aspect-ratio: 16/9; }
+.modal-content { width: 90vw; max-width: 900px; background: #111; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
+.modal-top { display: flex; flex-direction: row; }
+.modal-video-col { flex: 0 0 auto; width: 40%; }
+.modal-video-col #player-wrap { width: 100%; aspect-ratio: 16/9; }
+.modal-info-col { flex: 1; min-width: 0; padding: 0.75rem 1rem; overflow-y: auto; max-height: 50vh; }
+.modal-bottom { padding: 0 1rem 0.75rem; flex-shrink: 0; }
 .modal-close { position: absolute; top: 1rem; right: 1.5rem; font-size: 2rem; color: #fff; background: none; border: none; cursor: pointer; z-index: 10; }
-.modal-body { padding: 0.75rem 1rem; max-height: 50vh; overflow-y: auto; }
 .modal-title { margin: 0 0 0.4rem; font-size: 1rem; }
 .modal-meta { font-size: 0.8rem; opacity: 0.7; margin-bottom: 0.5rem; }
 .modal-series-link { margin-bottom: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
@@ -312,9 +315,9 @@ body::after {
 .game-badge-link { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); color: #d8b4fe; }
 .game-badge-link:hover { background: rgba(168,85,247,0.25); }
 .ep-badge { font-size: 0.75rem; opacity: 0.6; }
-.modal-description { margin: 0 0 0.75rem; }
-.desc-label { font-size: 0.8rem; font-weight: 600; margin: 0 0 0.3rem; opacity: 0.7; }
-.desc-text { font-size: 0.82rem; line-height: 1.5; opacity: 0.85; max-height: 200px; overflow-y: auto; }
+.modal-description { }
+.desc-label { font-size: 0.8rem; font-weight: 600; margin: 0 0 0.3rem; opacity: 0.7; display: none; }
+.desc-text { font-size: 0.82rem; line-height: 1.5; opacity: 0.85; }
 .desc-text a { color: #5eead4; text-decoration: underline; }
 .modal-chapters, .modal-next { margin: 0 0 0.75rem; }
 .chapters-label, .next-label { font-size: 0.8rem; font-weight: 600; margin: 0 0 0.4rem; opacity: 0.7; }
@@ -323,6 +326,12 @@ body::after {
 .next-card { padding: 0.5rem; border-radius: 6px; background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.15); cursor: pointer; transition: background 0.15s; }
 .next-card:hover { background: rgba(45,212,191,0.15); }
 .next-title { font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .modal-top { flex-direction: column; }
+  .modal-video-col { width: 100%; }
+  .modal-info-col { max-height: none; }
+}
 
 /* === PAGE: About === */
 .about-intro {

@@ -90,11 +90,14 @@ function parseChapters(description) {
   return chapters;
 }
 
-/* "Watch next" - find next video in same series */
+/* "Watch next" - find next chronological video in same series */
 function findWatchNext(currentCard) {
   var series = currentCard ? currentCard.getAttribute('data-series') : null;
   if (!series) return null;
   var cards = Array.from(document.querySelectorAll('[data-series="' + series + '"]'));
+  cards.sort(function(a, b) {
+    return new Date(a.getAttribute('data-published')) - new Date(b.getAttribute('data-published'));
+  });
   var idx = cards.indexOf(currentCard);
   return (idx >= 0 && idx < cards.length - 1) ? cards[idx + 1] : null;
 }

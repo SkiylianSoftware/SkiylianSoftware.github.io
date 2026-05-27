@@ -33,6 +33,11 @@ def main():
         print("No data to build history from")
         return
 
+    # Filter to start from the first analytics entry with real data to avoid a 0-value flatline
+    analytics_dates = sorted([e["date"] for e in analytics if e.get("youtube_main", {}).get("subs", 0) > 0])
+    if analytics_dates:
+        all_dates = [d for d in all_dates if d >= analytics_dates[0]]
+
     # Build daily entries
     entries = []
     cum_videos = 0

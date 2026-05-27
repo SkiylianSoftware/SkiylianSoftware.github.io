@@ -638,6 +638,13 @@ def main():
                         new_reached[key] = d
                         break
 
+    # Remove combined_ milestones that duplicate youtube_ (same date and threshold)
+    for key in list(new_reached.keys()):
+        if key.startswith("combined_"):
+            yt_key = key.replace("combined_", "youtube_", 1)
+            if yt_key in new_reached and new_reached[yt_key] == new_reached[key]:
+                del new_reached[key]
+
     # Collapse milestones: for each label, keep only the highest threshold per date
     def collapse_key(key):
         return key.rsplit("_", 1)[0]
@@ -750,22 +757,28 @@ def main():
             rest = key[5:]
             if "_ep_" in rest:
                 g, _, n = rest.partition("_ep_")
-                msg = f"{n} episodes in {g}"
+                sname = game_first_series.get(g, "")
+                msg = f"{n} episodes in {sname}" if sname else f"{n} episodes in {g}"
             elif "_upload_" in rest:
                 g, _, n = rest.partition("_upload_")
-                msg = f"{n} hours uploaded in {g}"
+                sname = game_first_series.get(g, "")
+                msg = f"{n} hours uploaded in {sname}" if sname else f"{n} hours uploaded in {g}"
             elif "_started" in rest:
                 g = rest.replace("_started", "")
-                msg = f"{g} series started"
+                sname = game_first_series.get(g, "")
+                msg = f"{sname} started" if sname else f"{g} series started"
             elif "_views_" in rest:
                 g, _, n = rest.partition("_views_")
-                msg = f"{n} views across {g}"
+                sname = game_first_series.get(g, "")
+                msg = f"{n} views across {sname}" if sname else f"{n} views across {g}"
             elif "_hours_" in rest:
                 g, _, n = rest.partition("_hours_")
-                msg = f"{n} hours watched in {g}"
+                sname = game_first_series.get(g, "")
+                msg = f"{n} hours watched in {sname}" if sname else f"{n} hours watched in {g}"
             elif "_return_" in rest:
                 g, _, n = rest.partition("_return_")
-                msg = f"Back to {g} after {n} days"
+                sname = game_first_series.get(g, "")
+                msg = f"Back to {sname} after {n} days" if sname else f"Back to {g} after {n} days"
             else:
                 msg = key
         elif key.startswith("age_"):

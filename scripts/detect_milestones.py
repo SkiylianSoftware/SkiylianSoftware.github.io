@@ -569,7 +569,7 @@ def main():
                     game_icon = game_icons.get(gname, "")
 
                     if sep == "_ep_":
-                        # Link episode milestones to the specific video; use series/playlist thumbnail
+                        # Series-level: video-specific link, use playlist thumbnail, fallback to game icon
                         try:
                             ep_num = int(rest.split(sep)[1])
                         except ValueError:
@@ -578,7 +578,6 @@ def main():
                         if 0 < ep_num <= len(vlist):
                             _, vid, _thumb, title = vlist[ep_num - 1]
                             entry = {"url": f"/videos#vid-{vid}", "text": title}
-                            # Prefer playlist thumbnail as series thumbnail; fall back to game icon
                             if pl and pl.get("thumbnail"):
                                 entry["thumb"] = pl["thumbnail"]
                             elif game_icon:
@@ -586,19 +585,21 @@ def main():
                             if gname in game_first_series:
                                 entry["series_name"] = game_first_series[gname]
 
-                    elif sep == "_started":
-                        # Link to playlist; use game icon + series_name
+                    elif sep in ("_started", "_return_"):
+                        # Series-level milestones: use playlist thumbnail, fallback to game icon
                         if pl and pl.get("playlist_id"):
                             entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
+                            if pl.get("thumbnail"):
+                                entry["thumb"] = pl["thumbnail"]
                         else:
                             entry = {"url": "/games"}
-                        if game_icon:
+                        if game_icon and "thumb" not in entry:
                             entry["thumb"] = game_icon
                         if gname in game_first_series:
                             entry["series_name"] = game_first_series[gname]
 
                     else:
-                        # views/hours/return/upload: link to playlist; use game icon + series_name as thumb
+                        # Game-level milestones (_views_, _hours_, _upload_): use game icon
                         if pl and pl.get("playlist_id"):
                             entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
                         else:

@@ -97,6 +97,24 @@ def main():
 
         entries.append(entry)
 
+    # Outlier detection: replace V-shaped dips with lerped values
+    def fix_outliers(entries, platform, field, threshold=0.5):
+        vals = [e.get(platform, {}).get(field, 0) for e in entries]
+        fixed = 0
+        for i in range(1, len(vals) - 1):
+            p, c, n = vals[i - 1], vals[i], vals[i + 1]
+            if p > 0 and c > 0 and n > 0 and c < p * threshold and c < n * threshold:
+                entries[i][platform][field] = round((p + n) / 2)
+                vals[i] = entries[i][platform][field]
+                fixed += 1
+        return fixed
+
+    for pf in ("youtube_main", "youtube_vods"):
+        for field in ("subs", "views"):
+            count = fix_outliers(entries, pf, field)
+            if count:
+                print(f"  Fixed {count} {pf}.{field} outlier(s) via interpolation")
+
     if debug:
         print(f"  History built: {len(entries)} entries")
         print(f"  First: {entries[0]['date']} - {entries[0]['youtube_main']}")

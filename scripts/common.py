@@ -42,14 +42,6 @@ except Exception as e:
 # Keep GAME_EP_THRESH as an alias for backwards compatibility
 GAME_EP_THRESH = ALL_THRESH
 
-# Default milestone message templates for games (used by fetch_youtube.py legacy detector)
-GAME_DEFAULT = {
-    "ep": "{{m}} episodes in {game}!",
-    "views": "{{count}} views across {game}!",
-    "hours": "{{hours}} hours in {game}!",
-    "return": "Back to {game} after {{days}} days!",
-}
-
 # per-type threshold lists for game milestones — ALL use the full combined set
 GAME_THRESHOLDS = {
     "ep": ALL_THRESH,
@@ -64,124 +56,8 @@ SEQUEL_BASE = {
     "Transport Fever 3": "Transport Fever",
 }
 
-# Per-game milestone message overrides — every threshold up to 100 has a custom message.
-# Falls back to GAME_DEFAULT for any missing key, and SEQUEL_BASE for missing sequels.
-GAME_OVERRIDES = {
-    "Kerbal Space Program": {
-        "ep": {
-            1: "First launch at KSC!",
-            2: "Orbit achieved!",
-            3: "Munar flyby complete!",
-            4: "Mun landing!",
-            8: "Minmus landing!",
-            9: "Duna transfer window!",
-            10: "Duna landing!",
-            16: "Interplanetary fleet assembled!",
-            25: "Jool system arrival!",
-            27: "Jool system fleet deployed!",
-            32: "Eeloo reached!",
-            50: "Kerbals across the solar system!",
-            64: "Space station network established!",
-            81: "Grand tour completed!",
-            100: "Century of launches!",
-        }
-    },
-    "Factorio": {
-        "ep": {
-            1: "First burner miner placed!",
-            2: "Steam power online!",
-            3: "Red science automated!",
-            4: "Green science automated!",
-            8: "Oil processing started!",
-            9: "Blue science online!",
-            10: "Logistic bots deployed!",
-            16: "Rail network built!",
-            25: "Logistic network active!",
-            27: "Rocket silo constructed!",
-            32: "Space science packed!",
-            50: "Mega base expanding!",
-            64: "Quad-blue belt main bus!",
-            81: "Mega base operational!",
-            100: "Factory must grow!",
-        }
-    },
-    "Minecraft": {
-        "ep": {
-            1: "Wooden tools crafted!",
-            2: "Coal mined!",
-            3: "Nether portal activated!",
-            4: "Iron armor equipped!",
-            8: "Enchanting table built!",
-            9: "Stronghold located!",
-            10: "Brewing stand made!",
-            16: "Netherite tools forged!",
-            25: "Beacon assembled!",
-            27: "Ender Dragon defeated!",
-            32: "Elytra acquired!",
-            50: "Ocean monument raided!",
-            64: "Woodland mansion found!",
-            81: "Full beacon pyramid!",
-            100: "Wither defeated!",
-        }
-    },
-    "Transport Fever": {
-        "ep": {
-            1: "First bus route!",
-            2: "Cargo line opened!",
-            3: "Three lines running!",
-            4: "Train station built!",
-            8: "Tram network started!",
-            9: "Train network growing!",
-            10: "Truck routes delivering!",
-            16: "Airport constructed!",
-            25: "High-speed rail built!",
-            27: "Continent-spanning network!",
-            32: "Ship lines launched!",
-            50: "Metropolitan network!",
-            64: "National rail grid!",
-            81: "Transcontinental empire!",
-            100: "Logistics tycoon!",
-        }
-    },
-    "Mars First Logistics": {
-        "ep": {
-            1: "First contract signed!",
-            2: "Wheels attached!",
-            3: "Rover chassis assembled!",
-            4: "Solar panels tested!",
-            8: "Cargo lifted!",
-            9: "Rocket launched!",
-            10: "Second depot built!",
-            16: "Hydraulic arm fitted!",
-            25: "Third depot operational!",
-            27: "Three depots connected!",
-            32: "Wind turbine added!",
-            50: "Across the dunes!",
-            64: "Full workshop upgraded!",
-            81: "Martian rover fleet!",
-            100: "Logistics mastered!",
-        }
-    },
-    "Station Flow": {
-        "ep": {
-            1: "First platform open!",
-            2: "Ticket machine installed!",
-            3: "Queue managed!",
-            4: "Platform signage up!",
-            8: "Second concourse built!",
-            9: "Escalators installed!",
-            10: "Express service started!",
-            16: "Third platform added!",
-            25: "Underground passage dug!",
-            27: "Expansion complete!",
-            32: "Grand concourse built!",
-            50: "Regional hub!",
-            64: "Intercity connections!",
-            81: "Metroplex achieved!",
-            100: "Station perfected!",
-        }
-    },
-}
+# Anniversary milestone year thresholds
+ANNIVERSARY_THRESH = ALL_THRESH
 
 
 def _fmt(m, b):
@@ -191,63 +67,64 @@ def _fmt(m, b):
 FMT = _fmt
 
 P3_MSG = {
-    1: "The unitary state",
-    3: "Three-body problem solved",
-    9: "Nonary game complete",
+    1: "The unitary state.",
+    3: "Three-body problem solved.",
+    9: "Nonary game complete.",
     27: "Cube it!",
-    81: "Trit-trit-trit!",
-    243: "3^5 - Fifth power unlocked",
-    729: "3^6 - One gross in balanced ternary",
-    2187: "3^7 - Lucky sevens",
-    6561: "3^8 - Octotrit",
-    19683: "3^9 - Padovan sequence spotted",
-    59049: "3^10 - Decitrit! Tenfold power!",
-    177147: "3^11 - Ternary galaxy!",
-    531441: "3^12 - Dozenal trit!",
+    81: "Trit-trit-trit-trit!",
+    243: "Fifth power unlocked.",
+    729: "729! A full Setun tryte.",
+    2187: "Lucky sevens! The 7th power achieved.",
+    6561: "A perfectly balanced octotrit.",
+    19683: "19,683! A historic Setun half-word.",
+    59049: "Decitrit! Tenfold power!",
+    177147: "Welcome to the ternary galaxy!",
+    531441: "531,441! The mighty dozenal trit.",
 }
 P2_MSG = {
-    2: "A pair!",
-    4: "Four! Quadbit!",
-    8: "Byte!",
-    16: "Half-word!",
-    32: "Word!",
-    64: "Double-word!",
-    128: "Kilobit!",
-    256: "Byte plural!",
-    512: "Half a K!",
-    1024: "1K! A true kilobyte!",
-    2048: "2K!",
-    4096: "4K! Page boundary!",
-    8192: "8K!",
-    16384: "16K!",
-    32768: "Half of 64K!",
-    65536: "64K! Full address space!",
-    131072: "128K! Expanded memory!",
-    262144: "256K! High memory area!",
-    524288: "512K! Extended memory!",
-    1048576: "1M! Megabyte territory!",
+    2: "Two. The foundation of binary.",
+    4: "Four. A perfect nybble.",
+    8: "Eight! A full byte.",
+    16: "Sixteen. The hexadecimal base.",
+    32: "32. Entering 32-bit territory.",
+    64: "64. Stepping up to 64-bit.",
+    128: "128. Crossing into three digits.",
+    256: "256! A full 8-bit range.",
+    512: "512. Closing in on 1K.",
+    1024: "1K! A true binary kilobyte.",
+    2048: "2K. Doubling the kilobyte.",
+    4096: "4K! Hitting the page boundary.",
+    8192: "8K. Scaling up the memory.",
+    16384: "16K. A solid block of data.",
+    32768: "32K. Pushing past the 15-bit mark.",
+    65536: "64K! Classic 16-bit address space.",
+    131072: "128K. Stepping into expanded memory.",
+    262144: "256K. Gaining serious capacity.",
+    524288: "512K. Halfway to a megabyte.",
+    1048576: "1M! Megabyte territory achieved.",
 }
 RND_MSG = {
-    1: "Just getting started",
-    10: "First double digits!",
-    25: "Quarter of a century!",
-    50: "Halfway to 100!",
-    75: "Three-quarters and thriving!",
-    100: "Triple digits!",
-    250: "Quarter thousand!",
-    500: "Half a thousand!",
-    750: "Three-quarters of a grand!",
-    1000: "The big 1 Thousand!",
-    2500: "Two and a half grand!",
-    5000: "5 Thousand strong!",
-    7500: "Seven and a half thousand!",
-    10000: "10 Thousand! Unreal!",
-    25000: "25 Thousand! Quarter of a hundred thousand!",
-    50000: "50 Thousand! Halfway to 100 Thousand!",
-    75000: "75 Thousand! Three-quarters there!",
-    100000: "100 Thousand!!! Thank you!",
-    500000: "Half a million!",
-    1000000: "1 Million! Unbelievable!",
+    10: "Double digits achieved.",
+    25: "Gaining momentum at 25.",
+    50: "Hitting the 50 mark.",
+    75: "Cruising past 75.",
+    100: "One hundred strong! Triple digits.",
+    250: "A solid 250 on the board.",
+    500: "Five hundred and climbing.",
+    750: "Next major stop: one thousand.",
+    1000: "One thousand! A major milestone.",
+    2500: "Crossing the 2,500 threshold.",
+    5000: "Five thousand! The community is growing.",
+    7500: "Moving swiftly past 7,500.",
+    10000: "Ten thousand! Welcome to five digits.",
+    25000: "Twenty-five thousand and counting.",
+    50000: "Fifty thousand! An impressive feat.",
+    75000: "Seventy-five thousand strong.",
+    100000: "One hundred thousand! Six digits achieved.",
+    250000: "A massive 250,000.",
+    500000: "Five hundred thousand! A monumental achievement.",
+    750000: "750,000 and pushing forward.",
+    1000000: "One million! A truly historic milestone.",
 }
 
 MILESTONE_SPECS = [

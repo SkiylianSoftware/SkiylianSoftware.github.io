@@ -8,6 +8,7 @@ import yaml
 from common import (
     ALIAS_MAP,
     ALL_THRESH,
+    ANNIVERSARY_THRESH,
     DATA_DIR,
     FMT,
     GAME_EP_THRESH,
@@ -692,7 +693,7 @@ def main():
             if slug in caps:
                 with contextlib.suppress(ValueError):
                     cap_at = datetime.strptime(caps[slug], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            for m in reversed(ALL_THRESH):
+            for m in reversed(ANNIVERSARY_THRESH):
                 ann = base_dt + relativedelta(years=+m)
                 if ann.month == 2 and ann.day == 29:
                     ann = ann.replace(month=3, day=1)

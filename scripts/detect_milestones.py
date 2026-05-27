@@ -2,7 +2,7 @@ import contextlib
 import json
 import os
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import yaml
 from common import (
@@ -669,7 +669,7 @@ def main():
             category = md_entry.get("category", "")
             if not md_label or not raw_date or not category:
                 continue
-            if isinstance(raw_date, datetime.date) and not isinstance(raw_date, datetime.datetime):
+            if isinstance(raw_date, date) and not isinstance(raw_date, datetime):
                 md_date = raw_date.strftime("%Y-%m-%d")
             else:
                 md_date = str(raw_date)[:10]
@@ -685,7 +685,7 @@ def main():
             md_label = md_entry.get("label", "")
             if not raw_date or not md_label:
                 continue
-            if isinstance(raw_date, datetime.date) and not isinstance(raw_date, datetime.datetime):
+            if isinstance(raw_date, date) and not isinstance(raw_date, datetime):
                 md_date = raw_date.strftime("%Y-%m-%d")
             else:
                 md_date = str(raw_date)[:10]
@@ -701,7 +701,7 @@ def main():
             cap_at = None
             if slug in caps:
                 cap_raw = caps[slug]
-                if isinstance(cap_raw, datetime.date) and not isinstance(cap_raw, datetime.datetime):
+                if isinstance(cap_raw, date) and not isinstance(cap_raw, datetime):
                     cap_str = cap_raw.strftime("%Y-%m-%d")
                 else:
                     cap_str = str(cap_raw)[:10]

@@ -68,9 +68,16 @@ def main():
         if ha:
             ym = ha.get("youtube_main", {}) or {}
             an = ha.get("_analytics", {}) or {}
-            # Subs and views are monotonic (never decrease); guard against bad snapshot data
-            entry["youtube_main"]["subs"] = max(ym.get("subs", 0), last_subs)
+            # Views are monotonic (cumulative); guard against bad snapshot data
+            raw_subs = ym.get("subs", 0)
             entry["youtube_main"]["views"] = max(ym.get("views", 0), last_views)
+            # Subs can drop, but reject drops >15% in one entry as data errors
+            if raw_subs >= last_subs:
+                entry["youtube_main"]["subs"] = raw_subs
+            elif last_subs > 0 and (last_subs - raw_subs) / last_subs > 0.15:
+                entry["youtube_main"]["subs"] = last_subs
+            else:
+                entry["youtube_main"]["subs"] = raw_subs
             entry["youtube_main"]["likes"] = ym.get("likes", 0)
             entry["youtube_main"]["comments"] = ym.get("comments", 0)
             entry["youtube_main"]["duration_seconds"] = ym.get("duration_seconds", 0)

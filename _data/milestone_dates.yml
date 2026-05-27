@@ -1,7 +1,7 @@
 - date: 2025-02-01
-  label: Content reboot
-  category: era
+  label: 2025 Main channel refresh
+  category: main_era
 
-# - date: 2026-06-XX
-#   label: Channel relaunch
-#   category: era
+# - date: 2026-06-01
+#   label: 2026 Main channel refresh
+#   category: main_era

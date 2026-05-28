@@ -12,17 +12,13 @@ from common import (
     ALL_THRESH,
     ANNIVERSARY_THRESH,
     DATA_DIR,
-    FMT,
     GAME_EP_THRESH,
     HIATUS_DAYS_THRESH,
     HOURS_THRESH,
     MILESTONE_SPECS,
     P2,
-    P2_MSG,
     P3,
-    P3_MSG,
     RND,
-    RND_MSG,
     SEQUEL_BASE,
     VALID_GAMES,
     VIDEO_FIRST_THRESH,
@@ -86,7 +82,7 @@ def main():
     # Collect ALL thresholds (no break), then collapse same-label same-date later
     custom_msgs = {}
     values = {"subs": subs, "views": views, "videos": videos_count}
-    for label, thresholds, msg_map, formatter in MILESTONE_SPECS:
+    for label, thresholds, *_ in MILESTONE_SPECS:
         if label in ("likes", "comments"):
             continue
         value = values.get(label, 0)
@@ -103,7 +99,6 @@ def main():
                 if not date:
                     date = today
                 new_reached[key] = date
-                custom_msgs[key] = formatter(m, msg_map.get(m, ""))
 
     # Process game milestones from per-video cumulative data
     all_videos = yt_main.get("videos", [])
@@ -141,7 +136,7 @@ def main():
     def _track_like_comment(source, prefix, videos, field):
         """Generate likes or comments milestones for a specific source."""
         total = sum(v.get(field, 0) for v in videos)
-        for thresholds, msg_map, formatter in ((P3, P3_MSG, FMT), (P2, P2_MSG, FMT), (RND, RND_MSG, FMT)):
+        for thresholds in (P3, P2, RND):
             for m in sorted(thresholds, reverse=True):
                 if total >= m:
                     key = f"{prefix}_{m}"
@@ -153,14 +148,13 @@ def main():
                             date = v.get("published", "")[:10]
                             break
                     new_reached[key] = date
-                    custom_msgs[key] = formatter(m, msg_map.get(m, ""))
 
     for label, field in (("likes", "like_count"), ("comments", "comment_count")):
         _track_like_comment(label, f"youtube_{label}", all_videos, field)
         _track_like_comment(label, f"vods_{label}", yt_vods_data.get("videos", []), field)
         combined_field = combined_likes if label == "likes" else combined_comments
         combined_total = combined_field
-        for thresholds, msg_map, formatter in ((P3, P3_MSG, FMT), (P2, P2_MSG, FMT), (RND, RND_MSG, FMT)):
+        for thresholds in (P3, P2, RND):
             for m in sorted(thresholds, reverse=True):
                 if combined_total >= m:
                     key = f"combined_{label}_{m}"
@@ -176,7 +170,6 @@ def main():
                             date = v.get("published", "")[:10]
                             break
                     new_reached[key] = date
-                    custom_msgs[key] = formatter(m, msg_map.get(m, ""))
 
     def _steam_icon_url(steam_url):
         """Construct Steam store header image URL from store page URL."""
@@ -791,7 +784,7 @@ def main():
                     game_icon = game_icons.get(gname, "")
 
                     if sep == "_ep_":
-                        # Series-level: video-specific link, use playlist thumbnail, fallback to game icon
+                        # Game-level: video-specific link, use game icon, fallback to playlist thumbnail
                         try:
                             ep_num = int(rest.split(sep)[1])
                         except ValueError:
@@ -801,23 +794,23 @@ def main():
                             _, vid, _thumb, title = vlist[ep_num - 1]
                             entry = {"url": f"/videos#vid-{vid}", "text": title}
 
-                            if pl and pl.get("thumbnail"):
-                                entry["thumb"] = pl["thumbnail"]
-                            elif game_icon:
+                            if game_icon:
                                 entry["thumb"] = game_icon
+                            elif pl and pl.get("thumbnail"):
+                                entry["thumb"] = pl["thumbnail"]
                             if gname in game_first_series:
                                 entry["series_name"] = game_first_series[gname]
 
                     elif sep in ("_started", "_return_"):
-                        # Series-level milestones: use playlist thumbnail, fallback to game icon
+                        # Game-level milestones: game icon for thumb, playlist url for link
                         if pl and pl.get("playlist_id"):
                             entry = {"url": f"/playlists#pl-{pl['playlist_id']}"}
-                            if pl.get("thumbnail"):
-                                entry["thumb"] = pl["thumbnail"]
                         else:
                             entry = {"url": "/games"}
-                        if game_icon and "thumb" not in entry:
+                        if game_icon:
                             entry["thumb"] = game_icon
+                        elif pl and pl.get("thumbnail"):
+                            entry["thumb"] = pl["thumbnail"]
                         if gname in game_first_series:
                             entry["series_name"] = game_first_series[gname]
 
@@ -847,16 +840,14 @@ def main():
                     pl = game_to_playlist.get(gname) or series_to_playlist.get(gname)
                     game_icon = game_icons.get(gname, "")
                     entry = {}
+                    if game_icon:
+                        entry = {"thumb": game_icon}
                     if pl and pl.get("playlist_id"):
                         entry["url"] = f"/playlists#pl-{pl['playlist_id']}"
-                        if pl.get("thumbnail"):
+                        if not entry.get("thumb") and pl.get("thumbnail"):
                             entry["thumb"] = pl["thumbnail"]
-                        elif game_icon:
-                            entry["thumb"] = game_icon
                     else:
-                        entry["url"] = "/games"
-                        if game_icon:
-                            entry["thumb"] = game_icon
+                        entry.setdefault("url", "/games")
                     entry["series_name"] = sname
                     milestone_links[key] = entry
                     break
@@ -904,6 +895,122 @@ def main():
                 milestone_links[key]["text"] = f"1 year since {label}"
             else:
                 milestone_links[key]["text"] = f"{m} years since {label}"
+
+    # Generate display text for ALL milestones (single source of truth for marquee and timeline)
+    def _milestone_msg(key):
+        if key.startswith("game_"):
+            rest = key[5:]
+            if "_ep_" in rest:
+                g, _, n = rest.partition("_ep_")
+                return f"{n} episodes in {g}"
+            if "_upload_" in rest:
+                g, _, n = rest.partition("_upload_")
+                return f"{n} hours uploaded in {g}"
+            if "_started" in rest:
+                g = rest.replace("_started", "")
+                sname = game_first_series.get(g, "")
+                return f"{sname} ({g}) started" if sname else f"{g} series started"
+            if "_views_" in rest:
+                g, _, n = rest.partition("_views_")
+                return f"{n} views across {g}"
+            if "_hours_" in rest:
+                g, _, n = rest.partition("_hours_")
+                return f"{n} hours watched in {g}"
+            if "_return_" in rest:
+                g, _, n = rest.partition("_return_")
+                return f"Back to {g} after {n} days"
+            return key
+        if key.startswith("age_"):
+            return f"{key[4:]} days old"
+        if key.startswith("hiatus_vods_"):
+            return f"VODs hiatus ended after {key[12:]} days"
+        if key.startswith("hiatus_"):
+            return f"Returned after hiatus of {key[7:]} days"
+        if key.startswith("streak_vods_"):
+            return f"{key[12:]}-week VODs upload streak"
+        if key.startswith("streak_"):
+            return f"{key[7:]}-week upload streak"
+        if key.startswith("video_first_likes_"):
+            v = key[19:]
+            link = milestone_links.get(key, {})
+            title = link.get("text", "")
+            return f"First video to {v} likes: {title}" if title else f"First video to {v} likes"
+        if key.startswith("video_first_comments_"):
+            v = key[22:]
+            link = milestone_links.get(key, {})
+            title = link.get("text", "")
+            return f"First video to {v} comments: {title}" if title else f"First video to {v} comments"
+        if key.startswith("video_first_"):
+            v = key[12:]
+            link = milestone_links.get(key, {})
+            title = link.get("text", "")
+            return f"First video to {v} views: {title}" if title else f"First video to {v} views"
+        if key.startswith("series_"):
+            rest = key[7:]
+            if "_views_" in rest:
+                sname, _, n = rest.partition("_views_")
+                return f"{n} views in {sname}"
+            if "_hours_" in rest:
+                sname, _, n = rest.partition("_hours_")
+                return f"{n} hours watched in {sname}"
+            if "_upload_" in rest:
+                sname, _, n = rest.partition("_upload_")
+                return f"{n} hours uploaded in {sname}"
+            if "_return_" in rest:
+                sname, _, n = rest.partition("_return_")
+                return f"Back to {sname} after {n} days"
+            return key
+        if key.startswith("twitch_followers_"):
+            return f"{key[17:]} Twitch followers"
+        if key.startswith("twitch_views_"):
+            return f"{key[13:]} Twitch views"
+        if key.startswith("store_orders_"):
+            return f"{key[13:]} store orders"
+        if key.startswith("youtube_hours_"):
+            return f"{key[14:]} hours watched on YouTube"
+        if key.startswith("combined_hours_"):
+            return f"{key[16:]} hours watched across all channels"
+        if key.startswith("youtube_upload_"):
+            return f"{key[15:]} hours uploaded on YouTube"
+        if key.startswith("vods_upload_"):
+            return f"{key[12:]} hours uploaded on VODs"
+        if key.startswith("combined_upload_"):
+            return f"{key[16:]} hours uploaded across all channels"
+        if key.startswith("youtube_likes_"):
+            return f"{key[14:]} likes on YouTube"
+        if key.startswith("vods_likes_"):
+            return f"{key[11:]} likes on VODs"
+        if key.startswith("combined_likes_"):
+            return f"{key[16:]} likes across all channels"
+        if key.startswith("youtube_comments_"):
+            return f"{key[17:]} comments on YouTube"
+        if key.startswith("vods_comments_"):
+            return f"{key[14:]} comments on VODs"
+        if key.startswith("combined_comments_"):
+            return f"{key[19:]} comments across all channels"
+        if key.startswith("anniversary_"):
+            link = milestone_links.get(key, {})
+            text = link.get("text", "")
+            if text:
+                return text
+            parts = key[len("anniversary_") :].split("_")
+            y = parts[-1]
+            label = " ".join(parts[:-1]).capitalize()
+            return f"{y} year{'s' if y != '1' else ''} since {label}"
+        if key in custom_msgs:
+            return custom_msgs[key]
+        parts = key.rsplit("_", 1)
+        try:
+            m = int(parts[1])
+        except ValueError:
+            return key
+        return f"{m:,} {parts[0]}"
+
+    for key in list(new_reached.keys()):
+        if key not in milestone_links:
+            milestone_links[key] = {}
+        if "msg" not in milestone_links[key]:
+            milestone_links[key]["msg"] = _milestone_msg(key)
 
     # Per-platform and combined watch time (hours) from video_history.json
     if video_history:
@@ -1040,114 +1147,8 @@ def main():
         if d < cutoff_dt:
             continue
 
-        if key.startswith("game_"):
-            rest = key[5:]
-            if "_ep_" in rest:
-                g, _, n = rest.partition("_ep_")
-                sname = game_first_series.get(g, "")
-                msg = f"{n} episodes in {sname}" if sname else f"{n} episodes in {g}"
-            elif "_upload_" in rest:
-                g, _, n = rest.partition("_upload_")
-                sname = game_first_series.get(g, "")
-                msg = f"{n} hours uploaded in {sname}" if sname else f"{n} hours uploaded in {g}"
-            elif "_started" in rest:
-                g = rest.replace("_started", "")
-                sname = game_first_series.get(g, "")
-                msg = f"{sname} ({g}) started" if sname else f"{g} series started"
-            elif "_views_" in rest:
-                g, _, n = rest.partition("_views_")
-                sname = game_first_series.get(g, "")
-                msg = f"{n} views across {sname}" if sname else f"{n} views across {g}"
-            elif "_hours_" in rest:
-                g, _, n = rest.partition("_hours_")
-                sname = game_first_series.get(g, "")
-                msg = f"{n} hours watched in {sname}" if sname else f"{n} hours watched in {g}"
-            elif "_return_" in rest:
-                g, _, n = rest.partition("_return_")
-                sname = game_first_series.get(g, "")
-                msg = f"Back to {sname} after {n} days" if sname else f"Back to {g} after {n} days"
-            else:
-                msg = key
-        elif key.startswith("age_"):
-            msg = f"{key[4:]} days old"
-        elif key.startswith("hiatus_vods_"):
-            msg = f"VODs hiatus ended after {key[12:]} days"
-        elif key.startswith("hiatus_"):
-            msg = f"Returned after hiatus of {key[7:]} days"
-        elif key.startswith("streak_vods_"):
-            msg = f"{key[12:]}-week VODs upload streak"
-        elif key.startswith("streak_"):
-            msg = f"{key[7:]}-week upload streak"
-        elif key.startswith("video_first_likes_"):
-            v = key[19:]
-            link = milestone_links.get(key, {})
-            title = link.get("text", "")
-            msg = f"First video to {v} likes: {title}" if title else f"First video to {v} likes"
-        elif key.startswith("video_first_comments_"):
-            v = key[22:]
-            link = milestone_links.get(key, {})
-            title = link.get("text", "")
-            msg = f"First video to {v} comments: {title}" if title else f"First video to {v} comments"
-        elif key.startswith("video_first_"):
-            v = key[12:]
-            link = milestone_links.get(key, {})
-            title = link.get("text", "")
-            msg = f"First video to {v} views: {title}" if title else f"First video to {v} views"
-        elif key.startswith("series_"):
-            rest = key[7:]
-            if "_views_" in rest:
-                sname, _, n = rest.partition("_views_")
-                msg = f"{n} views in {sname}"
-            elif "_hours_" in rest:
-                sname, _, n = rest.partition("_hours_")
-                msg = f"{n} hours watched in {sname}"
-            elif "_upload_" in rest:
-                sname, _, n = rest.partition("_upload_")
-                msg = f"{n} hours uploaded in {sname}"
-            elif "_return_" in rest:
-                sname, _, n = rest.partition("_return_")
-                msg = f"Back to {sname} after {n} days"
-            else:
-                msg = key
-        elif key.startswith("twitch_followers_"):
-            msg = f"{key[17:]} Twitch followers"
-        elif key.startswith("twitch_views_"):
-            msg = f"{key[13:]} Twitch views"
-        elif key.startswith("store_orders_"):
-            msg = f"{key[13:]} store orders"
-        elif key.startswith("youtube_hours_"):
-            msg = f"{key[14:]} hours watched on YouTube"
-        elif key.startswith("combined_hours_"):
-            msg = f"{key[16:]} hours watched across all channels"
-        elif key.startswith("youtube_upload_"):
-            msg = f"{key[15:]} hours uploaded on YouTube"
-        elif key.startswith("vods_upload_"):
-            msg = f"{key[12:]} hours uploaded on VODs"
-        elif key.startswith("combined_upload_"):
-            msg = f"{key[16:]} hours uploaded across all channels"
-        elif key.startswith("youtube_likes_"):
-            msg = f"{key[14:]} likes on YouTube"
-        elif key.startswith("vods_likes_"):
-            msg = f"{key[11:]} likes on VODs"
-        elif key.startswith("combined_likes_"):
-            msg = f"{key[16:]} likes across all channels"
-        elif key.startswith("youtube_comments_"):
-            msg = f"{key[17:]} comments on YouTube"
-        elif key.startswith("vods_comments_"):
-            msg = f"{key[14:]} comments on VODs"
-        elif key.startswith("combined_comments_"):
-            msg = f"{key[19:]} comments across all channels"
-        else:
-            if key in custom_msgs:
-                msg = custom_msgs[key]
-            else:
-                parts = key.rsplit("_", 1)
-                try:
-                    m = int(parts[1])
-                except ValueError:
-                    continue
-                msg = f"{m:,} {parts[0]}"
-
+        link = milestone_links.get(key, {})
+        msg = link.get("msg", key)
         current_list.append({"message": msg})
 
     # Save

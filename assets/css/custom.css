@@ -697,16 +697,17 @@ body::after {
   justify-content: center;
 }
 
-/* Thumbnail: fixed height, contain via background-image (avoids Chirpy refactor-content nesting) */
+/* Thumbnail: fixed height, cover via background-image (avoids Chirpy refactor-content nesting) */
 .tl-thumb {
   display: inline-block;
   height: 2.5rem;
   width: 5rem;
   min-width: 2.5rem;
   border-radius: 5px;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  background-color: var(--card-bg, #1a1a1a);
   flex-shrink: 0;
   align-self: center;
 }

@@ -279,16 +279,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/" %}
       {% assign display = key | remove: "age_" | append: " days old (main)" %}
     {% elsif key contains "anniversary_" %}
-      {% assign link = "/about" %}
-      {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}
-      {% if link_meta.text %}
-        {% assign display = link_meta.text %}
-      {% else %}
-        {% assign parts = key | remove_first: "anniversary_" | split: "_" %}
-        {% assign y = parts | last %}
-        {% assign label_parts = parts | pop | join: " " | capitalize %}
-        {% capture d %}{{ y }} year{% if y != "1" %}s{% endif %} since {{ label_parts }}{% endcapture %}{% assign display = d %}
-      {% endif %}
+      {% assign icon = "&#127800;" %}{% assign mclass = "ms-age" %}{% assign link = "/about" %}
     {% elsif key contains "hiatus_vods_" %}
       {% assign icon = "&#127987;" %}{% assign mclass = "ms-hiatus" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "hiatus_vods_" %}
@@ -396,15 +387,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
-    {% if key contains "video_first_" and link_meta.text %}
-      {% capture d %}First video to {{ val }} views: {{ link_meta.text }}{% endcapture %}{% assign display = d %}
-    {% elsif link_meta.msg %}
-      {% if link_meta.msg contains ": " %}
-        {% assign phrase = link_meta.msg | split: ": " | last %}
-        {% assign display = display | append: " (" | append: phrase | append: ")" %}
-      {% else %}
-        {% assign display = link_meta.msg %}
-      {% endif %}
+    {% if link_meta.msg %}
+      {% assign display = link_meta.msg %}
+    {% elsif link_meta.text and key contains "video_first_" %}
+      {% assign display = display | append: ": " | append: link_meta.text %}
     {% endif %}
 
     {% assign has_thumb = link_meta.thumb %}

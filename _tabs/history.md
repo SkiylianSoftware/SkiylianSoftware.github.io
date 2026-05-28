@@ -238,14 +238,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign rest = key | remove_first: "game_" %}
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
-        {% assign gname = parts[0] %}
-        {% assign sname = link_meta.series_name | default: gname %}
-        {% capture d %}{{ parts[1] }} episodes in {{ sname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_upload_" %}
         {% assign parts = rest | split: "_upload_" %}
-        {% assign gname = parts[0] %}
-        {% assign sname = link_meta.series_name | default: gname %}
-        {% capture d %}{{ parts[1] }} hours uploaded in {{ sname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_started" %}
         {% assign g = rest | remove: "_started" %}
         {% assign mclass = "ms-started" %}
@@ -253,19 +249,13 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
         {% capture d %}{{ gname }} ({{ g }}) started{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
-        {% assign gname = parts[0] %}
-        {% assign sname = link_meta.series_name | default: gname %}
-        {% capture d %}{{ parts[1] }} views across {{ sname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_hours_" %}
         {% assign parts = rest | split: "_hours_" %}
-        {% assign gname = parts[0] %}
-        {% assign sname = link_meta.series_name | default: gname %}
-        {% capture d %}{{ parts[1] }} hours watched in {{ sname }}{% endcapture %}{% assign display = d %}
+        {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}
       {% elsif rest contains "_return_" %}
         {% assign parts = rest | split: "_return_" %}
-        {% assign gname = parts[0] %}
-        {% assign sname = link_meta.series_name | default: gname %}
-        {% capture d %}Back to {{ sname }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
+        {% capture d %}Back to {{ parts[0] }} after {{ parts[1] }} days{% endcapture %}{% assign display = d %}
       {% endif %}
       {% assign game_slug = rest | split: "_" | first | slugify %}
       {% assign link = "/games#" | append: game_slug %}

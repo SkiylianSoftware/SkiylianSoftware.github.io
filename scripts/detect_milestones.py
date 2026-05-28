@@ -65,6 +65,12 @@ def main():
     prev = read_json("milestones.json") or {}
     prev_reached = prev.get("reached", {})
     new_reached = {}
+    if prev_reached:
+        _zk = [k for k in prev_reached if k.endswith("_0")]
+        if _zk:
+            print("DEBUG: prev_reached contains _0 keys:")
+            for _k in _zk:
+                print(f"  {_k}: {prev_reached[_k]}")
 
     if debug:
         print(

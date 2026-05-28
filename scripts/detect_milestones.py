@@ -753,6 +753,9 @@ def main():
     if all_videos:
         for label, field in (("likes", "like_count"), ("comments", "comment_count")):
             for m in sorted(ALL_THRESH, reverse=True):
+                if m < 1:
+                    print(f"  WARNING: skipping video_first_{label}_{m} (m < 1, possible bug)")
+                    continue
                 best_date = None
                 best_vid = None
                 for v in sorted(all_videos, key=lambda x: x.get("published", "")):

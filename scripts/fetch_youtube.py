@@ -283,6 +283,22 @@ def enrich_playlist_stats(playlists):
     return playlists
 
 
+def _fetch_playlist_cover(pid):
+    """Scrape the YouTube playlist page for the signed pl_c cover URL."""
+    try:
+        resp = requests.get(
+            f"https://www.youtube.com/playlist?list={pid}",
+            timeout=10,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        m = re.search(r'/pl_c/[^"\'&?]+/studio_square_thumbnail\.jpg\?[^"\' ]+', resp.text)
+        if m:
+            return "https://i.ytimg.com" + m.group(0).replace("&amp;", "&")
+    except Exception:
+        pass
+    return ""
+
+
 def fetch_playlists():
     if not YOUTUBE_API_KEY:
         return None
@@ -300,19 +316,18 @@ def fetch_playlists():
         for item in data.get("items", []):
             snippet = item.get("snippet", {})
             thumb = snippet.get("thumbnails", {})
+            api_thumb = (
+                thumb.get("maxres", {}) or thumb.get("medium", {}) or thumb.get("high", {}) or thumb.get("default", {})
+            ).get("url", "")
+            cover = _fetch_playlist_cover(item["id"])
             all_playlists.append(
                 {
                     "title": snippet.get("title", ""),
                     "url": f"https://www.youtube.com/playlist?list={item['id']}",
                     "playlist_id": item["id"],
                     "item_count": item.get("contentDetails", {}).get("itemCount", 0),
-                    "thumbnail": f"https://i.ytimg.com/pl_c/{item['id']}/studio_square_thumbnail.jpg",
-                    "thumbnail_fallback": (
-                        thumb.get("maxres", {})
-                        or thumb.get("medium", {})
-                        or thumb.get("high", {})
-                        or thumb.get("default", {})
-                    ).get("url", ""),
+                    "thumbnail": cover or api_thumb,
+                    "thumbnail_fallback": api_thumb,
                     "description": snippet.get("description", ""),
                     "description_parts": snippet.get("description", "").split("\n"),
                     "published": snippet.get("publishedAt", ""),

@@ -53,11 +53,7 @@ group: media
      data-duration="{{ pl.total_duration_seconds | default: 0 }}"
      data-last-updated="{{ pl.last_updated | default: '' }}">
     {% if pl.thumbnail %}
-      {% if pl.thumbnail_fallback %}
-      <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')" onerror="this.style.backgroundImage='url({{ pl.thumbnail_fallback }})'"></div>
-      {% else %}
       <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
-      {% endif %}
     {% endif %}
     <div class="playlist-row-info">
       <h3>{{ pl.title }}</h3>

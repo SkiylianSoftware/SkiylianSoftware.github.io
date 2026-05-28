@@ -840,14 +840,14 @@ def main():
                     pl = game_to_playlist.get(gname) or series_to_playlist.get(gname)
                     game_icon = game_icons.get(gname, "")
                     entry = {}
-                    if game_icon:
-                        entry = {"thumb": game_icon}
                     if pl and pl.get("playlist_id"):
                         entry["url"] = f"/playlists#pl-{pl['playlist_id']}"
-                        if not entry.get("thumb") and pl.get("thumbnail"):
+                        if pl.get("thumbnail"):
                             entry["thumb"] = pl["thumbnail"]
                     else:
-                        entry.setdefault("url", "/games")
+                        entry["url"] = "/games"
+                    if not entry.get("thumb") and game_icon:
+                        entry["thumb"] = game_icon
                     entry["series_name"] = sname
                     milestone_links[key] = entry
                     break

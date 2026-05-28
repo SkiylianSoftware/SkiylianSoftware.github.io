@@ -306,7 +306,8 @@ def fetch_playlists():
                     "url": f"https://www.youtube.com/playlist?list={item['id']}",
                     "playlist_id": item["id"],
                     "item_count": item.get("contentDetails", {}).get("itemCount", 0),
-                    "thumbnail": (
+                    "thumbnail": f"https://i.ytimg.com/pl_c/{item['id']}/studio_square_thumbnail.jpg",
+                    "thumbnail_fallback": (
                         thumb.get("maxres", {})
                         or thumb.get("medium", {})
                         or thumb.get("high", {})

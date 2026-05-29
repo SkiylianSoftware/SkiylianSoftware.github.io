@@ -71,6 +71,9 @@ def main():
             print("DEBUG: prev_reached contains _0 keys:")
             for _k in _zk:
                 print(f"  {_k}: {prev_reached[_k]}")
+            print(f"  Stripping {len(_zk)} stale _0 milestone keys from prev_reached")
+            for _k in _zk:
+                del prev_reached[_k]
 
     if debug:
         print(
@@ -758,6 +761,13 @@ def main():
     # First video to reach N likes/comments (from Data API snapshots)
     if all_videos:
         for label, field in (("likes", "like_count"), ("comments", "comment_count")):
+            _sorted_vids = sorted(all_videos, key=lambda x: x.get("published", ""))
+            _sample = [(v.get("video_id", "")[:8], v.get(field, "MISSING"),
+                        v.get("published", "")[:10]) for v in _sorted_vids[:5]]
+            _total = sum(v.get(field, 0) for v in all_videos)
+            _non_zero = sum(1 for v in all_videos if v.get(field, 0) > 0)
+            print(f"  DEBUG video_first_{label}: total={_total}, "
+                  f"non_zero={_non_zero}, sample={_sample}")
             for m in sorted(ALL_THRESH, reverse=True):
                 if m < 1:
                     print(f"  WARNING: skipping video_first_{label}_{m} (m < 1, possible bug)")
@@ -1159,6 +1169,15 @@ def main():
         link = milestone_links.get(key, {})
         msg = link.get("msg", key)
         current_list.append({"message": msg})
+
+    # Final cleanup: strip any stale _0 keys from all structures
+    for _k in list(new_reached.keys()):
+        if _k.endswith("_0"):
+            print(f"  Purged stale {_k} from new_reached before save")
+            del new_reached[_k]
+    for _k in list(milestone_links.keys()):
+        if _k.endswith("_0"):
+            del milestone_links[_k]
 
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)

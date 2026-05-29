@@ -127,8 +127,10 @@ jobs:
         run: |
           echo "=== milestones.json BEFORE JEKYLL ==="
           md5sum _data/milestones.json
-          echo "--- Listing ALL milestones* files in _data/ ---"
-          ls -la _data/milestones* 2>&1 || echo "(no milestone files found)"
+          echo "--- Full listing of _data/ ---"
+          ls -laR _data/ 2>&1 | head -50
+          echo "--- Checking for _data/milestones/ directory ---"
+          ls -la _data/milestones/ 2>&1 || echo "(directory does not exist or is empty)"
           python3 << 'PYEOF'
           import json, os
           # Verify we're reading from the same path Jekyll uses
@@ -144,11 +146,25 @@ jobs:
           # Also dump ALL keys that end with _0 or _ (stale pattern)
           stale = {k: v for k, v in reached.items() if k.endswith('_0') or k.endswith('_')}
           if stale:
-              print(f'WARNING: {len(stale)} stale keys found!')
+              print(f'WARNING: {len(stale)} stale keys found in reached!')
               for k in sorted(stale):
                   print(f'  {k!r}: {stale[k]}')
           else:
-              print('No stale keys found - good')
+              print('No stale keys found in reached - good')
+          # Also check the links section
+          links = data.get('links', {})
+          stale_links = {k: v for k, v in links.items() if k.endswith('_0') or k.endswith('_')}
+          if stale_links:
+              print(f'WARNING: {len(stale_links)} stale keys found in links!')
+              for k in sorted(stale_links):
+                  print(f'  Links {k!r}: {stale_links[k].get("text", "?")}')
+          else:
+              print('No stale keys found in links - good')
+          # Show all video_first_* links keys
+          vf_links = {k: v for k, v in links.items() if k.startswith('video_first_')}
+          print(f'video_first_* entries in links: {len(vf_links)}')
+          for k in sorted(vf_links):
+              print(f'  Links {k!r}: {vf_links[k].get("text", "?")}')
           PYEOF
 
       - name: Build site

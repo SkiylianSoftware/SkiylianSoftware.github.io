@@ -7,7 +7,7 @@ layout: default
     {% include banner.html %}
 
     {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.size > 0 %}
-    <div class="milestone-marquee" id="milestone-marquee" style="overflow:hidden">
+    <div class="milestone-marquee" id="milestone-marquee">
         <div class="milestone-track" id="milestone-track">
             {% for m in site.data.milestones.current %}
             <span class="milestone-item">&#11088;{% if m.icon %} {{ m.icon }}{% endif %} {{ m.message }}</span>
@@ -278,28 +278,41 @@ layout: default
     }
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlayer(); });
 
-    var marquee = document.getElementById('milestone-marquee');
-    var track = document.getElementById('milestone-track');
-    if (marquee && track) {
-        var html = track.innerHTML;
-        track.innerHTML = html + html;
-        var setWidth = 0;
+    (function() {
+        var marquee = document.getElementById('milestone-marquee');
+        var track = document.getElementById('milestone-track');
+        if (!marquee || !track) return;
+        marquee.style.overflow = 'hidden';
         var items = track.children;
         var half = items.length / 2;
-        for (var i = 0; i < half; i++) {
-            setWidth += items[i].offsetWidth;
+        var setWidth = 0;
+        function calcWidth() {
+            setWidth = 0;
+            for (var i = 0; i < half; i++) {
+                setWidth += items[i].offsetWidth;
+            }
+            return setWidth > 0;
         }
-        if (setWidth > 0) {
+        if (!calcWidth()) {
+            requestAnimationFrame(function() {
+                if (!calcWidth()) return;
+                startScroll();
+            });
+            return;
+        }
+        startScroll();
+        function startScroll() {
             var speed = 0.5;
-            (function scroll() {
+            var scroll = function() {
                 marquee.scrollLeft += speed;
                 if (marquee.scrollLeft >= setWidth) {
                     marquee.scrollLeft -= setWidth;
                 }
                 requestAnimationFrame(scroll);
-            })();
+            };
+            requestAnimationFrame(scroll);
         }
-    }
+    })();
 </script>
 
 <style>

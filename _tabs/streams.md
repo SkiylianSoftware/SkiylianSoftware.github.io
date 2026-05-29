@@ -41,19 +41,29 @@ group: media
 
 {% assign twitch_sched = site.data.twitch_schedule.segments %}
 {% if twitch_sched and twitch_sched.size > 0 %}
+{% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+{% assign week_from_now = now_epoch | plus: 604800 %}
+{% assign shown = 0 %}
 <div class="section-break"></div>
 
 <div class="widget-card">
   <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Upcoming Streams</h3>
   <div class="widget-body">
-    {% for s in twitch_sched limit: 5 %}
+    {% for s in twitch_sched limit: 10 %}
+    {% assign s_epoch = s.start_time | date: "%s" | plus: 0 %}
+    {% if s_epoch > now_epoch and s_epoch < week_from_now %}
+    {% assign shown = shown | plus: 1 %}
     {% assign start = s.start_time | date: "%A" %}
     <div class="schedule-item">
       <span class="schedule-day">{{ start }}</span>
-      <span class="schedule-time">{{ s.start_time | date: "%H:%M" }}</span>
+      <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
       <span class="schedule-type">{{ s.category | default: s.title | truncate: 50 }}</span>
     </div>
+    {% endif %}
     {% endfor %}
+    {% if shown == 0 %}
+    <p class="schedule-none">No streams scheduled this week.</p>
+    {% endif %}
   </div>
 </div>
 {% endif %}
@@ -130,6 +140,19 @@ function closePlayer() {
   document.getElementById('video-modal').classList.remove('open');
 }
 document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closePlayer(); });
+
+var scheduleTimes = document.querySelectorAll('.schedule-utc');
+for (var i = 0; i < scheduleTimes.length; i++) {
+    var el = scheduleTimes[i];
+    var utc = el.getAttribute('datetime');
+    if (utc) {
+        var d = new Date(utc);
+        var h = d.getHours().toString().padStart(2, '0');
+        var m = d.getMinutes().toString().padStart(2, '0');
+        var tz = d.toTimeString().match(/[A-Z]{3,5}(?![+\-])/);
+        el.textContent = h + ':' + m + (tz ? ' (' + tz[0] + ')' : '');
+    }
+}
 </script>
 
 <style>
@@ -305,5 +328,12 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 .schedule-type {
   opacity: 0.6;
   font-size: 0.8rem;
+}
+
+.schedule-none {
+  text-align: center;
+  opacity: 0.5;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
 }
 </style>

@@ -218,7 +218,14 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 {% assign ms_keys = milestones.reached %}
 {% if ms_keys %}
 <!-- DEBUG --><pre id="debug-milestone-keys">
-{% for _d_item in ms_keys %}{% assign _d_k = _d_item[0] %}{% assign _d_v = _d_item[1] | truncate: 10, "" %}{% if _d_k contains "video_first_" %}{{ _d_k }} | {{ _d_v }}
+{% for _d_item in ms_keys %}{% assign _d_k = _d_item[0] %}{% assign _d_v = _d_item[1] | truncate: 10, "" %}
+{%- if _d_k contains "video_first_" -%}
+{{ _d_k }} | {{ _d_v }}
+|  likes_check=[{% if _d_k contains "video_first_likes_" %}YES{% else %}NO{% endif %}]
+|  comments_check=[{% if _d_k contains "video_first_comments_" %}YES{% else %}NO{% endif %}]
+|  remove_likes=[{{ _d_k | remove: "video_first_likes_" }}]
+|  remove_comments=[{{ _d_k | remove: "video_first_comments_" }}]
+|  remove_views=[{{ _d_k | remove: "video_first_" }}]
 {% endif %}{% endfor %}
 </pre><!-- /DEBUG -->
 <div class="timeline">

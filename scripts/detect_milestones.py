@@ -66,13 +66,11 @@ def main():
     prev_reached = prev.get("reached", {})
     new_reached = {}
     if prev_reached:
-        _zk = [k for k in prev_reached if k.endswith("_0")]
+        _zk = [k for k in prev_reached if k.endswith("_0") or k.endswith("_")]
         if _zk:
-            print("DEBUG: prev_reached contains _0 keys:")
+            print(f"  Stripping {len(_zk)} stale milestone keys from prev_reached")
             for _k in _zk:
-                print(f"  {_k}: {prev_reached[_k]}")
-            print(f"  Stripping {len(_zk)} stale _0 milestone keys from prev_reached")
-            for _k in _zk:
+                print(f"    {_k}: {prev_reached[_k]}")
                 del prev_reached[_k]
 
     if debug:
@@ -1168,13 +1166,12 @@ def main():
         msg = link.get("msg", key)
         current_list.append({"message": msg})
 
-    # Final cleanup: strip any stale _0 keys from all structures
+    # Final cleanup: strip stale _0 and empty-threshold keys from all structures
     for _k in list(new_reached.keys()):
-        if _k.endswith("_0"):
-            print(f"  Purged stale {_k} from new_reached before save")
+        if _k.endswith("_0") or _k.endswith("_"):
             del new_reached[_k]
     for _k in list(milestone_links.keys()):
-        if _k.endswith("_0"):
+        if _k.endswith("_0") or _k.endswith("_"):
             del milestone_links[_k]
 
     # Save

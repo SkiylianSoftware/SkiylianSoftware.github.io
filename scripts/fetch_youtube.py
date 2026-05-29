@@ -595,6 +595,11 @@ def detect_milestones(
 
     prev_reached = prev.get("reached", {})
 
+    # Strip stale _0 and empty-threshold keys (e.g. video_first_likes_0, video_first_likes_)
+    for _k in list(prev_reached.keys()):
+        if _k.endswith("_0") or _k.endswith("_"):
+            del prev_reached[_k]
+
     # Migrate old key format (subs_10 → subs_rnd_10) to preserve historical timestamps
     for old_key in list(prev_reached.keys()):
         parts = old_key.split("_")

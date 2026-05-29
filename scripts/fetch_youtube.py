@@ -595,10 +595,28 @@ def detect_milestones(
 
     prev_reached = prev.get("reached", {})
 
+    # Debug: show video_first keys before stripping
+    _vf_before = [k for k in prev_reached if "video_first" in k]
+    if _vf_before:
+        print(f"  DEBUG fetch_youtube: video_first keys before strip ({len(_vf_before)}):")
+        for _k in sorted(_vf_before):
+            print(f"    {_k!r}: {prev_reached[_k]}")
+
     # Strip stale _0 and empty-threshold keys (e.g. video_first_likes_0, video_first_likes_)
+    _stripped = []
     for _k in list(prev_reached.keys()):
         if _k.endswith("_0") or _k.endswith("_"):
+            _stripped.append(_k)
             del prev_reached[_k]
+    if _stripped:
+        print(f"  DEBUG fetch_youtube: stripped {len(_stripped)} stale keys: {_stripped}")
+
+    # Debug: show video_first keys after stripping
+    _vf_after = [k for k in prev_reached if "video_first" in k]
+    if _vf_after:
+        print(f"  DEBUG fetch_youtube: video_first keys after strip ({len(_vf_after)}):")
+        for _k in sorted(_vf_after):
+            print(f"    {_k!r}: {prev_reached[_k]}")
 
     # Migrate old key format (subs_10 → subs_rnd_10) to preserve historical timestamps
     for old_key in list(prev_reached.keys()):

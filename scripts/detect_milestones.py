@@ -65,13 +65,24 @@ def main():
     prev = read_json("milestones.json") or {}
     prev_reached = prev.get("reached", {})
     new_reached = {}
+    _vf_before = [k for k in prev_reached if k.startswith("video_first_")]
+    if _vf_before:
+        print(f"  DEBUG video_first in prev_reached on load ({len(_vf_before)}):")
+        for _k in sorted(_vf_before):
+            print(f"    {_k!r}: {prev_reached[_k]}")
     if prev_reached:
         _zk = [k for k in prev_reached if k.endswith("_0") or k.endswith("_")]
         if _zk:
             print(f"  Stripping {len(_zk)} stale milestone keys from prev_reached")
             for _k in _zk:
-                print(f"    {_k}: {prev_reached[_k]}")
+                print(f"    {_k!r}: {prev_reached[_k]}")
                 del prev_reached[_k]
+
+    _vf_after_strip = [k for k in prev_reached if k.startswith("video_first_")]
+    if _vf_after_strip:
+        print(f"  DEBUG video_first left in prev_reached after strip ({len(_vf_after_strip)}):")
+        for _k in sorted(_vf_after_strip):
+            print(f"    {_k!r}: {prev_reached[_k]}")
 
     if debug:
         print(
@@ -843,6 +854,13 @@ def main():
                     if entry:
                         milestone_links[key] = entry
                     break
+    _vf_new = sorted(k for k in new_reached if k.startswith("video_first_likes_") or k.startswith("video_first_comments_"))
+    if _vf_new:
+        print(f"  DEBUG video_first_likes/comments FRESHLY GENERATED ({len(_vf_new)}):")
+        for _k in _vf_new:
+            print(f"    {_k!r}: {new_reached[_k]}")
+    else:
+        print("  DEBUG NO video_first_likes/comments were freshly generated")
 
     # Series milestone links: use playlist thumbnail if available, fallback to game icon
     for key in list(new_reached.keys()):
@@ -1167,12 +1185,26 @@ def main():
         current_list.append({"message": msg})
 
     # Final cleanup: strip stale _0 and empty-threshold keys from all structures
+    _nr_vf_before = [k for k in new_reached if k.startswith("video_first_")]
+    if _nr_vf_before:
+        print(f"  DEBUG video_first in new_reached before final cleanup ({len(_nr_vf_before)}):")
+        for _k in sorted(_nr_vf_before):
+            print(f"    {_k!r}: {new_reached[_k]}")
     for _k in list(new_reached.keys()):
         if _k.endswith("_0") or _k.endswith("_"):
             del new_reached[_k]
     for _k in list(milestone_links.keys()):
         if _k.endswith("_0") or _k.endswith("_"):
             del milestone_links[_k]
+    _nr_vf_after = [k for k in new_reached if k.startswith("video_first_")]
+    if _nr_vf_before and not _nr_vf_after:
+        print("  DEBUG: final cleanup removed ALL video_first keys from new_reached")
+    elif _nr_vf_after:
+        print(f"  DEBUG video_first remaining after final cleanup ({len(_nr_vf_after)}):")
+        for _k in sorted(_nr_vf_after):
+            print(f"    {_k!r}: {new_reached[_k]}")
+    else:
+        print("  DEBUG: no video_first keys in new_reached at save time")
 
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)

@@ -401,8 +401,6 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
       {% endif %}
     {% endif %}
 
-    {% if key contains "video_first_likes_" or key contains "video_first_comments_" or key contains "video_first_" %}<pre style="display:none">DEBUG-LOOP: key=[{{ key }}] val=[{{ val }}] mclass=[{{ mclass }}] display=[{{ display }}]</pre>{% endif %}
-
     {% if mclass == "ms-subs" %}{% assign dtype = "subs" %}
     {% elsif mclass == "ms-views" %}{% assign dtype = "views" %}
     {% elsif mclass == "ms-videos" %}{% assign dtype = "videos" %}
@@ -419,14 +417,10 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
     {% if link_meta.msg %}
-<pre style="display:none">DEBUG-MSG-OVERRIDE: key=[{{ key }}] msg=[{{ link_meta.msg }}] old_display=[{{ display }}] new_display=[{{ link_meta.msg }}]</pre>
       {% assign display = link_meta.msg %}
     {% elsif link_meta.text and key contains "video_first_" %}
-<pre style="display:none">DEBUG-BEFORE-APPEND: key=[{{ key }}] display=[{{ display }}] text=[{{ link_meta.text }}]</pre>
       {% assign display = display | append: ": " | append: link_meta.text %}
-<pre style="display:none">DEBUG-AFTER-APPEND: key=[{{ key }}] display=[{{ display }}] text=[{{ link_meta.text }}]</pre>
     {% endif %}
-    {% if key contains "video_first_likes_" or key contains "video_first_comments_" or key contains "video_first_" %}<pre style="display:none">DEBUG-AFTER: key=[{{ key }}] display=[{{ display }}]</pre>{% endif %}
 
     {% assign has_thumb = link_meta.thumb %}
     {% assign tag = "div" %}

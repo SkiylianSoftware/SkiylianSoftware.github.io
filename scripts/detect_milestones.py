@@ -966,12 +966,12 @@ def main():
         if key.startswith("streak_"):
             return f"{key[7:]}-week upload streak"
         if key.startswith("video_first_likes_"):
-            v = key[19:]
+            v = key[18:]
             link = milestone_links.get(key, {})
             title = link.get("text", "")
             return f"First video to {v} likes: {title}" if title else f"First video to {v} likes"
         if key.startswith("video_first_comments_"):
-            v = key[22:]
+            v = key[21:]
             link = milestone_links.get(key, {})
             title = link.get("text", "")
             return f"First video to {v} comments: {title}" if title else f"First video to {v} comments"

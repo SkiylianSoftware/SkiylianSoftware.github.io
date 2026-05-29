@@ -217,35 +217,6 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 {% assign milestones = site.data.milestones %}
 {% assign ms_keys = milestones.reached %}
 {% if ms_keys %}
-<!-- DEBUG --><pre id="debug-milestone-keys">
-{% for _d_item in ms_keys %}{% assign _d_k = _d_item[0] %}{% assign _d_v = _d_item[1] | truncate: 10, "" %}
-{%- if _d_k contains "video_first_" -%}
-{{ _d_k }} | {{ _d_v }}
-|  likes_check=[{% if _d_k contains "video_first_likes_" %}YES{% else %}NO{% endif %}]
-|  comments_check=[{% if _d_k contains "video_first_comments_" %}YES{% else %}NO{% endif %}]
-|  remove_likes=[{{ _d_k | remove: "video_first_likes_" }}]
-|  remove_comments=[{{ _d_k | remove: "video_first_comments_" }}]
-|  remove_views=[{{ _d_k | remove: "video_first_" }}]
-{% endif %}{% endfor %}
-</pre><!-- /DEBUG -->
-<!-- LOOP-DEBUG: dump all items as Liquid sees them -->
-<pre id="loop-debug">
-{% for _li_item in ms_keys %}{% assign _li_k = _li_item[0] %}{% assign _li_v = _li_item[1] | truncate: 10, "" %}{% if _li_k contains "video_first_likes_" or _li_k contains "video_first_comments_" or _li_k contains "video_first_" %}{{ _li_k }}::{{ _li_v }}
-{% endif %}{% endfor %}
-</pre>
-<!-- /LOOP-DEBUG -->
-<!-- BYPASS RENDER: Direct rendering for video_first keys bypassing main chain -->
-<pre id="bypass-render">
-{% for _by_item in ms_keys %}{% assign _by_k = _by_item[0] %}{% assign _by_v = _by_item[1] | truncate: 10, "" %}
-{%- if _by_k contains "video_first_likes_" -%}
-BYPASS likes: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_likes_" }}] date=[{{ _by_v }}]
-{%- elsif _by_k contains "video_first_comments_" -%}
-BYPASS comments: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_comments_" }}] date=[{{ _by_v }}]
-{%- elsif _by_k contains "video_first_" -%}
-BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=[{{ _by_v }}]
-{%- endif -%}{% endfor %}
-</pre>
-<!-- /BYPASS RENDER -->
 <div class="timeline">
   {% assign prev_month = "" %}
   {% for item in ms_keys %}

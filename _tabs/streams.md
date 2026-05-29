@@ -7,11 +7,6 @@ permalink: /streams/
 group: media
 ---
 
-<div class="streams-hero">
-  <p>Catch me live on <a href="https://live.skiylia.dev" class="btn"><i class="fab fa-twitch"></i> Twitch</a>.
-  Past streams are archived on the <a href="https://vods.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> VODs channel</a>.</p>
-</div>
-
 <div id="live-status" class="live-section">
   {% if site.data.livestream.platform == "twitch" %}
   <div class="live-embed">
@@ -138,19 +133,6 @@ document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closeP
 </script>
 
 <style>
-.streams-hero {
-  font-size: 1.05rem;
-  line-height: 1.7;
-  max-width: 600px;
-  margin: 1.5rem 0 2rem;
-  opacity: 0.9;
-}
-
-.streams-hero .btn {
-  font-size: 0.85rem;
-  padding: 0.3rem 0.8rem;
-}
-
 .streams-empty {
   text-align: center;
   padding: 3rem 1.5rem;

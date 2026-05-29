@@ -7,7 +7,7 @@ layout: default
     {% include banner.html %}
 
     {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.size > 0 %}
-    <div class="milestone-marquee" id="milestone-marquee">
+    <div class="milestone-marquee" id="milestone-marquee" style="overflow:hidden">
         <div class="milestone-track" id="milestone-track">
             {% for m in site.data.milestones.current %}
             <span class="milestone-item">&#11088;{% if m.icon %} {{ m.icon }}{% endif %} {{ m.message }}</span>

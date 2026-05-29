@@ -32,14 +32,16 @@ permalink: /support/
 {% endif %}
 
 <div class="support-grid">
+{% if site.data.fourthwall.products.size > 0 %}
   <a href="https://store.skiylia.dev" target="_blank" rel="noopener" class="support-card card-merch btn">
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>
     <div class="card-body">
       <h3>Merch Store</h3>
-      <p>{% if site.data.fourthwall.products.size > 0 %}Featuring {% for p in site.data.fourthwall.products limit:3 %}{{ p.name }}{% unless forloop.last %}, {% endunless %}{% endfor %} and more;{% else %}Cool merch;{% endif %} powered by Fourthwall.</p>
+      <p>Featuring {% for p in site.data.fourthwall.products limit:3 %}{{ p.name }}{% unless forloop.last %}, {% endunless %}{% endfor %} and more; powered by Fourthwall.</p>
       <span class="card-cta">Browse the store &rarr;</span>
     </div>
   </a>
+{% endif %}
 
   <a href="https://support.skiylia.dev" target="_blank" rel="noopener" class="support-card card-kofi btn">
     <div class="card-icon"><i class="fas fa-mug-hot"></i></div>

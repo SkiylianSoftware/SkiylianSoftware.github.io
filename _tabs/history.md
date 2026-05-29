@@ -421,7 +421,9 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
     {% if link_meta.msg %}
       {% assign display = link_meta.msg %}
     {% elsif link_meta.text and key contains "video_first_" %}
+<pre style="display:none">DEBUG-BEFORE-APPEND: key=[{{ key }}] display=[{{ display }}] text=[{{ link_meta.text }}]</pre>
       {% assign display = display | append: ": " | append: link_meta.text %}
+<pre style="display:none">DEBUG-AFTER-APPEND: key=[{{ key }}] display=[{{ display }}] text=[{{ link_meta.text }}]</pre>
     {% endif %}
     {% if key contains "video_first_likes_" or key contains "video_first_comments_" or key contains "video_first_" %}<pre style="display:none">DEBUG-AFTER: key=[{{ key }}] display=[{{ display }}]</pre>{% endif %}
 

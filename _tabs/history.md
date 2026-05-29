@@ -234,6 +234,18 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 {% endif %}{% endfor %}
 </pre>
 <!-- /LOOP-DEBUG -->
+<!-- BYPASS RENDER: Direct rendering for video_first keys bypassing main chain -->
+<pre id="bypass-render">
+{% for _by_item in ms_keys %}{% assign _by_k = _by_item[0] %}{% assign _by_v = _by_item[1] | truncate: 10, "" %}
+{%- if _by_k contains "video_first_likes_" -%}
+BYPASS likes: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_likes_" }}] date=[{{ _by_v }}]
+{%- elsif _by_k contains "video_first_comments_" -%}
+BYPASS comments: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_comments_" }}] date=[{{ _by_v }}]
+{%- elsif _by_k contains "video_first_" -%}
+BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=[{{ _by_v }}]
+{%- endif -%}{% endfor %}
+</pre>
+<!-- /BYPASS RENDER -->
 <div class="timeline">
   {% assign prev_month = "" %}
   {% for item in ms_keys %}

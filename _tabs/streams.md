@@ -33,6 +33,7 @@ group: media
   </div>
   {% else %}
   <div class="offline-schedule">
+    <span class="offline-badge"><i class="fas fa-circle"></i> Currently Offline</span>
     <div class="offline-schedule-icon"><i class="fas fa-calendar-alt"></i></div>
     <h2>Upcoming Streams</h2>
     {% if twitch_sched and twitch_sched.size > 0 %}

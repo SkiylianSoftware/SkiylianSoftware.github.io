@@ -216,7 +216,7 @@ def main():
             return True
         gl_ns = gl.replace(" ", "").replace("-", "").replace("_", "").replace(":", "")
         pt_ns = pt.replace(" ", "").replace("-", "").replace("_", "").replace(":", "")
-        return gl_ns == pt_ns or pt_ns.startswith(gl_ns) or gl_ns.startswith(pt_ns)
+        return gl_ns == pt_ns or pt_ns.startswith(gl_ns) or gl_ns.startswith(pt_ns) or gl_ns in pt_ns
 
     def _build_playlist_index(playlist_data, game_cumulative, game_first_series):
         """Build game_to_playlist and series_to_playlist mappings with normalized matching."""

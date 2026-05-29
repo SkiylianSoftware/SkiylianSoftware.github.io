@@ -217,6 +217,10 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 {% assign milestones = site.data.milestones %}
 {% assign ms_keys = milestones.reached %}
 {% if ms_keys %}
+<!-- DEBUG --><pre id="debug-milestone-keys">
+{% for _d_item in ms_keys %}{% assign _d_k = _d_item[0] %}{% assign _d_v = _d_item[1] | truncate: 10, "" %}{% if _d_k contains "video_first_" %}{{ _d_k }} | {{ _d_v }}
+{% endif %}{% endfor %}
+</pre><!-- /DEBUG -->
 <div class="timeline">
   {% assign prev_month = "" %}
   {% for item in ms_keys %}

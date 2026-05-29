@@ -126,16 +126,30 @@ jobs:
       - name: Dump milestones.json before Jekyll build
         run: |
           echo "=== milestones.json BEFORE JEKYLL ==="
-          python3 << 'EOF'
-          import json
-          with open('_data/milestones.json') as f:
+          md5sum _data/milestones.json
+          echo "--- Listing ALL milestones* files in _data/ ---"
+          ls -la _data/milestones* 2>&1 || echo "(no milestone files found)"
+          python3 << 'PYEOF'
+          import json, os
+          # Verify we're reading from the same path Jekyll uses
+          path = os.path.abspath('_data/milestones.json')
+          print(f'Reading from: {path}')
+          with open(path) as f:
               data = json.load(f)
           reached = data.get('reached', {})
           vf = {k: v for k, v in reached.items() if k.startswith('video_first_')}
           print(f'Total video_first_* entries: {len(vf)}')
           for k in sorted(vf):
               print(f'  {k!r}: {vf[k]}')
-          EOF
+          # Also dump ALL keys that end with _0 or _ (stale pattern)
+          stale = {k: v for k, v in reached.items() if k.endswith('_0') or k.endswith('_')}
+          if stale:
+              print(f'WARNING: {len(stale)} stale keys found!')
+              for k in sorted(stale):
+                  print(f'  {k!r}: {stale[k]}')
+          else:
+              print('No stale keys found - good')
+          PYEOF
 
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"

@@ -401,6 +401,8 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
       {% endif %}
     {% endif %}
 
+    {% if key contains "video_first_likes_" or key contains "video_first_comments_" or key contains "video_first_" %}<!-- DEBUG-LOOP: key=[{{ key }}] val=[{{ val }}] mclass=[{{ mclass }}] display=[{{ display }}] -->{% endif %}
+
     {% if mclass == "ms-subs" %}{% assign dtype = "subs" %}
     {% elsif mclass == "ms-views" %}{% assign dtype = "views" %}
     {% elsif mclass == "ms-videos" %}{% assign dtype = "videos" %}
@@ -421,6 +423,7 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
     {% elsif link_meta.text and key contains "video_first_" %}
       {% assign display = display | append: ": " | append: link_meta.text %}
     {% endif %}
+    {% if key contains "video_first_likes_" or key contains "video_first_comments_" or key contains "video_first_" %}<!-- DEBUG-AFTER: key=[{{ key }}] display=[{{ display }}] -->{% endif %}
 
     {% assign has_thumb = link_meta.thumb %}
     {% assign tag = "div" %}

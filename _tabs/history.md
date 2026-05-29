@@ -262,7 +262,19 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
     {% assign link_meta = milestones.links[key] %}
     {% assign display = key %}
 
-    {% if key contains "game_" %}
+    {% if key contains "video_first_likes_" %}
+      {% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = nil %}
+      {% assign val = key | remove: "video_first_likes_" %}
+      {% capture d %}First video to {{ val }} likes{% endcapture %}{% assign display = d %}
+    {% elsif key contains "video_first_comments_" %}
+      {% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = nil %}
+      {% assign val = key | remove: "video_first_comments_" %}
+      {% capture d %}First video to {{ val }} comments{% endcapture %}{% assign display = d %}
+    {% elsif key contains "video_first_" %}
+      {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
+      {% assign val = key | remove: "video_first_" %}
+      {% capture d %}First video to {{ val }} views{% endcapture %}{% assign display = d %}
+    {% elsif key contains "game_" %}
       {% assign icon = "&#127918;" %}{% assign mclass = "ms-game" %}
       {% assign rest = key | remove_first: "game_" %}
       {% if rest contains "_ep_" %}
@@ -325,21 +337,6 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
       {% assign icon = "&#128293;" %}{% assign mclass = "ms-streak" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "streak_" %}
       {% capture d %}{{ val }}-week upload streak (main){% endcapture %}{% assign display = d %}
-    {% elsif key contains "video_first_likes_" %}
-      {% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = nil %}
-      {% assign val = key | remove: "video_first_likes_" %}
-      <!-- DEBUG-LIKES: key=[{{ key }}] val=[{{ val }}] -->
-      {% capture d %}First video to {{ val }} likes{% endcapture %}{% assign display = d %}
-    {% elsif key contains "video_first_comments_" %}
-      {% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = nil %}
-      {% assign val = key | remove: "video_first_comments_" %}
-      <!-- DEBUG-COMMENTS: key=[{{ key }}] val=[{{ val }}] -->
-      {% capture d %}First video to {{ val }} comments{% endcapture %}{% assign display = d %}
-    {% elsif key contains "video_first_" %}
-      {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
-      {% assign val = key | remove: "video_first_" %}
-      <!-- DEBUG-VIEWS: key=[{{ key }}] val=[{{ val }}] -->
-      {% capture d %}First video to {{ val }} views{% endcapture %}{% assign display = d %}
     {% elsif key contains "youtube_hours_" %}
       {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "youtube_hours_" %}

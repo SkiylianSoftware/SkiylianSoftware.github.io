@@ -854,7 +854,9 @@ def main():
                     if entry:
                         milestone_links[key] = entry
                     break
-    _vf_new = sorted(k for k in new_reached if k.startswith("video_first_likes_") or k.startswith("video_first_comments_"))
+    _vf_new = sorted(
+        k for k in new_reached if k.startswith("video_first_likes_") or k.startswith("video_first_comments_")
+    )
     if _vf_new:
         print(f"  DEBUG video_first_likes/comments FRESHLY GENERATED ({len(_vf_new)}):")
         for _k in _vf_new:
@@ -1215,6 +1217,13 @@ def main():
     with open(MILESTONES_FILE, "w") as f:
         json.dump(result, f, indent=2)
     print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones, {len(current_list)} current)")
+    with open(MILESTONES_FILE) as f:
+        _reread = json.load(f)
+    _rr_reached = _reread.get("reached", {})
+    _rr_vf = {k: v for k, v in _rr_reached.items() if k.startswith("video_first_")}
+    print(f"  REREAD VERIFY: {len(_rr_reached)} reached keys, {len(_rr_vf)} video_first_* entries")
+    for _k in sorted(_rr_vf):
+        print(f"    {_k!r}: {_rr_vf[_k]}")
 
 
 if __name__ == "__main__":

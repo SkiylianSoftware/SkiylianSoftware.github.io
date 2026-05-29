@@ -94,18 +94,18 @@ jobs:
       - name: Dump milestones.json for debugging
         run: |
           echo "=== milestones.json REACHED keys ==="
-          python3 -c "
-import json
-with open('_data/milestones.json') as f:
-    data = json.load(f)
-reached = data.get('reached', {})
-vf = {k: v for k, v in reached.items() if k.startswith('video_first_')}
-print(f'Total video_first_* entries: {len(vf)}')
-for k in sorted(vf):
-    print(f'  {k!r}: {vf[k]}')
-print(f'First 5 overall: {list(sorted(reached.items()))[:5]}')
-print(f'Last 5 overall: {list(sorted(reached.items()))[-5:]}')
-"
+          python3 << 'EOF'
+          import json
+          with open('_data/milestones.json') as f:
+              data = json.load(f)
+          reached = data.get('reached', {})
+          vf = {k: v for k, v in reached.items() if k.startswith('video_first_')}
+          print(f'Total video_first_* entries: {len(vf)}')
+          for k in sorted(vf):
+              print(f'  {k!r}: {vf[k]}')
+          print(f'First 5 overall: {list(sorted(reached.items()))[:5]}')
+          print(f'Last 5 overall: {list(sorted(reached.items()))[-5:]}')
+          EOF
 
       - name: Track history
         run: python scripts/track_history.py

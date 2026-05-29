@@ -7,6 +7,10 @@ permalink: /streams/
 group: media
 ---
 
+{% assign twitch_sched = site.data.twitch_schedule.segments %}
+{% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+{% assign week_from_now = now_epoch | plus: 604800 %}
+
 <div id="live-status" class="live-section">
   {% if site.data.livestream.platform == "twitch" %}
   <div class="live-embed">
@@ -28,24 +32,40 @@ group: media
     <a href="https://watch.skiylia.dev" class="btn btn-primary" target="_blank">Watch on YouTube</a>
   </div>
   {% else %}
-  <div class="offline-panel">
-    <div class="offline-icon"><i class="fas fa-circle"></i></div>
-    <div class="offline-text">
-      <h2>Currently Offline</h2>
-      <p>Not streaming right now. Check the schedule below for upcoming streams.</p>
-      <p><a href="https://live.skiylia.dev" class="btn" target="_blank">Visit Twitch Channel</a></p>
+  <div class="offline-schedule">
+    <div class="offline-schedule-icon"><i class="fas fa-calendar-alt"></i></div>
+    <h2>Upcoming Streams</h2>
+    {% if twitch_sched and twitch_sched.size > 0 %}
+    {% assign shown = 0 %}
+    <div class="offline-schedule-list">
+      {% for s in twitch_sched limit: 10 %}
+      {% assign s_epoch = s.start_time | date: "%s" | plus: 0 %}
+      {% if s_epoch > now_epoch and s_epoch < week_from_now %}
+      {% assign shown = shown | plus: 1 %}
+      {% assign start = s.start_time | date: "%A" %}
+      <div class="schedule-item">
+        <span class="schedule-day">{{ start }}</span>
+        <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+        <span class="schedule-type">{{ s.category | default: s.title | truncate: 50 }}</span>
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% if shown == 0 %}
+      <p class="schedule-none">No streams scheduled this week.</p>
+      {% endif %}
     </div>
+    {% else %}
+    <p class="schedule-none">No upcoming streams scheduled.</p>
+    {% endif %}
+    <p class="offline-schedule-cta"><a href="https://live.skiylia.dev" class="btn" target="_blank">Visit Twitch Channel</a></p>
   </div>
   {% endif %}
 </div>
 
-{% assign twitch_sched = site.data.twitch_schedule.segments %}
+{% if site.data.livestream.platform == "twitch" or site.data.livestream.platform == "youtube" %}
 {% if twitch_sched and twitch_sched.size > 0 %}
-{% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-{% assign week_from_now = now_epoch | plus: 604800 %}
 {% assign shown = 0 %}
 <div class="section-break"></div>
-
 <div class="widget-card">
   <h3 class="widget-title"><i class="fas fa-calendar-alt"></i> Upcoming Streams</h3>
   <div class="widget-body">
@@ -66,6 +86,7 @@ group: media
     {% endif %}
   </div>
 </div>
+{% endif %}
 {% endif %}
 
 <div class="section-break"></div>
@@ -147,10 +168,13 @@ for (var i = 0; i < scheduleTimes.length; i++) {
     var utc = el.getAttribute('datetime');
     if (utc) {
         var d = new Date(utc);
-        var h = d.getHours().toString().padStart(2, '0');
-        var m = d.getMinutes().toString().padStart(2, '0');
-        var tz = d.toTimeString().match(/[A-Z]{3,5}(?![+\-])/);
-        el.textContent = h + ':' + m + (tz ? ' (' + tz[0] + ')' : '');
+        var utcH = d.getUTCHours().toString().padStart(2, '0');
+        var utcM = d.getUTCMinutes().toString().padStart(2, '0');
+        var locH = d.getHours().toString().padStart(2, '0');
+        var locM = d.getMinutes().toString().padStart(2, '0');
+        var m = d.toTimeString().match(/[A-Z]{3,5}(?![+\-])/);
+        var locTz = m ? ' ' + m[0] : '';
+        el.textContent = utcH + ':' + utcM + ' UTC (' + locH + ':' + locM + locTz + ')';
     }
 }
 </script>
@@ -233,7 +257,7 @@ for (var i = 0; i < scheduleTimes.length; i++) {
   font-weight: 500;
 }
 
-.offline-panel {
+.offline-schedule {
   margin: 2rem auto;
   padding: 2rem;
   border-radius: 12px;
@@ -243,29 +267,26 @@ for (var i = 0; i < scheduleTimes.length; i++) {
   max-width: 500px;
 }
 
-.offline-panel .offline-icon i {
+.offline-schedule-icon i {
   font-size: 2rem;
   color: #555577;
-  animation: offline-pulse 3s ease-in-out infinite;
+  opacity: 0.6;
 }
 
-@keyframes offline-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-}
-
-.offline-panel h2 {
+.offline-schedule h2 {
   font-size: 1.1rem;
   margin: 0.5rem 0;
 }
 
-.offline-panel p {
-  font-size: 0.9rem;
-  opacity: 0.7;
-  margin: 0;
+.offline-schedule .schedule-item {
+  justify-content: center;
 }
 
-.offline-panel .btn {
+.offline-schedule-cta {
+  margin: 1rem 0 0;
+}
+
+.offline-schedule-cta .btn {
   font-size: 0.85rem;
 }
 

@@ -10,10 +10,10 @@ layout: default
     <div class="milestone-marquee" id="milestone-marquee">
         <div class="milestone-track" id="milestone-track">
             {% for m in site.data.milestones.current %}
-            <span class="milestone-item">{{ m.icon | default: "&#11088;" }} {{ m.message }}</span>
+            <span class="milestone-item">&#11088;{% if m.icon %} {{ m.icon }}{% endif %} {{ m.message }}</span>
             {% endfor %}
             {% for m in site.data.milestones.current %}
-            <span class="milestone-item">{{ m.icon | default: "&#11088;" }} {{ m.message }}</span>
+            <span class="milestone-item">&#11088;{% if m.icon %} {{ m.icon }}{% endif %} {{ m.message }}</span>
             {% endfor %}
         </div>
     </div>

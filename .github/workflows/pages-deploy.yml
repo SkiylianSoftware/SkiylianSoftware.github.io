@@ -86,6 +86,9 @@ jobs:
           DEBUG: "1"
         run: python scripts/build_history.py
 
+      - name: Clear stale cached milestones.json
+        run: rm -f _data/milestones.json && echo "Cleared cached milestones.json"
+
       - name: Detect milestones with debug
         env:
           DEBUG: "1"

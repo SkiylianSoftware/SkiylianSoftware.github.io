@@ -934,34 +934,34 @@ def main():
     # Map milestone key to an icon HTML entity
     def _milestone_icon(key):
         if key.startswith("video_first_likes_"):
-            return "\U0001f44d"  # thumbs up
+            return "&#128077;"  # thumbs up
         if key.startswith("video_first_comments_"):
-            return "\U0001f4ac"  # speech bubble
+            return "&#128172;"  # speech bubble
         if key.startswith("video_first_"):
-            return "\U0001f3ac"  # movie camera
+            return "&#127916;"  # movie camera
         if key.startswith("game_") or key.startswith("series_"):
-            return "\U0001f3ae"  # joystick
+            return "&#127918;"  # joystick
         if key.startswith("anniversary_") or key.startswith("age_"):
-            return "\U0001f338"  # cherry blossom
+            return "&#127800;"  # cherry blossom
         if key.startswith("hiatus_"):
-            return "\U0001f3f3"  # flag
+            return "&#127987;"  # flag
         if key.startswith("streak_"):
-            return "\U0001f525"  # fire
+            return "&#128293;"  # fire
         if ("hours_" in key) or ("_hours_" in key):
-            return "\u23f0"  # clock
+            return "&#9200;"  # clock
         if "upload_" in key:
-            return "\U0001f4dd"  # notebook
+            return "&#128221;"  # notebook
         if key.startswith("twitch_followers_") or key.startswith("store_orders_"):
-            return "\u2b50"  # star (subs/store)
+            return "&#11088;"  # star (subs/store)
         if "views" in key or "views_" in key:
-            return "\U0001f441"  # eye
+            return "&#128065;"  # eye
         if "videos" in key:
-            return "\U0001f3ac"  # movie camera
+            return "&#127916;"  # movie camera
         if "likes" in key:
-            return "\U0001f44d"  # thumbs up
+            return "&#128077;"  # thumbs up
         if "comments" in key:
-            return "\U0001f4ac"  # speech bubble
-        return "\u2b50"  # star (default)
+            return "&#128172;"  # speech bubble
+        return "&#11088;"  # star (default)
 
     # Generate display text for ALL milestones (single source of truth for marquee and timeline)
     def _milestone_msg(key):
@@ -1248,7 +1248,7 @@ def main():
     if milestone_links:
         result["links"] = milestone_links
     with open(MILESTONES_FILE, "w") as f:
-        json.dump(result, f, indent=2)
+        json.dump(result, f, indent=2, ensure_ascii=False)
     print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones, {len(current_list)} current)")
     with open(MILESTONES_FILE) as f:
         _reread = json.load(f)

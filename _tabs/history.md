@@ -310,14 +310,17 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% elsif key contains "video_first_likes_" %}
       {% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_likes_" %}
+      <!-- DEBUG-LIKES: key=[{{ key }}] val=[{{ val }}] -->
       {% capture d %}First video to {{ val }} likes{% endcapture %}{% assign display = d %}
     {% elsif key contains "video_first_comments_" %}
       {% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_comments_" %}
+      <!-- DEBUG-COMMENTS: key=[{{ key }}] val=[{{ val }}] -->
       {% capture d %}First video to {{ val }} comments{% endcapture %}{% assign display = d %}
     {% elsif key contains "video_first_" %}
       {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_" %}
+      <!-- DEBUG-VIEWS: key=[{{ key }}] val=[{{ val }}] -->
       {% capture d %}First video to {{ val }} views{% endcapture %}{% assign display = d %}
     {% elsif key contains "youtube_hours_" %}
       {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}

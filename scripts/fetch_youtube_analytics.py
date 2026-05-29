@@ -218,7 +218,7 @@ def fetch_video_history(video_history, access_token, start_date, end_date):
             "ids": "channel==MINE",
             "startDate": start_date,
             "endDate": end_date,
-            "metrics": "views,estimatedMinutesWatched",
+            "metrics": "views,estimatedMinutesWatched,likes,comments",
             "dimensions": "day",
             "filters": f"video=={vid}",
             "sort": "day",
@@ -238,11 +238,15 @@ def fetch_video_history(video_history, access_token, start_date, end_date):
                 d = row[0]
                 views = int(row[1]) if row[1] else 0
                 watch_time = int(row[2]) if row[2] else 0
+                likes = int(row[3]) if len(row) > 3 and row[3] else 0
+                comments = int(row[4]) if len(row) > 4 and row[4] else 0
                 if vid not in video_history:
                     video_history[vid] = {"daily": {}}
                 video_history[vid].setdefault("daily", {})[d] = {
                     "views": views,
                     "watch_time": watch_time,
+                    "likes": likes,
+                    "comments": comments,
                 }
             fetched += 1
             if fetched % 10 == 0:

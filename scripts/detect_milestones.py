@@ -931,6 +931,38 @@ def main():
             else:
                 milestone_links[key]["text"] = f"{m} years since {label}"
 
+    # Map milestone key to an icon HTML entity
+    def _milestone_icon(key):
+        if key.startswith("video_first_likes_"):
+            return "\U0001f44d"  # thumbs up
+        if key.startswith("video_first_comments_"):
+            return "\U0001f4ac"  # speech bubble
+        if key.startswith("video_first_"):
+            return "\U0001f3ac"  # movie camera
+        if key.startswith("game_") or key.startswith("series_"):
+            return "\U0001f3ae"  # joystick
+        if key.startswith("anniversary_") or key.startswith("age_"):
+            return "\U0001f338"  # cherry blossom
+        if key.startswith("hiatus_"):
+            return "\U0001f3f3"  # flag
+        if key.startswith("streak_"):
+            return "\U0001f525"  # fire
+        if ("hours_" in key) or ("_hours_" in key):
+            return "\u23f0"  # clock
+        if "upload_" in key:
+            return "\U0001f4dd"  # notebook
+        if key.startswith("twitch_followers_") or key.startswith("store_orders_"):
+            return "\u2b50"  # star (subs/store)
+        if "views" in key or "views_" in key:
+            return "\U0001f441"  # eye
+        if "videos" in key:
+            return "\U0001f3ac"  # movie camera
+        if "likes" in key:
+            return "\U0001f44d"  # thumbs up
+        if "comments" in key:
+            return "\U0001f4ac"  # speech bubble
+        return "\u2b50"  # star (default)
+
     # Generate display text for ALL milestones (single source of truth for marquee and timeline)
     def _milestone_msg(key):
         if key.startswith("game_"):
@@ -1184,7 +1216,8 @@ def main():
 
         link = milestone_links.get(key, {})
         msg = link.get("msg", key)
-        current_list.append({"message": msg})
+        icon = _milestone_icon(key)
+        current_list.append({"message": msg, "icon": icon})
 
     # Final cleanup: strip stale _0 and empty-threshold keys from all structures
     _nr_vf_before = [k for k in new_reached if k.startswith("video_first_")]

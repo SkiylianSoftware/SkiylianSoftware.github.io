@@ -97,11 +97,11 @@ permalink: /about/
     <div class="quick-links">
       <a href="https://watch.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://live.skiylia.dev" class="btn"><i class="fab fa-twitch"></i> Twitch</a>
-      <a href="https://code.skiylia.dev" class="btn"><i class="fab fa-github"></i> GitHub</a>
+      <a href="https://vods.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> VODs</a>
       {% if store.products and store.products.size > 0 %}
       <a href="https://store.skiylia.dev" class="btn"><i class="fas fa-store"></i> Merch</a>
       {% endif %}
-      <a href="https://vods.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> VODs</a>
+      <a href="https://code.skiylia.dev" class="btn"><i class="fab fa-github"></i> GitHub</a>
       <a href="https://support.skiylia.dev" class="btn"><i class="fas fa-heart"></i> Support</a>
     </div>
   </div>
@@ -124,5 +124,5 @@ permalink: /about/
 
 <p class="about-intro" style="margin-top: 2rem;">
   I count in balanced ternary. Negatives are natural (just invert + and -), radix economy peaks at three, and 3<sup>n</sup> thresholds create a beautiful spread: 1, 3, 9, 27, 81, 243, 729&hellip; where each milestone feels earned. Powers of two are for software; round numbers are for growing up in Britain. Powers of three are my own little corner of the universe.</p>
-  <p>The Setun &mdash; a Soviet ternary computer built in 1958 &mdash; proved the concept works in hardware too. Balanced ternary on vacuum tubes, with magnetic drum memory and a beautifully minimal instruction set. It was reliable, economical, and decades ahead of its time. An elegant design, and I love that the same numeric system powers my milestone tracking.
+  <p>The Setun - a Soviet ternary computer built in 1958 - proved the concept works in hardware too. Balanced ternary on vacuum tubes, with magnetic drum memory and a beautifully minimal instruction set. It was reliable, economical, and decades ahead of its time. An elegant design, and I love that the same numeric system powers my milestone tracking.
 </p>

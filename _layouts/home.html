@@ -7,13 +7,13 @@ layout: default
     {% include banner.html %}
 
     {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.size > 0 %}
-    <div class="milestone-marquee">
+    <div class="milestone-marquee" id="milestone-marquee">
         <div class="milestone-track" id="milestone-track">
             {% for m in site.data.milestones.current %}
-            <span class="milestone-item">&#11088; {{ m.message }}</span>
+            <span class="milestone-item">{{ m.icon | default: "&#11088;" }} {{ m.message }}</span>
             {% endfor %}
             {% for m in site.data.milestones.current %}
-            <span class="milestone-item" aria-hidden="true">&#11088; {{ m.message }}</span>
+            <span class="milestone-item">{{ m.icon | default: "&#11088;" }} {{ m.message }}</span>
             {% endfor %}
         </div>
     </div>
@@ -278,9 +278,27 @@ layout: default
     }
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlayer(); });
 
-    var mt = document.getElementById('milestone-track');
-    if (mt) {
-        mt.classList.add('animating');
+    var marquee = document.getElementById('milestone-marquee');
+    var track = document.getElementById('milestone-track');
+    if (marquee && track) {
+        var html = track.innerHTML;
+        track.innerHTML = html + html;
+        var setWidth = 0;
+        var items = track.children;
+        var half = items.length / 2;
+        for (var i = 0; i < half; i++) {
+            setWidth += items[i].offsetWidth;
+        }
+        if (setWidth > 0) {
+            var speed = 0.5;
+            (function scroll() {
+                marquee.scrollLeft += speed;
+                if (marquee.scrollLeft >= setWidth) {
+                    marquee.scrollLeft -= setWidth;
+                }
+                requestAnimationFrame(scroll);
+            })();
+        }
     }
 </script>
 
@@ -354,25 +372,11 @@ layout: default
         display: inline-flex;
     }
 
-    .animating {
-        animation: marquee 30s linear infinite;
-    }
-
     .milestone-item {
         padding: 0 2rem;
         font-size: 0.85rem;
         opacity: 0.85;
         white-space: nowrap;
-    }
-
-    @keyframes marquee {
-        0% {
-            transform: translateX(0);
-        }
-
-        100% {
-            transform: translateX(-50%);
-        }
     }
 
     .hero-links {

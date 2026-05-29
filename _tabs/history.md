@@ -228,6 +228,12 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
 |  remove_views=[{{ _d_k | remove: "video_first_" }}]
 {% endif %}{% endfor %}
 </pre><!-- /DEBUG -->
+<!-- LOOP-DEBUG: dump all items as Liquid sees them -->
+<pre id="loop-debug">
+{% for _li_item in ms_keys %}{% assign _li_k = _li_item[0] %}{% assign _li_v = _li_item[1] | truncate: 10, "" %}{% if _li_k contains "video_first_likes_" or _li_k contains "video_first_comments_" or _li_k contains "video_first_" %}{{ _li_k }}::{{ _li_v }}
+{% endif %}{% endfor %}
+</pre>
+<!-- /LOOP-DEBUG -->
 <div class="timeline">
   {% assign prev_month = "" %}
   {% for item in ms_keys %}

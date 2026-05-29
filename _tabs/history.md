@@ -419,6 +419,7 @@ BYPASS views: key=[{{ _by_k }}] val=[{{ _by_k | remove: "video_first_" }}] date=
     {% if link_meta %}{% assign link = link_meta.url %}{% endif %}
 
     {% if link_meta.msg %}
+<pre style="display:none">DEBUG-MSG-OVERRIDE: key=[{{ key }}] msg=[{{ link_meta.msg }}] old_display=[{{ display }}] new_display=[{{ link_meta.msg }}]</pre>
       {% assign display = link_meta.msg %}
     {% elsif link_meta.text and key contains "video_first_" %}
 <pre style="display:none">DEBUG-BEFORE-APPEND: key=[{{ key }}] display=[{{ display }}] text=[{{ link_meta.text }}]</pre>

@@ -81,8 +81,10 @@ layout: default
             {% assign shown = shown | plus: 1 %}
             {% assign start = s.start_time | date: "%A" %}
             <div class="schedule-item">
-                <span class="schedule-day">{{ start }}</span>
-                <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+                <div class="schedule-row">
+                    <span class="schedule-day">{{ start }}</span>
+                    <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+                </div>
                 <span class="schedule-type">{{ s.category | default: s.title | truncate: 40 }}</span>
             </div>
             {% endif %}
@@ -323,6 +325,22 @@ layout: default
             requestAnimationFrame(scroll);
         }
     })();
+
+    var scheduleTimes = document.querySelectorAll('.schedule-utc');
+    for (var i = 0; i < scheduleTimes.length; i++) {
+        var el = scheduleTimes[i];
+        var utc = el.getAttribute('datetime');
+        if (utc) {
+            var d = new Date(utc);
+            var utcH = d.getUTCHours().toString().padStart(2, '0');
+            var utcM = d.getUTCMinutes().toString().padStart(2, '0');
+            var locH = d.getHours().toString().padStart(2, '0');
+            var locM = d.getMinutes().toString().padStart(2, '0');
+            var m = d.toTimeString().match(/[A-Z]{3,5}(?![+\-])/);
+            var locTz = m ? ' ' + m[0] : '';
+            el.textContent = utcH + ':' + utcM + ' UTC (' + locH + ':' + locM + locTz + ')';
+        }
+    }
 </script>
 
 <style>
@@ -550,10 +568,13 @@ layout: default
     }
 
     .schedule-item {
+        margin-bottom: 0.6rem;
+    }
+
+    .schedule-row {
         display: flex;
         gap: 0.5rem;
         align-items: baseline;
-        margin-bottom: 0.4rem;
     }
 
     .schedule-day {
@@ -567,8 +588,10 @@ layout: default
     }
 
     .schedule-type {
+        display: block;
         opacity: 0.6;
         font-size: 0.8rem;
+        margin-top: 0.1rem;
     }
 
     .obsession-item {

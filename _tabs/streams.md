@@ -45,8 +45,10 @@ group: media
       {% assign shown = shown | plus: 1 %}
       {% assign start = s.start_time | date: "%A" %}
       <div class="schedule-item">
-        <span class="schedule-day">{{ start }}</span>
-        <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+        <div class="schedule-row">
+          <span class="schedule-day">{{ start }}</span>
+          <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+        </div>
         <span class="schedule-type">{{ s.category | default: s.title | truncate: 50 }}</span>
       </div>
       {% endif %}
@@ -76,8 +78,10 @@ group: media
     {% assign shown = shown | plus: 1 %}
     {% assign start = s.start_time | date: "%A" %}
     <div class="schedule-item">
-      <span class="schedule-day">{{ start }}</span>
-      <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+      <div class="schedule-row">
+        <span class="schedule-day">{{ start }}</span>
+        <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+      </div>
       <span class="schedule-type">{{ s.category | default: s.title | truncate: 50 }}</span>
     </div>
     {% endif %}
@@ -268,6 +272,22 @@ for (var i = 0; i < scheduleTimes.length; i++) {
   max-width: 500px;
 }
 
+.offline-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #555577;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.offline-badge i {
+  font-size: 0.5rem;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+}
+
 .offline-schedule-icon i {
   font-size: 2rem;
   color: #555577;
@@ -279,7 +299,7 @@ for (var i = 0; i < scheduleTimes.length; i++) {
   margin: 0.5rem 0;
 }
 
-.offline-schedule .schedule-item {
+.offline-schedule .schedule-row {
   justify-content: center;
 }
 
@@ -331,10 +351,13 @@ for (var i = 0; i < scheduleTimes.length; i++) {
 }
 
 .schedule-item {
+  margin-bottom: 0.6rem;
+}
+
+.schedule-row {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
-  margin-bottom: 0.4rem;
 }
 
 .schedule-day {
@@ -348,8 +371,10 @@ for (var i = 0; i < scheduleTimes.length; i++) {
 }
 
 .schedule-type {
+  display: block;
   opacity: 0.6;
   font-size: 0.8rem;
+  margin-top: 0.1rem;
 }
 
 .schedule-none {

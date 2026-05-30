@@ -177,8 +177,14 @@ for (var i = 0; i < scheduleTimes.length; i++) {
         var utcM = d.getUTCMinutes().toString().padStart(2, '0');
         var locH = d.getHours().toString().padStart(2, '0');
         var locM = d.getMinutes().toString().padStart(2, '0');
-        var m = d.toTimeString().match(/[A-Z]{3,5}(?![+\-])/);
-        var locTz = m ? ' ' + m[0] : '';
+        var tzParts = Intl.DateTimeFormat('en', { timeZoneName: 'short' }).formatToParts(d);
+        var locTz = '';
+        for (var j = 0; j < tzParts.length; j++) {
+            if (tzParts[j].type === 'timeZoneName') {
+                locTz = ' ' + tzParts[j].value;
+                break;
+            }
+        }
         el.textContent = utcH + ':' + utcM + ' UTC (' + locH + ':' + locM + locTz + ')';
     }
 }

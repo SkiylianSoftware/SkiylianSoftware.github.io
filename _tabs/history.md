@@ -248,15 +248,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
     {% assign link_meta = milestones.links[key] %}
     {% assign display = key %}
 
-    {% if key contains "video_first_likes_" %}
-      {% assign icon = "&#128077;" %}{% assign mclass = "ms-likes" %}{% assign link = nil %}
-      {% assign val = key | remove: "video_first_likes_" %}
-      {% capture d %}First video to {{ val }} likes{% endcapture %}{% assign display = d %}
-    {% elsif key contains "video_first_comments_" %}
-      {% assign icon = "&#128172;" %}{% assign mclass = "ms-comments" %}{% assign link = nil %}
-      {% assign val = key | remove: "video_first_comments_" %}
-      {% capture d %}First video to {{ val }} comments{% endcapture %}{% assign display = d %}
-    {% elsif key contains "video_first_" %}
+    {% if key contains "video_first_" %}
       {% assign icon = "&#127916;" %}{% assign mclass = "ms-video-first" %}{% assign link = nil %}
       {% assign val = key | remove: "video_first_" %}
       {% capture d %}First video to {{ val }} views{% endcapture %}{% assign display = d %}

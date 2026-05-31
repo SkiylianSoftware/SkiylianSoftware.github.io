@@ -363,6 +363,14 @@ def main():
 
     # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
     video_history = read_json("video_history.json") or {}
+    # Build series_first_game mapping from all videos (needed for milestone links)
+    series_first_game = {}
+    for v in all_videos:
+        s = v.get("series", {})
+        sname = (s or {}).get("series_name", "")
+        gname = resolve_gname((s or {}).get("game", ""))
+        if sname and gname and sname not in series_first_game:
+            series_first_game[sname] = gname
     if video_history:
         # Build game -> [video_id] mapping (resolved names)
         game_videos = {}
@@ -437,7 +445,6 @@ def main():
         # Per-series view/hour milestones from video_history.json
         # Build series -> [video_id] mapping
         series_videos = {}
-        series_first_game = {}
         for v in all_videos:
             vid = v.get("video_id", "")
             s = v.get("series", {})
@@ -1199,6 +1206,88 @@ def main():
                     print(f"  New milestone: Back to {g} after {n} days (date={date})")
             else:
                 print(f"  New milestone: {m:,} {parts[0]} (date={date})")
+
+    # Fallback: compute game/series view and video-first milestones from per-video totals
+    # when video_history.json (YouTube Analytics) is unavailable
+    if not video_history and all_videos:
+        if debug:
+            print("  INFO: video_history.json unavailable; estimating view milestones from per-video totals")
+
+        # Game view milestones
+        game_view_data = {}
+        for v in all_videos:
+            s = v.get("series", {})
+            gname = resolve_gname((s or {}).get("game", ""))
+            if gname:
+                game_view_data.setdefault(gname, []).append(v)
+        if VALID_GAMES:
+            game_view_data = {g: vs for g, vs in game_view_data.items() if g in VALID_GAMES}
+
+        for gname, vobs in game_view_data.items():
+            sorted_vobs = sorted(vobs, key=lambda x: x.get("published", ""))
+            cum = 0
+            for v in sorted_vobs:
+                cum += v.get("view_count", 0)
+                pub = v.get("published", "")[:10]
+                for m in sorted(GAME_EP_THRESH, reverse=True):
+                    key = f"game_{gname}_views_{m}"
+                    if cum >= m and key not in new_reached:
+                        new_reached[key] = pub
+
+        # Series view milestones
+        series_view_data = {}
+        for v in all_videos:
+            s = v.get("series", {})
+            sname = (s or {}).get("series_name", "")
+            if sname:
+                series_view_data.setdefault(sname, []).append(v)
+
+        for sname, svobs in series_view_data.items():
+            sorted_sv = sorted(svobs, key=lambda x: x.get("published", ""))
+            cum = 0
+            for v in sorted_sv:
+                cum += v.get("view_count", 0)
+                pub = v.get("published", "")[:10]
+                for m in sorted(GAME_EP_THRESH, reverse=True):
+                    key = f"series_{sname}_views_{m}"
+                    if cum >= m and key not in new_reached:
+                        new_reached[key] = pub
+
+        # Video-first milestones: first video to reach N views/likes/comments
+        sorted_main = sorted(all_videos, key=lambda x: x.get("published", ""))
+
+        for m in sorted(VIDEO_FIRST_THRESH, reverse=True):
+            cum = 0
+            for v in sorted_main:
+                cum += v.get("view_count", 0)
+                if cum >= m:
+                    key = f"video_first_{m}"
+                    if key not in new_reached:
+                        new_reached[key] = v.get("published", "")[:10]
+                        entry = {"url": f"/videos#vid-{v.get('video_id', '')}", "text": v.get("title", "")}
+                        thumb = v.get("thumbnail", "")
+                        if thumb:
+                            entry["thumb"] = thumb
+                        milestone_links[key] = entry
+                    break
+
+        for label, field in (("likes", "like_count"), ("comments", "comment_count")):
+            for m in sorted(ALL_THRESH, reverse=True):
+                if m < 1:
+                    continue
+                cum = 0
+                for v in sorted_main:
+                    cum += v.get(field, 0)
+                    if cum >= m:
+                        key = f"video_first_{label}_{m}"
+                        if key not in new_reached:
+                            new_reached[key] = v.get("published", "")[:10]
+                            entry = {"url": f"/videos#vid-{v.get('video_id', '')}", "text": v.get("title", "")}
+                            thumb = v.get("thumbnail", "")
+                            if thumb:
+                                entry["thumb"] = thumb
+                            milestone_links[key] = entry
+                        break
 
     # Sort milestones: descending by date, then by threshold descending within same date
     def sort_key(item):

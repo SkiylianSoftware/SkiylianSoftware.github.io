@@ -18,6 +18,23 @@ group: media
 {% if all_videos and all_videos.size > 0 %}
 {% assign series_set = all_videos | map: "series" | compact | map: "series_name" | uniq %}
 {% assign recency_map = site.data.youtube_main.series_recency %}
+{% if site.data.playlists.playlists %}
+  {% assign pl_titles = site.data.playlists.playlists | map: "title" %}
+  {% assign real_set = "" | split: "," %}
+  {% for name in series_set %}
+    {% assign found = false %}
+    {% for pl_title in pl_titles %}
+      {% if pl_title contains name or name contains pl_title %}
+        {% assign found = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    {% if found %}
+      {% assign real_set = real_set | push: name %}
+    {% endif %}
+  {% endfor %}
+  {% assign series_set = real_set %}
+{% endif %}
 {% if series_set.size > 1 %}
 <div class="filter-bar">
   <button class="filter-btn active" onclick="filterSeries(this, '')">All</button>

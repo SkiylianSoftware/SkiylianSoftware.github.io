@@ -949,6 +949,12 @@ def main():
             else:
                 milestone_links[key]["text"] = f"{m} years since {label}"
 
+    # Catch-all: fill any game/series milestone missing a thumbnail with channel avatar
+    if channel_avatar:
+        for key in list(milestone_links.keys()):
+            if not milestone_links[key].get("thumb"):
+                milestone_links[key]["thumb"] = channel_avatar
+
     # Map milestone key to an icon HTML entity
     def _milestone_icon(key):
         if key.startswith("video_first_likes_"):

@@ -139,3 +139,104 @@ document.addEventListener('DOMContentLoaded', function() {
 el.textContent = '\u00b7 ' + rel;
   });
 });
+
+/* Live stream auto-detection */
+(function() {
+  var twitchPlayer = null;
+  var twitchLive = false;
+  var currentPlatform = 'twitch';
+  var CHECK_MS = 5 * 60 * 1000;
+  var onlineFired = false;
+
+  function getParents() {
+    var hosts = ['localhost', 'skiyliansoftware.github.io', 'skiyliansoftware.com'];
+    if (window.location.hostname) hosts.push(window.location.hostname);
+    return hosts;
+  }
+
+  function initTwitch() {
+    if (typeof Twitch === 'undefined') {
+      var s = document.createElement('script');
+      s.src = 'https://player.twitch.tv/js/embed/v1.js';
+      s.onload = createTwitchPlayer;
+      s.onerror = function() { console.warn('Twitch embed failed to load'); };
+      document.head.appendChild(s);
+    } else {
+      createTwitchPlayer();
+    }
+  }
+
+  function createTwitchPlayer() {
+    var c = document.getElementById('twitch-player-container');
+    if (!c) return;
+    try {
+      twitchPlayer = new Twitch.Player('twitch-player-container', {
+        channel: 'skiylia',
+        width: '100%',
+        height: 480,
+        autoplay: true,
+        parent: getParents(),
+      });
+
+      twitchPlayer.addEventListener(Twitch.Player.ONLINE, function() {
+        onlineFired = true;
+        twitchLive = true;
+        showLive('twitch');
+      });
+
+      twitchPlayer.addEventListener(Twitch.Player.OFFLINE, function() {
+        twitchLive = false;
+        if (currentPlatform === 'twitch') checkOffline();
+      });
+
+      setTimeout(function() {
+        if (!onlineFired) {
+          twitchLive = false;
+        }
+      }, 8000);
+    } catch (e) {
+      console.warn('Twitch player init failed:', e);
+    }
+  }
+
+  function showLive(platform) {
+    var off = document.getElementById('offline-panel');
+    var live = document.getElementById('live-embed');
+    if (off) off.style.display = 'none';
+    if (live) live.style.display = 'block';
+    if (platform) switchLivePlatform(platform);
+  }
+
+  function hideLive() {
+    var off = document.getElementById('offline-panel');
+    var live = document.getElementById('live-embed');
+    if (off) off.style.display = '';
+    if (live) live.style.display = 'none';
+  }
+
+  function checkOffline() {
+    if (!twitchLive) hideLive();
+  }
+
+  window.switchLivePlatform = function(platform) {
+    currentPlatform = platform;
+    document.querySelectorAll('.live-tab').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.platform === platform);
+    });
+    document.getElementById('twitch-player-container').style.display =
+      platform === 'twitch' ? '' : 'none';
+    document.getElementById('youtube-player-container').style.display =
+      platform === 'youtube' ? '' : 'none';
+    if (platform === 'youtube') refreshYouTube();
+  };
+
+  function refreshYouTube() {
+    var f = document.getElementById('youtube-live-iframe');
+    if (f) f.src = 'https://www.youtube.com/embed/live_stream?channel=UC4s4eXHuzj7OxwJXgiZgAYw&autoplay=1&_=' + Date.now();
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initTwitch();
+    setInterval(refreshYouTube, CHECK_MS);
+  });
+})();

@@ -203,15 +203,22 @@ def main():
         try:
             with open(gl_path) as f:
                 _gl = yaml.safe_load(f) or {}
-            for name, entry in _gl.items():
-                if isinstance(entry, dict):
-                    icon = entry.get("icon", "")
-                    if not icon and entry.get("steam"):
-                        icon = _steam_icon_url(entry["steam"])
-                    if icon:
-                        game_icons[name] = icon
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  Warning: could not load {gl_path}: {e}")
+            _gl = {}
+        for name, entry in _gl.items():
+            if isinstance(entry, dict):
+                icon = entry.get("icon", "")
+                if not icon and entry.get("steam"):
+                    icon = _steam_icon_url(entry["steam"])
+                if icon:
+                    game_icons[name] = icon
+        if debug:
+            _with_icons = [k for k, v in game_icons.items() if v]
+            _missing = [k for k in _gl if k not in game_icons]
+            print(f"  DEBUG game_icons: {len(_with_icons)} loaded, {len(_missing)} missing")
+            if _missing:
+                print(f"    Missing icons for: {', '.join(_missing)}")
 
     def _matches_playlist(gname, pl_title):
         """Match game name to playlist title using word-level matching with space-normalized fallback."""
@@ -356,7 +363,6 @@ def main():
 
     # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
     video_history = read_json("video_history.json") or {}
-    series_first_game = {}
     if video_history:
         # Build game -> [video_id] mapping (resolved names)
         game_videos = {}
@@ -431,6 +437,7 @@ def main():
         # Per-series view/hour milestones from video_history.json
         # Build series -> [video_id] mapping
         series_videos = {}
+        series_first_game = {}
         for v in all_videos:
             vid = v.get("video_id", "")
             s = v.get("series", {})
@@ -865,6 +872,10 @@ def main():
         print("  DEBUG NO video_first_likes/comments were freshly generated")
 
     # Series milestone links: use playlist thumbnail if available, fallback to game icon
+    try:
+        _ = series_first_game
+    except NameError:
+        series_first_game = {}
     for key in list(new_reached.keys()):
         if key.startswith("series_"):
             rest = key[7:]
@@ -1203,24 +1214,21 @@ def main():
         if len(new_reached) > 15:
             print(f"    ... and {len(new_reached) - 15} more")
 
-    # Build current milestone list for marquee (recent milestones, fallback to most recent)
-    cutoff_dt = now - timedelta(days=30)
+    # Build current milestone list for marquee (all milestones within cutoff)
+    cutoff_dt = now - timedelta(days=14)
     current_list = []
-    recent_fallback = []
     for key, date in sorted(new_reached.items(), key=sort_key, reverse=True):
         try:
             d = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except Exception:
             continue
+        if d < cutoff_dt:
+            continue
+
         link = milestone_links.get(key, {})
         msg = link.get("msg", key)
         icon = _milestone_icon(key)
-        if d >= cutoff_dt:
-            current_list.append({"message": msg, "icon": icon})
-        elif len(recent_fallback) < 5:
-            recent_fallback.append({"message": msg, "icon": icon})
-    if not current_list:
-        current_list = recent_fallback
+        current_list.append({"message": msg, "icon": icon})
 
     # Final cleanup: strip stale _0 and empty-threshold keys from all structures
     _nr_vf_before = [k for k in new_reached if k.startswith("video_first_")]

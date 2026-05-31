@@ -142,7 +142,7 @@ def process_channel_analytics(analytics, history, platform_key):
         if "videos" not in entry[platform_key]:
             entry[platform_key]["videos"] = 0
 
-        if platform_key == "youtube_main":
+        if platform_key == "youtube_main" and "_analytics" not in entry:
             entry["_analytics"] = {
                 "views_gained": day["views"],
                 "watch_time_minutes": round(day["watch_time"] / 60),

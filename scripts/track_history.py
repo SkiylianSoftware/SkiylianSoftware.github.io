@@ -257,6 +257,10 @@ def main():
             print(f"Migrated {len(history)} history entries: added duration/likes/comments")
     snapshot = build_snapshot()
     if history and history[-1].get("date") == today:
+        existing = history[-1]
+        # Preserve analytics deltas so build_history.py can use anchor-based accumulation
+        if "_analytics" in existing:
+            snapshot["_analytics"] = existing["_analytics"]
         history[-1] = snapshot
         print(f"Updated today's entry ({today})")
     else:

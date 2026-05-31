@@ -291,38 +291,18 @@ layout: default
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlayer(); });
 
     (function() {
-        var marquee = document.getElementById('milestone-marquee');
         var track = document.getElementById('milestone-track');
-        if (!marquee || !track) return;
-        marquee.style.overflow = 'hidden';
+        if (!track) return;
+        var halfWidth = 0;
         var items = track.children;
-        var half = items.length / 2;
-        var setWidth = 0;
-        function calcWidth() {
-            setWidth = 0;
-            for (var i = 0; i < half; i++) {
-                setWidth += items[i].offsetWidth;
-            }
-            return setWidth > 0;
+        var half = Math.floor(items.length / 2);
+        for (var i = 0; i < half; i++) {
+            halfWidth += items[i].offsetWidth;
         }
-        if (!calcWidth()) {
-            requestAnimationFrame(function() {
-                if (!calcWidth()) return;
-                startScroll();
-            });
-            return;
-        }
-        startScroll();
-        function startScroll() {
-            var speed = 0.5;
-            var scroll = function() {
-                marquee.scrollLeft += speed;
-                if (marquee.scrollLeft >= setWidth) {
-                    marquee.scrollLeft -= setWidth;
-                }
-                requestAnimationFrame(scroll);
-            };
-            requestAnimationFrame(scroll);
+        if (halfWidth > 0) {
+            var speed = 50;
+            var duration = Math.max(15, halfWidth / speed);
+            track.style.animationDuration = duration + 's';
         }
     })();
 
@@ -417,6 +397,12 @@ layout: default
 
     .milestone-track {
         display: inline-flex;
+        animation: marquee-scroll 30s linear infinite;
+    }
+
+    @keyframes marquee-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
     }
 
     .milestone-item {

@@ -82,26 +82,20 @@ def main():
             entry["youtube_main"]["comments"] = ym.get("comments", 0)
             entry["youtube_main"]["duration_seconds"] = ym.get("duration_seconds", 0)
 
-            # Use Analytics API daily deltas anchored to Data API snapshot for subs/views.
-            # Re-anchor whenever a fresh Data API snapshot is available to prevent drift.
-            if ym.get("subs", 0) > 0:
-                # Data API snapshot available; use as new anchor (most accurate)
-                if debug and cum_subs is not None:
-                    diff = ym["subs"] - cum_subs
-                    if abs(diff) > 10:
-                        print(f"    Re-anchoring {d}: analytics cum={cum_subs} -> Data API={ym['subs']} (diff={diff})")
-                cum_subs = ym["subs"]
-                cum_views = ym["views"]
-                entry["youtube_main"]["subs"] = cum_subs
-                entry["youtube_main"]["views"] = cum_views
-            elif an and cum_subs is not None:
-                # No Data API snapshot; accumulate from Analytics API daily deltas
-                cum_subs += an.get("subs_gained", 0) - an.get("subs_lost", 0)
-                cum_views += an.get("views_gained", 0)
+            # Use Analytics API daily deltas anchored to Data API snapshot for subs/views
+            if an and anchor and d >= anchor["date"]:
+                if cum_subs is None:
+                    # First entry at anchor date: Data API value already includes that day's deltas
+                    cum_subs = anchor["subs"]
+                    cum_views = anchor["views"]
+                else:
+                    # Subsequent days: accumulate from Analytics API daily deltas
+                    cum_subs += an.get("subs_gained", 0) - an.get("subs_lost", 0)
+                    cum_views += an.get("views_gained", 0)
                 entry["youtube_main"]["subs"] = cum_subs
                 entry["youtube_main"]["views"] = cum_views
             else:
-                # No analytics or snapshot available; carry forward
+                # No analytics deltas available; use raw snapshot or carry forward
                 entry["youtube_main"]["subs"] = ym.get("subs", 0) or last_subs
                 entry["youtube_main"]["views"] = ym.get("views", 0) or last_views
 

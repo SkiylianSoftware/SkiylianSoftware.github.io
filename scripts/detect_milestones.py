@@ -1237,7 +1237,22 @@ def main():
             if sname:
                 series_view_data.setdefault(sname, []).append(v)
 
+        # Suppress series milestones when the game has only one series (duplicates game milestones)
+        game_series_map = {}
+        for v in all_videos:
+            s = v.get("series", {}) or {}
+            gname = resolve_gname(s.get("game", ""))
+            sname = s.get("series_name", "")
+            if gname and sname:
+                game_series_map.setdefault(gname, set()).add(sname)
+        _single_series_games = {g for g, ss in game_series_map.items() if len(ss) == 1}
+        _single_series = {next(iter(game_series_map[g])) for g in _single_series_games if g in game_series_map}
+        if debug and _single_series:
+            print(f"  INFO: suppressing series milestones for single-series games: {', '.join(sorted(_single_series))}")
+
         for sname, svobs in series_view_data.items():
+            if sname in _single_series:
+                continue
             sorted_sv = sorted(svobs, key=lambda x: x.get("published", ""))
             cum = 0
             for v in sorted_sv:
@@ -1262,6 +1277,8 @@ def main():
 
         # Series upload hours milestones
         for sname, svobs in series_view_data.items():
+            if sname in _single_series:
+                continue
             sorted_sv = sorted(svobs, key=lambda x: x.get("published", ""))
             cum_hours = 0
             for v in sorted_sv:

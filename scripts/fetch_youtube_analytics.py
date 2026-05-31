@@ -31,6 +31,9 @@ def refresh_access_token():
         },
         timeout=30,
     )
+    if resp.status_code != 200:
+        body = resp.text
+        print(f"  Token refresh failed ({resp.status_code}): {body}", file=sys.stderr)
     resp.raise_for_status()
     return resp.json()["access_token"]
 

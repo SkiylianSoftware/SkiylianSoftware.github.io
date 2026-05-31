@@ -356,6 +356,7 @@ def main():
 
     # Per-game view/hour milestones from video_history.json (YouTube Analytics API)
     video_history = read_json("video_history.json") or {}
+    series_first_game = {}
     if video_history:
         # Build game -> [video_id] mapping (resolved names)
         game_videos = {}
@@ -430,7 +431,6 @@ def main():
         # Per-series view/hour milestones from video_history.json
         # Build series -> [video_id] mapping
         series_videos = {}
-        series_first_game = {}
         for v in all_videos:
             vid = v.get("video_id", "")
             s = v.get("series", {})
@@ -1203,21 +1203,24 @@ def main():
         if len(new_reached) > 15:
             print(f"    ... and {len(new_reached) - 15} more")
 
-    # Build current milestone list for marquee (all milestones within cutoff)
-    cutoff_dt = now - timedelta(days=14)
+    # Build current milestone list for marquee (recent milestones, fallback to most recent)
+    cutoff_dt = now - timedelta(days=30)
     current_list = []
+    recent_fallback = []
     for key, date in sorted(new_reached.items(), key=sort_key, reverse=True):
         try:
             d = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except Exception:
             continue
-        if d < cutoff_dt:
-            continue
-
         link = milestone_links.get(key, {})
         msg = link.get("msg", key)
         icon = _milestone_icon(key)
-        current_list.append({"message": msg, "icon": icon})
+        if d >= cutoff_dt:
+            current_list.append({"message": msg, "icon": icon})
+        elif len(recent_fallback) < 5:
+            recent_fallback.append({"message": msg, "icon": icon})
+    if not current_list:
+        current_list = recent_fallback
 
     # Final cleanup: strip stale _0 and empty-threshold keys from all structures
     _nr_vf_before = [k for k in new_reached if k.startswith("video_first_")]

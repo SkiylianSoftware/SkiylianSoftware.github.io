@@ -91,6 +91,9 @@ def fetch_video_details(video_ids):
     return details
 
 
+PIPE_FULL_RE = re.compile(r"^(?P<subtitle>.+?)\s*\|\s*(?P<series>[^#]+?)\s*#\s*(?P<episode>\d+)\s*\|\s*(?P<game>.+)$")
+PIPE_NO_GAME_RE = re.compile(r"^(?P<subtitle>.+?)\s*\|\s*(?P<series>[^#]+?)\s*#\s*(?P<episode>\d+)$")
+PIPE_GAME_ONLY_RE = re.compile(r"^(?P<subtitle>.+?)\s*\|\s*(?P<game>.+)$")
 SERIES_RE = re.compile(
     r"^(?P<game>[^:]+?):\s*(?P<series>[^\s#][^#]*?)\s*#\s*(?P<episode>\d+)\s*[-–]\s*(?P<subtitle>.+)$"
 )
@@ -105,6 +108,9 @@ CONTENT_SERIES_RE = re.compile(r"^(?P<content_series>[^#]+?)\s*#\d+\s*[-–]\s*(
 
 def parse_series(title):
     for regex, has_series, has_sub in [
+        (PIPE_FULL_RE, True, True),
+        (PIPE_NO_GAME_RE, True, True),
+        (PIPE_GAME_ONLY_RE, False, True),
         (SERIES_RE, True, True),
         (SERIES_NOSUB_RE, True, False),
         (GAME_COLON_EP_SUB_RE, False, True),
@@ -116,14 +122,15 @@ def parse_series(title):
         m = regex.match(title)
         if m:
             result = {
-                "game": m.group("game").strip(),
+                "game": m.group("game").strip() if "game" in regex.groupindex else "",
                 "series_name": m.group("series").strip() if has_series else "",
                 "episode_number": int(m.group("episode")) if "episode" in regex.groupindex else 0,
                 "episode_title": m.group("subtitle").strip() if has_sub else "",
             }
-            # If GAME_COLON_RE matched and no episode number, use the whole title as episode_title
             if regex == GAME_COLON_RE:
                 result["episode_title"] = m.group("title").strip()
+            if not result["game"] and result["series_name"]:
+                result["game"] = result["series_name"]
             return result
     return None
 

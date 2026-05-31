@@ -781,6 +781,35 @@ def main():
                     entry["thumb"] = thumb
                 milestone_links[key] = entry
 
+        # First video to reach N likes/comments (from video_history.json)
+        for label, field in (("likes", "likes"), ("comments", "comments")):
+            for m in sorted(ALL_THRESH, reverse=True):
+                best_date = None
+                best_vid = None
+                for vid, vh in video_history.items():
+                    daily = vh.get("daily", {})
+                    if not daily:
+                        continue
+                    sd = sorted(daily.keys())
+                    cum = 0
+                    for d in sd:
+                        cum += daily[d].get(field, 0)
+                        if cum >= m:
+                            if best_date is None or d < best_date:
+                                best_date = d
+                                best_vid = vid
+                            break
+                if best_date and best_vid:
+                    key = f"video_first_{label}_{m}"
+                    new_reached[key] = best_date
+                    vi = vid_map.get(best_vid, {})
+                    title = vi.get("title", video_history.get(best_vid, {}).get("title", ""))
+                    entry = {"url": f"/videos#vid-{best_vid}", "text": title}
+                    thumb = vi.get("thumbnail", "")
+                    if thumb:
+                        entry["thumb"] = thumb
+                    milestone_links[key] = entry
+
     # Add game milestone links: episode milestones link to specific video; others link to playlist
     for key in list(new_reached.keys()):
         if key.startswith("game_"):
@@ -1234,6 +1263,21 @@ def main():
                             entry["thumb"] = thumb
                         milestone_links[key] = entry
                     break
+
+        # Video-first milestones: first video to individually reach N likes/comments
+        for label, field in (("likes", "like_count"), ("comments", "comment_count")):
+            for m in sorted(ALL_THRESH, reverse=True):
+                for v in sorted_main:
+                    if v.get(field, 0) >= m:
+                        key = f"video_first_{label}_{m}"
+                        if key not in new_reached:
+                            new_reached[key] = v.get("published", "")[:10]
+                            entry = {"url": f"/videos#vid-{v.get('video_id', '')}", "text": v.get("title", "")}
+                            thumb = v.get("thumbnail", "")
+                            if thumb:
+                                entry["thumb"] = thumb
+                            milestone_links[key] = entry
+                        break
 
     # Sort milestones: descending by date, then by threshold descending within same date
     def sort_key(item):

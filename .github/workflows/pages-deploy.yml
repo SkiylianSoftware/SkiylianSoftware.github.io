@@ -177,6 +177,16 @@ jobs:
         env:
           JEKYLL_ENV: "production"
 
+      - name: Upload debug data artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-data
+          path: |
+            _data/*.json
+            _data/*.yml
+            _data/*.yaml
+          retention-days: 7
+
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v4
         with:

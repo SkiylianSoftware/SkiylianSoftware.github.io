@@ -1248,6 +1248,30 @@ def main():
                     if cum >= m and key not in new_reached:
                         new_reached[key] = pub
 
+        # Game upload hours milestones (from video duration_seconds)
+        for gname, vobs in game_view_data.items():
+            sorted_vobs = sorted(vobs, key=lambda x: x.get("published", ""))
+            cum_hours = 0
+            for v in sorted_vobs:
+                cum_hours += v.get("duration_seconds", 0) // 3600
+                pub = v.get("published", "")[:10]
+                for m in sorted(GAME_EP_THRESH, reverse=True):
+                    key = f"game_{gname}_upload_{m}"
+                    if cum_hours >= m and key not in new_reached:
+                        new_reached[key] = pub
+
+        # Series upload hours milestones
+        for sname, svobs in series_view_data.items():
+            sorted_sv = sorted(svobs, key=lambda x: x.get("published", ""))
+            cum_hours = 0
+            for v in sorted_sv:
+                cum_hours += v.get("duration_seconds", 0) // 3600
+                pub = v.get("published", "")[:10]
+                for m in sorted(GAME_EP_THRESH, reverse=True):
+                    key = f"series_{sname}_upload_{m}"
+                    if cum_hours >= m and key not in new_reached:
+                        new_reached[key] = pub
+
         # Video-first milestones: first video to individually reach N views
         sorted_main = sorted(all_videos, key=lambda x: x.get("published", ""))
 

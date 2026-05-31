@@ -19,7 +19,6 @@ group: stats
   <button class="chart-btn active" onclick="toggleMetric('audience')" id="btn-audience">Audience</button>
   <button class="chart-btn" onclick="toggleMetric('views')" id="btn-views">Views</button>
   <button class="chart-btn" onclick="toggleMetric('content')" id="btn-content">Content</button>
-  <button class="chart-btn" onclick="toggleMetric('duration')" id="btn-duration">Duration</button>
   {% if site.data.fourthwall.products.size > 0 %}
   <button class="chart-btn" onclick="toggleMetric('orders')" id="btn-orders">Orders</button>
   {% endif %}
@@ -90,19 +89,6 @@ contentDatasets.push({
   borderWidth: 3, pointRadius: 0,
 });
 
-var durationDatasets = [
-  { label: 'YouTube (hrs)', data: histData.map(function(h) { return Math.round(pluck(h, 'youtube_main', 'duration_seconds') / 3600); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs (hrs)', data: histData.map(function(h) { return Math.round(pluck(h, 'youtube_vods', 'duration_seconds') / 3600); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-];
-durationDatasets.push({
-  label: 'Total (hrs)',
-  data: histData.map(function(h) {
-    return Math.round((pluck(h, 'youtube_main', 'duration_seconds') + pluck(h, 'youtube_vods', 'duration_seconds')) / 3600);
-  }),
-  borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
-  borderWidth: 3, pointRadius: 0,
-});
-
 {% if site.data.fourthwall.products.size > 0 %}
 var ordersDatasets = [
   { label: 'Fourthwall', data: histData.map(function(h) { return pluck(h, 'fourthwall', 'orders'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
@@ -124,7 +110,6 @@ var allMetrics = {
   audience: audienceDatasets,
   views: viewsDatasets,
   content: contentDatasets,
-  duration: durationDatasets,
   orders: ordersDatasets,
   github: githubDatasets,
   likes: [

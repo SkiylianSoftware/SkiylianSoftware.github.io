@@ -338,7 +338,7 @@ body::after {
 .filter-bar { display: flex; gap: 0.4rem; flex: 1; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; min-width: 0; }
 .filter-bar::-webkit-scrollbar { height: 3px; }
 .filter-bar::-webkit-scrollbar-thumb { background: rgba(192,132,252,0.3); border-radius: 2px; }
-.filter-more-wrap { position: relative; flex-shrink: 0; }
+.filter-more-wrap { position: relative; flex-shrink: 0; margin-left: auto; }
 .filter-more-btn { flex-shrink: 0; }
 .filter-more-dropdown {
   display: none;

@@ -11,9 +11,7 @@ The script will exchange it for tokens and print the refresh token.
 Copy the refresh token to the YOUTUBE_REFRESH_TOKEN GitHub secret.
 """
 
-import json
 import os
-import webbrowser
 
 import requests
 
@@ -30,6 +28,7 @@ REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob:auto"
 
 def build_auth_url():
     import urllib.parse
+
     scope_encoded = urllib.parse.quote(" ".join(SCOPES), safe="")
     redirect_encoded = urllib.parse.quote(REDIRECT_URI, safe="")
     client_encoded = urllib.parse.quote(CLIENT_ID, safe="")
@@ -100,7 +99,8 @@ def main():
     print(f"Refresh token: {refresh_token}")
     print()
     print("Update GitHub secret:")
-    print(f"  gh secret set YOUTUBE_REFRESH_TOKEN --repo SkiylianSoftware/SkiylianSoftware.github.io --body '{refresh_token}'")
+    repo = "SkiylianSoftware/SkiylianSoftware.github.io"
+    print(f"  gh secret set YOUTUBE_REFRESH_TOKEN --repo {repo} --body '{refresh_token}'")
 
 
 if __name__ == "__main__":

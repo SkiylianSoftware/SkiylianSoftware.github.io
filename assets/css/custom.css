@@ -334,7 +334,8 @@ body::after {
 .sort-bar::-webkit-scrollbar { height: 3px; }
 .sort-bar::-webkit-scrollbar-thumb { background: rgba(45,212,191,0.3); border-radius: 2px; }
 .random-btn { font-size: 1.1rem; padding: 0.3rem 0.6rem; flex-shrink: 0; }
-.filter-bar { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; align-items: center; }
+.filter-row { display: flex; gap: 0.4rem; margin-bottom: 1rem; align-items: center; }
+.filter-bar { display: flex; gap: 0.4rem; flex: 1; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; min-width: 0; }
 .filter-bar::-webkit-scrollbar { height: 3px; }
 .filter-bar::-webkit-scrollbar-thumb { background: rgba(192,132,252,0.3); border-radius: 2px; }
 .filter-more-wrap { position: relative; flex-shrink: 0; }

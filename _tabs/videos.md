@@ -9,8 +9,11 @@ group: media
 
 <div class="sort-bar">
   <button class="sort-btn active" data-sort="date" onclick="sortGrid(this, 'date')">Newest</button>
+  <button class="sort-btn" data-sort="oldest" onclick="sortGrid(this, 'oldest')">Oldest</button>
   <button class="sort-btn" data-sort="views" onclick="sortGrid(this, 'views')">Most viewed</button>
   <button class="sort-btn" data-sort="duration" onclick="sortGrid(this, 'duration')">Longest</button>
+  <button class="sort-btn" data-sort="shortest" onclick="sortGrid(this, 'shortest')">Shortest</button>
+  <button class="sort-btn" data-sort="alpha" onclick="sortGrid(this, 'alpha')">A-Z</button>
   <button class="sort-btn random-btn" onclick="randomVideo()" title="Random video">&#x1F3B2;</button>
 </div>
 
@@ -36,17 +39,28 @@ group: media
   {% assign series_set = real_set %}
 {% endif %}
 {% if series_set.size > 1 %}
-<div class="filter-bar">
+{% assign has_hidden = false %}
+{% for name in series_set %}
+  {% if recency_map and recency_map != "" %}
+    {% assign r = recency_map[name] %}{% assign rec = r.status | default: 'historical' %}
+  {% else %}
+    {% assign rec = 'historical' %}
+  {% endif %}
+  {% if rec == 'historical' %}{% assign has_hidden = true %}{% endif %}
+{% endfor %}
+<div class="filter-bar" id="filter-bar">
   <button class="filter-btn active" onclick="filterSeries(this, '')">All</button>
   {% for name in series_set %}
   {% if recency_map and recency_map != "" %}
-    {% assign r = recency_map[name] %}
-    {% assign recency = r.status | default: 'historical' %}
+    {% assign r = recency_map[name] %}{% assign rec = r.status | default: 'historical' %}
   {% else %}
-    {% assign recency = 'historical' %}
+    {% assign rec = 'historical' %}
   {% endif %}
-  <button class="filter-btn recency-{{ recency }}" onclick="filterSeries(this, '{{ name | escape }}')"><span class="recency-dot"></span> {{ name }}</button>
+  <button class="filter-btn recency-{{ rec }}" data-recency="{{ rec }}" onclick="filterSeries(this, '{{ name | escape }}')"><span class="recency-dot"></span> {{ name }}</button>
   {% endfor %}
+  {% if has_hidden %}
+  <button class="filter-btn filter-more-btn" id="filter-more-btn" onclick="toggleMoreFilters()">More &#9660;</button>
+  {% endif %}
 </div>
 {% endif %}
 
@@ -198,8 +212,11 @@ function sortGrid(btn, mode) {
   var cards = Array.from(grid.querySelectorAll('.video-card'));
   cards.sort(function(a, b) {
     if (mode === 'date') return new Date(b.getAttribute('data-published')) - new Date(a.getAttribute('data-published'));
+    if (mode === 'oldest') return new Date(a.getAttribute('data-published')) - new Date(b.getAttribute('data-published'));
     if (mode === 'views') return parseInt(b.getAttribute('data-views')) - parseInt(a.getAttribute('data-views'));
     if (mode === 'duration') return parseInt(b.getAttribute('data-duration')) - parseInt(a.getAttribute('data-duration'));
+    if (mode === 'shortest') return parseInt(a.getAttribute('data-duration')) - parseInt(b.getAttribute('data-duration'));
+    if (mode === 'alpha') return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
   });
   cards.forEach(function(c) { grid.appendChild(c); });
 }

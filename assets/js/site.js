@@ -56,6 +56,15 @@ function randomVideo() {
   }
 }
 
+/* Toggle More/Less for filter bar */
+function toggleMoreFilters() {
+  var bar = document.getElementById('filter-bar');
+  var btn = document.getElementById('filter-more-btn');
+  if (!bar || !btn) return;
+  bar.classList.toggle('show-all');
+  btn.innerHTML = bar.classList.contains('show-all') ? 'Less \u25B2' : 'More \u25BC';
+}
+
 /* Series filter */
 function filterSeries(btn, name) {
   var grid = document.getElementById('video-grid');

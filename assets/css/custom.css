@@ -330,9 +330,16 @@ body::after {
 .recency-current .recency-dot { background: #2dd4bf; }
 .recency-recent .recency-dot { background: #c084fc; }
 .recency-historical .recency-dot { background: #555577; }
-.sort-bar { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; align-items: center; }
-.random-btn { font-size: 1.1rem; padding: 0.3rem 0.6rem; }
-.filter-bar { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.sort-bar { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: nowrap; align-items: center; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; }
+.sort-bar::-webkit-scrollbar { height: 3px; }
+.sort-bar::-webkit-scrollbar-thumb { background: rgba(45,212,191,0.3); border-radius: 2px; }
+.random-btn { font-size: 1.1rem; padding: 0.3rem 0.6rem; flex-shrink: 0; }
+.filter-bar { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; }
+.filter-bar::-webkit-scrollbar { height: 3px; }
+.filter-bar::-webkit-scrollbar-thumb { background: rgba(192,132,252,0.3); border-radius: 2px; }
+.filter-bar .filter-btn[data-recency="historical"] { display: none; }
+.filter-bar.show-all .filter-btn[data-recency="historical"] { display: inline-flex; }
+.filter-more-btn { flex-shrink: 0; }
 .filter-btn {
   padding: 0.25rem 0.6rem; border-radius: 12px;
   border: 1px solid rgba(192,132,252,0.2); background: transparent;

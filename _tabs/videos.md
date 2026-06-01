@@ -44,7 +44,7 @@ group: media
   {% if recency_map and recency_map != "" %}
     {% assign r = recency_map[name] %}{% assign rec = r.status | default: 'historical' %}
   {% else %}
-    {% assign rec = 'historical' %}
+    {% assign rec = 'current' %}
   {% endif %}
   {% if rec == 'historical' %}{% assign has_hidden = true %}{% endif %}
 {% endfor %}
@@ -54,12 +54,28 @@ group: media
   {% if recency_map and recency_map != "" %}
     {% assign r = recency_map[name] %}{% assign rec = r.status | default: 'historical' %}
   {% else %}
-    {% assign rec = 'historical' %}
+    {% assign rec = 'current' %}
   {% endif %}
-  <button class="filter-btn recency-{{ rec }}" data-recency="{{ rec }}" onclick="filterSeries(this, '{{ name | escape }}')"><span class="recency-dot"></span> {{ name }}</button>
+  {% if rec != 'historical' %}
+  <button class="filter-btn recency-{{ rec }}" onclick="filterSeries(this, '{{ name | escape }}')"><span class="recency-dot"></span> {{ name }}</button>
+  {% endif %}
   {% endfor %}
   {% if has_hidden %}
-  <button class="filter-btn filter-more-btn" id="filter-more-btn" onclick="toggleMoreFilters()">More &#9660;</button>
+  <div class="filter-more-wrap">
+    <button class="filter-btn filter-more-btn" id="filter-more-btn" onclick="toggleMoreFilters()">More &#9660;</button>
+    <div class="filter-more-dropdown" id="filter-more-dropdown">
+      {% for name in series_set %}
+      {% if recency_map and recency_map != "" %}
+        {% assign r = recency_map[name] %}{% assign rec = r.status | default: 'historical' %}
+      {% else %}
+        {% assign rec = 'current' %}
+      {% endif %}
+      {% if rec == 'historical' %}
+      <button class="filter-btn dropdown-item" onclick="filterSeries(this, '{{ name | escape }}')"><span class="recency-dot"></span> {{ name }}</button>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
   {% endif %}
 </div>
 {% endif %}

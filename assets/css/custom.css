@@ -334,12 +334,45 @@ body::after {
 .sort-bar::-webkit-scrollbar { height: 3px; }
 .sort-bar::-webkit-scrollbar-thumb { background: rgba(45,212,191,0.3); border-radius: 2px; }
 .random-btn { font-size: 1.1rem; padding: 0.3rem 0.6rem; flex-shrink: 0; }
-.filter-bar { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; }
+.filter-bar { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; align-items: center; }
 .filter-bar::-webkit-scrollbar { height: 3px; }
 .filter-bar::-webkit-scrollbar-thumb { background: rgba(192,132,252,0.3); border-radius: 2px; }
-.filter-bar .filter-btn[data-recency="historical"] { display: none; }
-.filter-bar.show-all .filter-btn[data-recency="historical"] { display: inline-flex; }
+.filter-more-wrap { position: relative; flex-shrink: 0; }
 .filter-more-btn { flex-shrink: 0; }
+.filter-more-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 200px;
+  max-width: min(320px, 90vw);
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+  background: #1a1a2e;
+  border: 1px solid rgba(192,132,252,0.3);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.filter-more-dropdown.open { display: block; }
+.filter-more-dropdown .dropdown-item {
+  display: flex;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #8888aa;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.filter-more-dropdown .dropdown-item:hover { background: rgba(192,132,252,0.12); color: #c8c8d4; }
+.filter-more-dropdown .dropdown-item .recency-dot { margin-right: 8px; }
+.filter-more-dropdown .dropdown-item.active { background: rgba(192,132,252,0.15); color: #c084fc; }
 .filter-btn {
   padding: 0.25rem 0.6rem; border-radius: 12px;
   border: 1px solid rgba(192,132,252,0.2); background: transparent;

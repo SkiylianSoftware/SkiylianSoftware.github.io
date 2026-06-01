@@ -56,17 +56,28 @@ function randomVideo() {
   }
 }
 
-/* Toggle More/Less for filter bar */
+/* Toggle More dropdown for filter bar */
 function toggleMoreFilters() {
-  var bar = document.getElementById('filter-bar');
-  var btn = document.getElementById('filter-more-btn');
-  if (!bar || !btn) return;
-  bar.classList.toggle('show-all');
-  btn.innerHTML = bar.classList.contains('show-all') ? 'Less \u25B2' : 'More \u25BC';
+  var dd = document.getElementById('filter-more-dropdown');
+  if (!dd) return;
+  dd.classList.toggle('open');
 }
+
+/* Close More dropdown on outside click */
+document.addEventListener('click', function(e) {
+  var wrap = document.querySelector('.filter-more-wrap');
+  var dd = document.getElementById('filter-more-dropdown');
+  if (wrap && dd && dd.classList.contains('open') && !wrap.contains(e.target)) {
+    dd.classList.remove('open');
+  }
+});
 
 /* Series filter */
 function filterSeries(btn, name) {
+  // Close the More dropdown if open
+  var dd = document.getElementById('filter-more-dropdown');
+  if (dd) dd.classList.remove('open');
+
   var grid = document.getElementById('video-grid');
   if (!grid) return;
   var cards = grid.querySelectorAll('.video-card');

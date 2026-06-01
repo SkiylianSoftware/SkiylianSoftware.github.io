@@ -20,7 +20,7 @@ export default [
       "prefer-const": "off",
       "no-unused-vars": ["error", {
         args: "none",
-        varsIgnorePattern: "^(randomVideo|filterSeries|parseChapters|findWatchNext)$",
+        varsIgnorePattern: "^(randomVideo|filterSeries|parseChapters|findWatchNext|toggleMoreFilters)$",
       }],
     },
   },

@@ -290,13 +290,28 @@ def enrich_playlist_stats(playlists):
     return playlists
 
 
+PLAYLIST_COVER_DIR = os.path.join("assets", "img", "playlists")
+
+
+def _yt_headers():
+    """Headers + consent cookies so the playlist page scrape also works from EU IPs."""
+    return {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cookie": "CONSENT=YES+cb.20210328-17-p0.en+FX+; SOCS=CAISEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg",
+    }
+
+
 def _fetch_playlist_cover(pid):
     """Scrape the YouTube playlist page for the signed pl_c cover URL."""
     try:
         resp = requests.get(
             f"https://www.youtube.com/playlist?list={pid}",
             timeout=10,
-            headers={"User-Agent": "Mozilla/5.0"},
+            headers=_yt_headers(),
         )
         m = re.search(r'/pl_c/[^"\'&?]+/studio_square_thumbnail\.jpg\?[^"\' ]+', resp.text)
         if m:
@@ -304,6 +319,24 @@ def _fetch_playlist_cover(pid):
     except Exception:
         pass
     return ""
+
+
+def _download_playlist_cover(pid, cover_url):
+    """Download the cover into the site assets so the signed pl_c URL can't expire."""
+    if not cover_url:
+        return ""
+    try:
+        os.makedirs(PLAYLIST_COVER_DIR, exist_ok=True)
+        path = os.path.join(PLAYLIST_COVER_DIR, f"{pid}.jpg")
+        resp = requests.get(cover_url, timeout=15, headers=_yt_headers())
+        resp.raise_for_status()
+        if not resp.content or resp.headers.get("content-type", "").startswith("text/"):
+            return ""
+        with open(path, "wb") as f:
+            f.write(resp.content)
+        return f"/{PLAYLIST_COVER_DIR}/{pid}.jpg"
+    except Exception:
+        return ""
 
 
 def fetch_playlists():
@@ -327,13 +360,14 @@ def fetch_playlists():
                 thumb.get("maxres", {}) or thumb.get("medium", {}) or thumb.get("high", {}) or thumb.get("default", {})
             ).get("url", "")
             cover = _fetch_playlist_cover(item["id"])
+            cover_local = _download_playlist_cover(item["id"], cover)
             all_playlists.append(
                 {
                     "title": snippet.get("title", ""),
                     "url": f"https://www.youtube.com/playlist?list={item['id']}",
                     "playlist_id": item["id"],
                     "item_count": item.get("contentDetails", {}).get("itemCount", 0),
-                    "thumbnail": cover or api_thumb,
+                    "thumbnail": cover_local or api_thumb,
                     "thumbnail_fallback": api_thumb,
                     "description": snippet.get("description", ""),
                     "description_parts": snippet.get("description", "").split("\n"),

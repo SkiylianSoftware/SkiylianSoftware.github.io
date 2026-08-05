@@ -37,5 +37,7 @@ __pycache__
 _data/*.json
 # PC parts are semi-static - keep tracked as CI fallback
 !_data/pc_parts.json
+# Playlist covers (downloaded per CI run)
+assets/img/playlists/
 # Posts (generated for RSS feed)
 _posts/

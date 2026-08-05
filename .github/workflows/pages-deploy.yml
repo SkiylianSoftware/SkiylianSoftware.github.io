@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: _data/
-          key: site-data
+          key: site-data-v2
 
       - name: Install dependencies
         run: |
@@ -53,6 +53,12 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python scripts/fetch_youtube_analytics.py
+
+      - name: Verify video history was fetched
+        run: |
+          if [ ! -s _data/video_history.json ]; then
+            echo "::warning::video_history.json missing - YouTube Analytics fetch failed (check YOUTUBE_REFRESH_TOKEN). Watch-time milestones will be unavailable."
+          fi
 
       - name: Fetch Twitch data
         env:

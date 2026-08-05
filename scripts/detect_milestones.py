@@ -1092,23 +1092,26 @@ def main():
         if "msg" not in milestone_links[key]:
             milestone_links[key]["msg"] = _milestone_msg(key)
 
-    # Per-platform and combined watch time (hours) from video_history.json
-    if video_history:
-        daily_hours = {}
-        for _vid, vh in video_history.items():
-            for d, dv in vh.get("daily", {}).items():
-                daily_hours.setdefault(d, 0)
-                daily_hours[d] += dv.get("watch_time", 0) / 60.0
-        if daily_hours:
-            sorted_dates = sorted(daily_hours.keys())
-            for m in sorted(HOURS_THRESH, reverse=True):
-                cum = 0
-                for d in sorted_dates:
-                    cum += daily_hours[d]
-                    if cum >= m:
-                        key = f"youtube_hours_{m}"
-                        new_reached[key] = d
-                        break
+    # Watch time (hours): per-video history when available, else channel-level analytics
+    daily_hours = {}
+    for _vid, vh in video_history.items():
+        for d, dv in vh.get("daily", {}).items():
+            daily_hours[d] = daily_hours.get(d, 0) + dv.get("watch_time", 0) / 60.0
+    if not daily_hours:
+        # Fallback: channel analytics `_analytics.watch_time_minutes` (stored in hours)
+        for entry in history:
+            a = entry.get("_analytics") or {}
+            if a.get("watch_time_minutes"):
+                daily_hours[entry["date"]] = daily_hours.get(entry["date"], 0) + a["watch_time_minutes"]
+    if daily_hours:
+        sorted_dates = sorted(daily_hours.keys())
+        for m in sorted(HOURS_THRESH, reverse=True):
+            cum = 0
+            for d in sorted_dates:
+                cum += daily_hours[d]
+                if cum >= m:
+                    new_reached[f"youtube_hours_{m}"] = d
+                    break
 
     # Collapse milestones: for each label, keep only the highest threshold per date
     def collapse_key(key):

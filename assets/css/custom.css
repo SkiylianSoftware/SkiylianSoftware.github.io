@@ -281,6 +281,7 @@ body::after {
 /* === SHARED OVERLAY / BADGE / PLAY BUTTON === */
 .thumb-wrap { position: relative; }
 .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.video-card .preview-img { aspect-ratio: 16/9; }
 .play-overlay {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;

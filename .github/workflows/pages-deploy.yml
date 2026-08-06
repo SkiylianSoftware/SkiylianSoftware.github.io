@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -205,6 +205,43 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Skip deploy if this commit is already live
+        id: deployed
+        run: |
+          python3 << 'EOF'
+          import json, os, urllib.request
+          repo = "${{ github.repository }}"
+          sha = "${{ github.sha }}"
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/pages/deployments",
+              headers={"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+                       "Accept": "application/vnd.github+json"},
+          )
+          try:
+              with urllib.request.urlopen(req) as r:
+                  deps = json.load(r)
+          except Exception as e:
+              print(f"  deployment check failed: {e}")
+              exit(0)
+          for d in deps:
+              if d.get("pages_build_version") == sha and d.get("is_latest"):
+                  sreq = urllib.request.Request(
+                      d["status_url"],
+                      headers={"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+                               "Accept": "application/vnd.github+json"},
+                  )
+                  try:
+                      with urllib.request.urlopen(sreq) as sr:
+                          st = json.load(sr)
+                      if st.get("status") in ("deployed", "success"):
+                          print("  commit already deployed; skipping deploy")
+                          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                              f.write("skip=true\n")
+                  except Exception as e:
+                      print(f"  status check failed: {e}")
+                  break
+          EOF
       - name: Deploy to GitHub Pages
+        if: steps.deployed.outputs.skip != 'true'
         id: deployment
         uses: actions/deploy-pages@v4

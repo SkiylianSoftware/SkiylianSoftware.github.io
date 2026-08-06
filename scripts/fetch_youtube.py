@@ -87,6 +87,7 @@ def fetch_video_details(video_ids):
                 "like_count": int(stats.get("likeCount", 0)),
                 "comment_count": int(stats.get("commentCount", 0)),
                 "tags": snippet.get("tags", []),
+                "game": (snippet.get("gameDetails") or {}).get("gameTitle", ""),
             }
     return details
 
@@ -215,7 +216,11 @@ def fetch_uploads(playlist_id, label="uploads"):
     for v in videos:
         vid = v["video_id"]
         if vid in details:
-            v.update(details[vid])
+            d = details[vid]
+            v.update(d)
+            # Prefer the game attached in YouTube Studio; fall back to the title parse
+            if d.get("game") and v.get("series"):
+                v["series"]["game"] = d["game"]
 
     print(f"  Total: {len(videos)} videos fetched for {label}")
     return videos
@@ -539,7 +544,10 @@ def save(filename, data):
 
 def _parse_iso_date(s):
     try:
-        return datetime.fromisoformat(s)
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
     except Exception:
         return None
 
@@ -552,7 +560,7 @@ def _detect_game_milestones(games, prev_reached, now, cutoff, all_videos=None):
     if all_videos:
         for v in all_videos:
             s = v.get("series", {})
-            gname = (s or {}).get("game", "")
+            gname = ALIAS_MAP.get((s or {}).get("game", ""), (s or {}).get("game", ""))
             pub = v.get("published", "")
             if gname and pub and len(pub) >= 10:
                 game_dates.setdefault(gname, []).append(pub[:10])

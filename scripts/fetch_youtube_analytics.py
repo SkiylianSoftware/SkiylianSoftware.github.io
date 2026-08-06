@@ -77,7 +77,7 @@ def fetch_all_reports(access_token, start_date, end_date, ids="channel==MINE"):
         rows = report.get("rows", [])
         print(f"    Chunk {chunk_num}: got {len(rows)} rows ({chunk_start} to {chunk_end})")
         all_rows = rows + all_rows  # prepend oldest first
-        if len(rows) < 364 or chunk_start <= start_date:
+        if len(rows) == 0 or chunk_start <= start_date:
             break
         chunk_end = (datetime.strptime(chunk_start, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
     print(f"  Total: {len(all_rows)} rows across {chunk_num} chunks")

@@ -38,26 +38,44 @@ def main():
     if analytics_dates:
         all_dates = [d for d in all_dates if d >= analytics_dates[0]]
 
-    # Find the first analytics entry with a valid Data API snapshot as anchor
+    # Find the LAST analytics entry with a valid Data API snapshot as anchor.
+    # Walking forward from the first snapshot fails when the analytics window
+    # starts mid-history, so anchor on the newest snapshot and walk backward.
     anchor = None
-    for e in analytics:
+    for e in reversed(analytics):
         ym = e.get("youtube_main", {}) or {}
-        an = e.get("_analytics", {}) or {}
-        if ym.get("subs", 0) > 0 and an:
+        if ym.get("subs", 0) > 0:
             anchor = {"date": e["date"], "subs": ym["subs"], "views": ym["views"]}
             break
 
     # Build daily entries
     entries = []
     cum_videos = 0
-    cum_subs = None  # running cumulative from Analytics API deltas
-    cum_views = None
     last_subs = 0
     last_views = 0
     last_likes = 0
     last_comments = 0
     last_duration = 0
     hist_by_date = {e["date"]: e for e in analytics}
+
+    # Precompute subs/views by walking backward from the anchor snapshot.
+    # The anchor (newest real snapshot) includes all deltas since the start,
+    # so subtracting each day's deltas reconstructs every earlier day exactly.
+    subs_by_date = {}
+    views_by_date = {}
+    if anchor:
+        running_subs = anchor["subs"]
+        running_views = anchor["views"]
+        anchor_dates = [d for d in all_dates if d <= anchor["date"]]
+        for i in range(len(anchor_dates) - 1, -1, -1):
+            d = anchor_dates[i]
+            ha = hist_by_date.get(d) or {}
+            an = ha.get("_analytics", {}) or {}
+            subs_by_date[d] = max(0, running_subs)
+            views_by_date[d] = max(0, running_views)
+            # Snapshot at end of day d+1 minus day d+1's deltas gives day d
+            running_subs -= an.get("subs_gained", 0) - an.get("subs_lost", 0)
+            running_views -= an.get("views_gained", 0)
 
     for d in all_dates:
         cum_videos += video_dates.get(d, {}).get("videos", 0)
@@ -74,6 +92,11 @@ def main():
             },
         }
 
+        # Backward-walk values take precedence for every date up to the anchor
+        if anchor and d in subs_by_date:
+            entry["youtube_main"]["subs"] = subs_by_date[d]
+            entry["youtube_main"]["views"] = views_by_date[d]
+
         ha = hist_by_date.get(d)
         if ha:
             ym = ha.get("youtube_main", {}) or {}
@@ -82,20 +105,8 @@ def main():
             entry["youtube_main"]["comments"] = ym.get("comments", 0)
             entry["youtube_main"]["duration_seconds"] = ym.get("duration_seconds", 0)
 
-            # Use Analytics API daily deltas anchored to Data API snapshot for subs/views
-            if an and anchor and d >= anchor["date"]:
-                if cum_subs is None:
-                    # First entry at anchor date: Data API value already includes that day's deltas
-                    cum_subs = anchor["subs"]
-                    cum_views = anchor["views"]
-                else:
-                    # Subsequent days: accumulate from Analytics API daily deltas
-                    cum_subs += an.get("subs_gained", 0) - an.get("subs_lost", 0)
-                    cum_views += an.get("views_gained", 0)
-                entry["youtube_main"]["subs"] = cum_subs
-                entry["youtube_main"]["views"] = cum_views
-            else:
-                # No analytics deltas available; use raw snapshot or carry forward
+            if not (anchor and d in subs_by_date):
+                # No backward-walk value; use raw snapshot or carry forward
                 entry["youtube_main"]["subs"] = ym.get("subs", 0) or last_subs
                 entry["youtube_main"]["views"] = ym.get("views", 0) or last_views
 
@@ -110,8 +121,9 @@ def main():
                 if ha.get(pf):
                     entry[pf] = ha[pf]
         else:
-            entry["youtube_main"]["subs"] = last_subs
-            entry["youtube_main"]["views"] = last_views
+            if not (anchor and d in subs_by_date):
+                entry["youtube_main"]["subs"] = last_subs
+                entry["youtube_main"]["views"] = last_views
             entry["youtube_main"]["likes"] = last_likes
             entry["youtube_main"]["comments"] = last_comments
             entry["youtube_main"]["duration_seconds"] = last_duration

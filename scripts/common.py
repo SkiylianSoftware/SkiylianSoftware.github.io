@@ -49,8 +49,7 @@ GAME_THRESHOLDS = {
 
 # Maps sequel game names to their base game for shared milestone messages
 SEQUEL_BASE = {
-    "Transport Fever 2": "Transport Fever",
-    "Transport Fever 3": "Transport Fever",
+    "Transport Fever 3": "Transport Fever 2",
 }
 
 

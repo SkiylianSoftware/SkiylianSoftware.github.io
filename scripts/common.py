@@ -17,6 +17,13 @@ RND = {1, 10} | {10**x * y for x in range(5) for y in (25, 50, 75, 100)}
 # Combined threshold set for ALL milestone types (all scales)
 ALL_THRESH = sorted(P3 | P2 | RND)
 
+# Minimums for stats that grow to large values: sub-50 views or sub-5 hours
+# milestones are noise (reached on day one), not achievements
+VIEWS_MIN = 50
+HOURS_MIN = 5
+GAME_VIEWS_THRESH = [m for m in ALL_THRESH if m >= VIEWS_MIN]
+GAME_HOURS_THRESH = [m for m in ALL_THRESH if m >= HOURS_MIN]
+
 # Valid game names — canonical names from game_links.yml, used to distinguish
 # actual games from content series (Railway Exhibition Vlogs, Infrastructure Programming, etc.)
 _VALID_GAMES_PATH = os.path.join(DATA_DIR, "game_links.yml")
@@ -42,8 +49,8 @@ except Exception as e:
 # per-type threshold lists for game milestones — ALL use the full combined set
 GAME_THRESHOLDS = {
     "ep": ALL_THRESH,
-    "views": ALL_THRESH,
-    "hours": ALL_THRESH,
+    "views": GAME_VIEWS_THRESH,
+    "hours": GAME_HOURS_THRESH,
     "return": ALL_THRESH,
 }
 
@@ -138,7 +145,7 @@ MILESTONE_SPECS = [
     ("comments", RND, RND_MSG, FMT),
 ]
 
-HOURS_THRESH = ALL_THRESH
+HOURS_THRESH = GAME_HOURS_THRESH
 GAME_EP_THRESH = ALL_THRESH
 VIDEO_FIRST_THRESH = ALL_THRESH
 HIATUS_DAYS_THRESH = 60

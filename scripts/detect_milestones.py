@@ -13,7 +13,10 @@ from common import (
     ANNIVERSARY_THRESH,
     DATA_DIR,
     GAME_EP_THRESH,
+    GAME_HOURS_THRESH,
+    GAME_VIEWS_THRESH,
     HIATUS_DAYS_THRESH,
+    HOURS_MIN,
     HOURS_THRESH,
     MILESTONE_SPECS,
     P2,
@@ -399,8 +402,8 @@ def main():
         if VALID_GAMES:
             game_videos = {g: v for g, v in game_videos.items() if g in VALID_GAMES or g in api_games}
 
-        game_view_thresh = GAME_EP_THRESH
-        game_hour_thresh = GAME_EP_THRESH
+        game_view_thresh = GAME_VIEWS_THRESH
+        game_hour_thresh = GAME_HOURS_THRESH
 
         for gname, vids in game_videos.items():
             # Collect all dates from video_history for this game's videos
@@ -529,7 +532,7 @@ def main():
     if VALID_GAMES:
         game_durations = {g: s for g, s in game_durations.items() if g in VALID_GAMES or g in api_games}
 
-    upload_thresh = [m for m in GAME_EP_THRESH if m >= 1]
+    upload_thresh = [m for m in GAME_EP_THRESH if m >= HOURS_MIN]
     for gname, total_secs in game_durations.items():
         upload_hours = total_secs // 3600
         for m in sorted(upload_thresh, reverse=True):
@@ -970,6 +973,10 @@ def main():
             return "&#127987;"  # flag
         if key.startswith("streak_"):
             return "&#128293;"  # fire
+        if key.startswith("youtube_hours_"):
+            return '<i class="fab fa-youtube" style="color:#FF0000"></i>'
+        if key.startswith("twitch_hours_"):
+            return '<i class="fab fa-twitch" style="color:#9146FF"></i>'
         if ("hours_" in key) or ("_hours_" in key):
             return "&#9200;"  # clock
         if "upload_" in key:
@@ -1237,7 +1244,7 @@ def main():
             for v in sorted_vobs:
                 cum += v.get("view_count", 0)
                 pub = v.get("published", "")[:10]
-                for m in sorted(GAME_EP_THRESH, reverse=True):
+                for m in sorted(GAME_VIEWS_THRESH, reverse=True):
                     key = f"game_{gname}_views_{m}"
                     if cum >= m and key not in new_reached:
                         new_reached[key] = pub

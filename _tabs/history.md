@@ -316,9 +316,13 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% assign val = key | remove: "streak_" %}
       {% capture d %}{{ val }}-week upload streak (main){% endcapture %}{% assign display = d %}
     {% elsif key contains "youtube_hours_" %}
-      {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
+      {% assign icon = '<i class="fab fa-youtube" style="color:#FF0000"></i>' %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "youtube_hours_" %}
       {% capture d %}{{ val }} hours watched on YouTube{% endcapture %}{% assign display = d %}
+    {% elsif key contains "twitch_hours_" %}
+      {% assign icon = '<i class="fab fa-twitch" style="color:#9146FF"></i>' %}{% assign mclass = "ms-hours" %}{% assign link = "/streams" %}
+      {% assign val = key | remove: "twitch_hours_" %}
+      {% capture d %}{{ val }} hours watched on Twitch{% endcapture %}{% assign display = d %}
     {% elsif key contains "combined_hours_" %}
       {% assign icon = "&#9200;" %}{% assign mclass = "ms-hours" %}{% assign link = "/videos" %}
       {% assign val = key | remove: "combined_hours_" %}

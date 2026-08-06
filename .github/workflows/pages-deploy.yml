@@ -207,15 +207,18 @@ jobs:
     steps:
       - name: Skip deploy if this commit is already live
         id: deployed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python3 << 'EOF'
           import json, os, urllib.request
           repo = "${{ github.repository }}"
           sha = "${{ github.sha }}"
+          headers = {"Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                     "Accept": "application/vnd.github+json"}
           req = urllib.request.Request(
               f"https://api.github.com/repos/{repo}/pages/deployments",
-              headers={"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
-                       "Accept": "application/vnd.github+json"},
+              headers=headers,
           )
           try:
               with urllib.request.urlopen(req) as r:
@@ -227,8 +230,7 @@ jobs:
               if d.get("pages_build_version") == sha and d.get("is_latest"):
                   sreq = urllib.request.Request(
                       d["status_url"],
-                      headers={"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
-                               "Accept": "application/vnd.github+json"},
+                      headers=headers,
                   )
                   try:
                       with urllib.request.urlopen(sreq) as sr:

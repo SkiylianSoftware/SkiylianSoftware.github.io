@@ -120,6 +120,16 @@ def main():
 
     # Process game milestones from per-video cumulative data
     all_videos = yt_main.get("videos", [])
+    # Games reported by YouTube's API (gameDetails) are authoritative even if
+    # not listed in game_links.yml, so they bypass the VALID_GAMES whitelist
+    api_games = set()
+    for v in all_videos:
+        s = v.get("series") or {}
+        if s.get("game_source") == "api" and s.get("game"):
+            raw = s["game"]
+            api_games.add(raw)
+            api_games.add(ALIAS_MAP.get(raw, raw))
+            api_games.add(SEQUEL_BASE.get(raw, raw))
     game_cumulative = {}
     series_cumulative = {}
     game_first_series = {}
@@ -254,7 +264,7 @@ def main():
     # Filter out content series that aren't actual games (Railway Exhibition Vlogs, etc.)
     playlist_data = read_json("playlists.json") or {}
     if VALID_GAMES:
-        game_cumulative = {g: d for g, d in game_cumulative.items() if g in VALID_GAMES}
+        game_cumulative = {g: d for g, d in game_cumulative.items() if g in VALID_GAMES or g in api_games}
     elif playlist_data.get("playlists"):
         game_cumulative = {
             g: d
@@ -387,7 +397,7 @@ def main():
 
         # Filter out non-game content series (Railway Exhibition Vlogs, etc.)
         if VALID_GAMES:
-            game_videos = {g: v for g, v in game_videos.items() if g in VALID_GAMES}
+            game_videos = {g: v for g, v in game_videos.items() if g in VALID_GAMES or g in api_games}
 
         game_view_thresh = GAME_EP_THRESH
         game_hour_thresh = GAME_EP_THRESH
@@ -517,7 +527,7 @@ def main():
 
     # Filter out non-game content series for upload milestones
     if VALID_GAMES:
-        game_durations = {g: s for g, s in game_durations.items() if g in VALID_GAMES}
+        game_durations = {g: s for g, s in game_durations.items() if g in VALID_GAMES or g in api_games}
 
     upload_thresh = [m for m in GAME_EP_THRESH if m >= 1]
     for gname, total_secs in game_durations.items():
@@ -1219,7 +1229,7 @@ def main():
             if gname:
                 game_view_data.setdefault(gname, []).append(v)
         if VALID_GAMES:
-            game_view_data = {g: vs for g, vs in game_view_data.items() if g in VALID_GAMES}
+            game_view_data = {g: vs for g, vs in game_view_data.items() if g in VALID_GAMES or g in api_games}
 
         for gname, vobs in game_view_data.items():
             sorted_vobs = sorted(vobs, key=lambda x: x.get("published", ""))

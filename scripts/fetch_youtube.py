@@ -221,6 +221,7 @@ def fetch_uploads(playlist_id, label="uploads"):
             # Prefer the game attached in YouTube Studio; fall back to the title parse
             if d.get("game") and v.get("series"):
                 v["series"]["game"] = d["game"]
+                v["series"]["game_source"] = "api"
 
     print(f"  Total: {len(videos)} videos fetched for {label}")
     return videos
@@ -967,7 +968,8 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
             if alias_map and game in alias_map:
                 game = alias_map[game]
             # Skip videos whose game name isn't in valid_games (non-game content falsely detected as game)
-            if valid_games and game not in valid_games:
+            # unless the game came from YouTube's API (gameDetails), which is authoritative
+            if valid_games and game not in valid_games and s.get("game_source") != "api":
                 cat_name = "Misc"
                 if content_types:
                     for ct in content_types:

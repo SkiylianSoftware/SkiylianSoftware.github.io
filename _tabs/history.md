@@ -251,7 +251,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% if rest contains "_ep_" %}
         {% assign parts = rest | split: "_ep_" %}
         {% capture d %}{{ parts[1] }} episodes in {{ parts[0] }}{% endcapture %}{% assign display = d %}
-        {% assign mclass = "ms-upload" %}
+        {% assign mclass = "ms-videos" %}
       {% elsif rest contains "_upload_" %}
         {% assign parts = rest | split: "_upload_" %}
         {% capture d %}{{ parts[1] }} hours uploaded in {{ parts[0] }}{% endcapture %}{% assign display = d %}
@@ -264,7 +264,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% elsif rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
         {% capture d %}{{ parts[1] }} views across {{ parts[0] }}{% endcapture %}{% assign display = d %}
-        {% assign mclass = "ms-upload" %}
+        {% assign mclass = "ms-views" %}
       {% elsif rest contains "_hours_" %}
         {% assign parts = rest | split: "_hours_" %}
         {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}
@@ -281,7 +281,7 @@ document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
       {% if rest contains "_views_" %}
         {% assign parts = rest | split: "_views_" %}
         {% capture d %}{{ parts[1] }} views in {{ parts[0] }}{% endcapture %}{% assign display = d %}
-        {% assign mclass = "ms-upload" %}
+        {% assign mclass = "ms-views" %}
       {% elsif rest contains "_hours_" %}
         {% assign parts = rest | split: "_hours_" %}
         {% capture d %}{{ parts[1] }} hours watched in {{ parts[0] }}{% endcapture %}{% assign display = d %}

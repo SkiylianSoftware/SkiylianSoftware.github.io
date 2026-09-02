@@ -33,10 +33,7 @@ def main():
         print("No data to build history from")
         return
 
-    # Filter to start from the first analytics entry with real data to avoid a 0-value flatline
-    analytics_dates = sorted([e["date"] for e in analytics if e.get("youtube_main", {}).get("subs", 0) > 0])
-    if analytics_dates:
-        all_dates = [d for d in all_dates if d >= analytics_dates[0]]
+    all_dates = sorted(set(all_dates))
 
     # Find the LAST analytics entry with a valid Data API snapshot as anchor.
     # Walking forward from the first snapshot fails when the analytics window

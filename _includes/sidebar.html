@@ -51,6 +51,7 @@
       </li>
       {% assign groups_shown = "" %}
       {% for tab in site.tabs %}
+        {% if tab.no_sidebar %}{% continue %}{% endif %}
         {% if tab.group %}
           {% unless groups_shown contains tab.group %}
           {% assign groups_shown = groups_shown | append: "|" | append: tab.group %}

@@ -66,11 +66,6 @@ window.HIST_ORDERS = {% if site.data.fourthwall.products.size > 0 %}true{% else 
   <button class="ms-filter-btn" data-filter="other">Other</button>
 </div>
 
-<div class="heatmap-wrap">
-  <h2 class="milestones-heading">Upload Heatmap</h2>
-  <div id="upload-heatmap" class="upload-heatmap"></div>
-</div>
-
 <script>
 document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
   var btn = e.target.closest('.ms-filter-btn');

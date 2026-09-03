@@ -1089,7 +1089,14 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(transparent 40%, rgba(10, 10, 20, 0.4) 75%, rgba(10, 10, 20, 0.78) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 20, 0.15) 0%,
+    transparent 38%,
+    transparent 62%,
+    rgba(10, 10, 20, 0.55) 82%,
+    rgba(10, 10, 20, 0.9) 100%
+  );
   pointer-events: none;
 }
 .channel-hero:not([style*="background-image"]) { min-height: 0; margin: 0; padding: 0; border-radius: 0; }
@@ -1408,8 +1415,9 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 .live-section { margin: 2rem 0; text-align: center; }
 @media (min-width: 1200px) {
   .live-section { margin-top: auto; margin-bottom: 0; }
-  #main-wrapper { position: relative; }
-  .channel-hero {
+  /* Full-bleed banner only inside the home hero; on sub-pages the banner
+     stays in flow so its space is reserved and text never overlaps the art. */
+  .hero-stage .channel-hero {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -1421,9 +1429,6 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
     z-index: -1;
     max-width: none;
     aspect-ratio: auto;
-  }
-  .channel-hero::after {
-    position: absolute;
   }
 }
 .channel-hero+* { margin-top: 0 !important; }
@@ -1482,8 +1487,7 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 
 /* LQIP thumbnails - soft gradient placeholder behind lazy images */
 .thumb-wrap, .video-card .thumb-wrap { background: linear-gradient(120deg, rgba(var(--brand-rgb),0.06), rgba(var(--brand-lilac-rgb),0.06), rgba(var(--brand-rgb),0.06)); background-size: 200% 200%; animation: lqip-shimmer 2s ease-in-out infinite; }
-.video-card img { opacity: 0; transition: opacity 0.25s ease-in; }
-.video-card img.loaded { opacity: 1; }
+.video-card img { opacity: 1; transition: opacity 0.25s ease-in; }
 @keyframes lqip-shimmer { 0%, 100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
 
 /* Milestone badge on video cards */

@@ -74,18 +74,20 @@ def next_threshold(current, round_nums):
 def weighted_rate(dates, values):
     """Per-day growth from the whole series, decay-weighted toward recent.
 
-    Returns (slope_per_day, confidence) or (None, 0) if not significant.
+    Returns (growth_per_day, confidence) or (None, 0) if not significant.
     Values are cumulative; we fit against the number of days from the latest
-    point so older points carry exponentially less weight.
+    point so older points carry exponentially less weight. The regression is
+    done in "days before latest" so the slope is negative (values rise toward
+    now); we return the positive growth rate.
     """
     n = len(dates)
     if n < 2:
         return None, 0.0
     base = dates[-1]
-    xs = [(base - dates[i]).days for i in range(n)]  # 0 = latest, grows negative
+    xs = [(base - dates[i]).days for i in range(n)]  # 0 = latest, larger = older
     ys = [values[i] for i in range(n)]
 
-    weights = [math.exp(x / NEWTON_DECAY_DAYS) for x in xs]  # exp(-|x|/decay)
+    weights = [math.exp(-x / NEWTON_DECAY_DAYS) for x in xs]  # recent = high weight
 
     wsum = sum(weights)
     if wsum <= 0:
@@ -98,7 +100,10 @@ def weighted_rate(dates, values):
     slope = sum(w * (x - xbar) * (y - ybar) for w, x, y in zip(weights, xs, ys, strict=True)) / denom
     if not math.isfinite(slope):
         return None, 0.0
-    return slope, min(1.0, wsum / max(1, n))
+    growth = -slope  # as days-since-now decrease, value increases
+    if growth <= 0:
+        return None, 0.0
+    return growth, min(1.0, wsum / max(1, n))
 
 
 def eta_date(current, target, rate):
@@ -142,11 +147,12 @@ def main():
     meta = read_json("site_meta.json") or {}
     out = {}
     for key, (field, rounds) in spec.items():
+        hist_field = key  # history stores metric under its key (subs, views, comments, videos)
         cur = meta.get(field)
+        _dates, _values = series(hist_field)
         if cur is None:
-            dates, values = series(field)
-            cur = values[-1] if values else 0
-        dates, values = series(field)
+            cur = _values[-1] if _values else 0
+        dates, values = series(hist_field)
         nxt = next_threshold(int(cur or 0), rounds)
         rate, conf = weighted_rate(dates, values) if len(dates) >= 2 else (None, 0.0)
         entry = {"current": int(cur or 0), "next": nxt, "rate": None, "eta": None}

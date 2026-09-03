@@ -57,6 +57,13 @@ def _series_tags(video):
     return tags
 
 
+def slugify(name):
+    """Match Jekyll/Liquid's default slugify output."""
+    import re
+
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
 def _iso_duration(seconds):
     """ISO-8601 duration for schema.org, e.g. 3661 -> PT1H1M1S."""
     if not seconds:
@@ -130,6 +137,15 @@ def generate_video_posts(videos, label, channel_url):
         tags = _series_tags(v)
         if tags:
             frontmatter["tags"] = tags
+        # Record the canonical game/series so the post layout can link to
+        # the right /series/<slug>/ and /games/<slug>/ pages.
+        _series = v.get("series") or {}
+        if _series.get("game"):
+            frontmatter["game"] = _series["game"]
+            frontmatter["game_slug"] = slugify(_series["game"])
+        if _series.get("series_name"):
+            frontmatter["series_name"] = _series["series_name"]
+            frontmatter["series_slug"] = slugify(_series["series_name"])
         # Branded OG card takes precedence; it is generated into
         # /assets/img/og/<vid>.jpg before this script runs in CI.
         og_card = f"/assets/img/og/{vid}.jpg"

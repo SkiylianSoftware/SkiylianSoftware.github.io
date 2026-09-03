@@ -29,6 +29,15 @@ layout: default
     </div>
   </div>
 
+  {% if page.game %}
+  <div class="post-badges">
+    <a href="/games/{{ page.game_slug | default: '' | url_encode }}/" class="btn btn-outline-primary tag-btn"><i class="fab fa-steam"></i> {{ page.game }}</a>
+    {% if page.series_name %}
+    <a href="/series/{{ page.series_slug | default: '' | url_encode }}/" class="btn btn-outline-primary tag-btn">{{ page.series_name }}</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
   <div class="post-content">
     {{ content }}
   </div>
@@ -46,4 +55,5 @@ layout: default
 .video-featured-img { width: 100%; max-width: 640px; border-radius: 8px; margin: 0 0 1rem; aspect-ratio: 16/9; object-fit: cover; border: 1px solid rgba(45,212,191,0.12); }
 .post-tags { margin-top: 1.5rem; }
 .tag-btn { margin: 0.2rem; font-size: 0.8rem; }
+.post-badges { margin-bottom: 1rem; }
 </style>

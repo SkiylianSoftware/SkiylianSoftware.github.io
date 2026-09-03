@@ -12,58 +12,29 @@ group: media
 {% assign week_from_now = now_epoch | plus: 604800 %}
 
 <div id="live-status" class="live-section">
-  {% if site.data.livestream.platform == "twitch" %}
-  <div class="live-embed">
-    <div class="live-badge">LIVE</div>
-    <h2>Live on Twitch</h2>
-    <iframe
-      src="https://player.twitch.tv/?channel=skiylia&parent={{ site.url | remove: 'https://' | remove: 'http://' | default: 'localhost' }}"
-      height="480" width="100%" allowfullscreen></iframe>
-    <p class="live-title">{{ site.data.livestream.title }}</p>
-    <a href="https://live.skiylia.dev" class="btn btn-primary" target="_blank">Watch on Twitch</a>
-  </div>
-  {% elsif site.data.livestream.platform == "youtube" %}
-  <div class="live-embed">
-    <div class="live-badge">LIVE</div>
-    <h2>Live on YouTube</h2>
-    <iframe width="100%" height="480" src="https://www.youtube.com/embed/{{ site.data.livestream.video_id }}"
-      frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    <p class="live-title">{{ site.data.livestream.title }}</p>
-    <a href="https://watch.skiylia.dev" class="btn btn-primary" target="_blank">Watch on YouTube</a>
-  </div>
-  {% else %}
-  <div class="offline-schedule">
-    <span class="offline-badge"><i class="fas fa-circle"></i> Currently Offline</span>
-    <div class="offline-schedule-icon"><i class="fas fa-calendar-alt"></i></div>
-    <h2>Upcoming Streams</h2>
-    {% if twitch_sched and twitch_sched.size > 0 %}
-    {% assign shown = 0 %}
-    <div class="offline-schedule-list">
-      {% for s in twitch_sched limit: 10 %}
-      {% assign s_epoch = s.start_time | date: "%s" | plus: 0 %}
-      {% if s_epoch > now_epoch and s_epoch < week_from_now %}
-      {% assign shown = shown | plus: 1 %}
-      {% assign start = s.start_time | date: "%A" %}
-      <div class="schedule-item">
-        <div class="schedule-row">
-          <span class="schedule-day">{{ start }}</span>
-          <span class="schedule-time"><time class="schedule-utc" datetime="{{ s.start_time }}">{{ s.start_time | date: "%H:%M" }}</time></span>
+        <div id="offline-panel" class="offline-panel">
+            <div class="offline-icon"><i class="fas fa-circle"></i></div>
+            <div class="offline-text">
+                <h2>Currently Offline</h2>
+                <p>Not streaming right now.</p>
+                <p>Browse <a href="/videos" class="btn">videos</a> or check <a href="/streams" class="btn">past
+                        VODs</a></p>
+            </div>
         </div>
-        <span class="schedule-type">{{ s.category | default: s.title | truncate: 50 }}</span>
-      </div>
-      {% endif %}
-      {% endfor %}
-      {% if shown == 0 %}
-      <p class="schedule-none">No streams scheduled this week.</p>
-      {% endif %}
+        <div id="live-embed" class="live-embed" style="display: none;">
+            <div class="live-badge">LIVE</div>
+            <div class="live-platform-tabs">
+                <button class="live-tab active" data-platform="twitch" onclick="switchLivePlatform('twitch')">Twitch</button>
+                <button class="live-tab" data-platform="youtube" onclick="switchLivePlatform('youtube')">YouTube</button>
+            </div>
+            <div id="twitch-player-container"></div>
+            <div id="youtube-player-container" style="display: none;">
+                <iframe id="youtube-live-iframe" width="100%" height="480"
+                    src="https://www.youtube.com/embed/live_stream?channel=UC4s4eXHuzj7OxwJXgiZgAYw&autoplay=1"
+                    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+        </div>
     </div>
-    {% else %}
-    <p class="schedule-none">No upcoming streams scheduled.</p>
-    {% endif %}
-    <p class="offline-schedule-cta"><a href="https://live.skiylia.dev" class="btn" target="_blank">Visit Twitch Channel</a></p>
-  </div>
-  {% endif %}
-</div>
 
 {% if site.data.livestream.platform == "twitch" or site.data.livestream.platform == "youtube" %}
 {% if twitch_sched and twitch_sched.size > 0 %}

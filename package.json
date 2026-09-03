@@ -7,6 +7,6 @@
     "lint:fix": "eslint assets/js/ --fix"
   },
   "devDependencies": {
-    "eslint": "^9.0.0"
+    "eslint": "^10.9.1"
   }
 }

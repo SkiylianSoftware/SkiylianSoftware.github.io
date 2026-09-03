@@ -130,7 +130,12 @@ def generate_video_posts(videos, label, channel_url):
         tags = _series_tags(v)
         if tags:
             frontmatter["tags"] = tags
-        if v.get("thumbnail"):
+        # Branded OG card takes precedence; it is generated into
+        # /assets/img/og/<vid>.jpg before this script runs in CI.
+        og_card = f"/assets/img/og/{vid}.jpg"
+        if os.path.exists(og_card[1:]):
+            frontmatter["image"] = og_card
+        elif v.get("thumbnail"):
             frontmatter["image"] = v["thumbnail"]
         if v.get("duration_seconds"):
             frontmatter["duration_seconds"] = v["duration_seconds"]

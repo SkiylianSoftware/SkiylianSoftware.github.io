@@ -1017,6 +1017,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                     "series": set(),
                     "series_data": {},
                     "original_names": [game],
+                    "active_years": set(),
                 }
             g = games[game]
             g["episode_count"] += 1
@@ -1029,6 +1030,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                     g["first_video"] = published
                 if g["latest_video"] is None or published > g["latest_video"]:
                     g["latest_video"] = published
+                g["active_years"].add(published[:4])
             series_name = s.get("series_name", "")
             g["series"].add(series_name)
             original_name = s["game"]
@@ -1117,6 +1119,9 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
         g["series"] = sorted(g["series"])
         for _sname, sd in g.get("series_data", {}).items():
             sd["active_years"] = format_years(sd["active_years"])
+        # Game-level activity: sorted list of years for the activity bars
+        ay = sorted(int(x) for x in g.get("active_years", set()))
+        g["active_years"] = [str(x) for x in ay]
         latest = g.get("latest_video")
         if latest:
             try:

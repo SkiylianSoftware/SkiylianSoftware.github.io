@@ -39,6 +39,8 @@ _data/*.json
 !_data/pc_parts.json
 # Playlist covers (downloaded per CI run)
 assets/img/playlists/
+# Branded OG share cards (generated per CI run)
+assets/img/og/
 # Posts (generated for RSS feed)
 _posts/
 # Archive pages (generated for series/game landing pages)

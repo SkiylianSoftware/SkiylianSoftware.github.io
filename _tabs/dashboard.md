@@ -92,6 +92,56 @@ group: stats
   </span>
 </div>
 <h2 class="stats-subtitle">Overview</h2>
+{% if hist and hist.size > 1 %}
+{% assign next_milestones = "" | split: "," %}
+{% assign current_subs = meta.subscriber_count | default: 0 | plus: 0 %}
+{% assign subs_goals = "81,243,729" | split: "," %}
+{% for g in subs_goals %}
+  {% assign goal = g | plus: 0 %}
+  {% if goal > current_subs and m_subs_d > 0 %}
+    {% assign months_left = goal | minus: current_subs | divided_by: m_subs_d %}
+    {% assign eta_days = months_left | times: 30 %}
+    {% if eta_days > 0 %}
+      {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+      {% assign s_offset = eta_days | times: 86400 %}
+      {% assign eta_date_epoch = now_epoch | plus: s_offset %}
+      {% capture ms_item %}
+      <div class="stat-card">
+        <span class="stat-value">{{ goal }}</span>
+        <span class="stat-label">Next milestone (subs) ~{{ eta_date_epoch | date: "%b %Y" }}</span>
+      </div>
+      {% endcapture %}
+      {% assign next_milestones = next_milestones | push: ms_item %}
+      {% break %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% assign views_goal = 20000 %}
+{% assign current_views = meta.view_count | default: 0 | plus: 0 %}
+{% if views_goal > current_views %}
+  {% assign views_rate = m_views_d | divided_by: 30 %}
+  {% if views_rate > 0 %}
+    {% assign v_eta_days = views_goal | minus: current_views | divided_by: views_rate %}
+    {% if v_eta_days > 0 %}
+      {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+      {% assign v_offset = v_eta_days | times: 86400 %}
+      {% assign v_eta_epoch = now_epoch | plus: v_offset %}
+      {% capture views_item %}
+      <div class="stat-card accent-purple">
+        <span class="stat-value">{{ views_goal }}</span>
+        <span class="stat-label">Next views milestone ~{{ v_eta_epoch | date: "%b %Y" }}</span>
+      </div>
+      {% endcapture %}
+      {% assign next_milestones = next_milestones | push: views_item %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% if next_milestones.size > 0 %}
+<div class="stats-grid">
+  {% for m in next_milestones %}{{ m }}{% endfor %}
+</div>
+{% endif %}
+{% endif %}
 {% assign yt_subs = meta.subscriber_count | default: 0 %}
 {% assign vods_subs = meta.vods_subscriber_count | default: 0 %}
 {% assign twitch_followers = twitch.follower_count | default: 0 %}

@@ -122,7 +122,11 @@ layout: default
         </div>
     </div>
     {% endif %}
+
+    {% include on-this-day.html %}
 </div>
+
+{% include ternary-age.html %}
 
 {% if site.data.youtube_main.videos %}
 <h2 class="section-title">Latest Videos</h2>

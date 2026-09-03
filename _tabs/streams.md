@@ -96,6 +96,31 @@ group: media
 
 <div class="section-break"></div>
 
+{% assign clips = site.data.twitch_clips.clips %}
+{% if clips.size > 0 %}
+<h2 class="section-title">Recent Clips</h2>
+<div class="clips-grid">
+  {% for clip in clips limit: 12 %}
+  <div class="clip-card" onclick="openClip(this)" data-clip-id="{{ clip.id }}" data-title="{{ clip.title | escape }}"
+       data-views="{{ clip.view_count }}" data-duration="{{ clip.duration_seconds }}"
+       data-game="{{ clip.game_name }}" data-created="{{ clip.created_at }}">
+    <div class="thumb-wrap">
+      <img src="{{ clip.thumbnail }}" alt="{{ clip.title }}" loading="lazy">
+      <div class="play-overlay"><i class="fas fa-play"></i></div>
+      {% if clip.duration_seconds > 0 %}<span class="duration-badge">{{ clip.duration_seconds }}s</span>{% endif %}
+    </div>
+    <div class="card-body">
+      <h3>{{ clip.title }}</h3>
+      <div class="meta-row">
+        {% if clip.view_count %}<span class="views">{{ clip.view_count }} views</span>{% endif %}
+        {% if clip.game_name %}<span class="clips-game">{{ clip.game_name }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <h2 class="section-title">Stream Archives</h2>
 
 {% assign vods = "" | split: "," %}

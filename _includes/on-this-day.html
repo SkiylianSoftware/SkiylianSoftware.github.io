@@ -1,0 +1,40 @@
+<!-- "On this day" in channel history, from milestone + video data -->
+{% assign today_mmdd = site.time | date: "%m-%d" %}
+{% assign today_year = site.time | date: "%Y" %}
+{% assign otm_items = "" | split: "," %}
+{% assign ms_on_this_day = "" | split: "," %}
+{% assign ms_reached = site.data.milestones.reached %}
+{% if ms_reached %}
+{% for pair in ms_reached %}
+  {% assign mk = pair[0] %}
+  {% assign md = pair[1] %}
+  {% assign year = md | truncate: 4, "" %}
+  {% assign mmdd = md | date: "%m-%d" %}
+  {% if mmdd == today_mmdd and year != today_year %}
+    {% assign ml = site.data.milestones.links[mk] %}
+    {% assign disp = ml.msg | default: ml.text | default: mk %}
+    {% assign otm_items = otm_items | push: disp %}
+    {% assign ms_on_this_day = ms_on_this_day | push: year %}
+  {% endif %}
+{% endfor %}
+{% endif %}
+{% assign todays_videos = "" | split: "," %}
+{% for v in site.data.youtube_main.videos %}
+  {% assign vmd = v.published | date: "%m-%d" %}
+  {% if vmd == today_mmdd %}
+    {% assign todays_videos = todays_videos | push: v.title %}
+  {% endif %}
+{% endfor %}
+{% if otm_items.size > 0 or todays_videos.size > 0 %}
+<div class="widget-card otm-widget">
+  <h3 class="widget-title"><i class="fas fa-seedling"></i> On This Day</h3>
+  <div class="widget-body">
+    {% for item in otm_items %}
+    <div class="otm-item"><span class="otm-year" data-otm-year>{{ ms_on_this_day[forloop.index0] }}</span> {{ item }}</div>
+    {% endfor %}
+    {% for v in todays_videos %}
+    <div class="otm-item"><span class="otm-year">{{ site.time | date: "%Y" }}</span> {{ v }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

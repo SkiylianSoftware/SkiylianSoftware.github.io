@@ -171,6 +171,53 @@
     wrap.innerHTML = '<iframe width="100%" height="100%" src="' + src + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
   }
 
+  window.openClip = function(el) {
+    var cid = el.getAttribute('data-clip-id');
+    if (!cid) return;
+    _openEl = null; // clips aren't in the [data-video-id] series set
+    _lastFocused = document.activeElement;
+
+    var wrap = document.getElementById('player-wrap');
+    if (wrap) {
+      wrap.innerHTML = '<iframe width="100%" height="100%" src="https://clips.twitch.tv/embed?clip=' + cid + '&parent=' + window.location.hostname + '&autoplay=true" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+    }
+
+    var title = el.getAttribute('data-title') || '';
+    var titleNode = document.getElementById('modal-title');
+    if (titleNode) titleNode.textContent = title;
+
+    var link = document.getElementById('modal-link');
+    if (link) {
+      link.href = 'https://clips.twitch.tv/' + cid;
+      link.textContent = 'Watch on Twitch';
+    }
+
+    var metaBox = document.getElementById('modal-meta');
+    if (metaBox) {
+      var parts = [];
+      var views = parseInt(el.getAttribute('data-views'), 10) || 0;
+      if (views > 0) parts.push('<span class="meta-views">' + Number(views).toLocaleString() + ' views</span>');
+      var game = el.getAttribute('data-game');
+      if (game) parts.push('<span class="meta-views">' + escapeHtml(game) + '</span>');
+      metaBox.innerHTML = parts.join(' &middot; ');
+      metaBox.style.display = parts.length ? '' : 'none';
+    }
+
+    ['modal-description', 'modal-chapters', 'modal-next', 'modal-series-more'].forEach(function(sel) {
+      var box = document.getElementById(sel);
+      if (box) { box.innerHTML = ''; box.style.display = 'none'; }
+    });
+    var seriesBox = document.getElementById('modal-series-link');
+    if (seriesBox) { seriesBox.innerHTML = ''; seriesBox.style.display = 'none'; }
+
+    var modal = document.getElementById('video-modal');
+    if (modal) {
+      modal.classList.add('open');
+      var close = modal.querySelector('.modal-close');
+      if (close) close.focus();
+    }
+  };
+
   window.openPlayer = function(el) {
     _openEl = el;
     var id = el.getAttribute('data-video-id');

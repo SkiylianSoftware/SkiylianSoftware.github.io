@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -106,6 +106,41 @@ def fetch_schedule(user_id, token):
             }
         )
     return schedule
+
+
+def fetch_clips(user_id, token, days=30, limit=12):
+    """Fetch recent highlight clips from the Twitch clips API."""
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=days)
+    params = {
+        "broadcaster_id": user_id,
+        "started_at": start.isoformat(),
+        "ended_at": end.isoformat(),
+        "first": limit,
+    }
+    resp = requests.get(
+        f"{API_URL}/clips",
+        headers={"Client-ID": TWITCH_CLIENT_ID, "Authorization": f"Bearer {token}"},
+        params=params,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    clips = resp.json().get("data", [])
+    out = []
+    for c in clips:
+        out.append(
+            {
+                "id": c.get("id", ""),
+                "title": c.get("title", ""),
+                "url": c.get("url", ""),
+                "thumbnail": c.get("thumbnail_url", ""),
+                "view_count": c.get("view_count", 0),
+                "created_at": c.get("created_at", ""),
+                "duration_seconds": int(c.get("duration", 0) or 0),
+                "game_name": c.get("game_name", ""),
+            }
+        )
+    return out
 
 
 def fetch_vods(user_id, token):
@@ -236,6 +271,19 @@ def main():
         print(f"Twitch VODs: {len(vods)} past broadcasts (after YouTube dedupe)")
     except Exception as e:
         print(f"Could not fetch Twitch VODs: {e}", file=sys.stderr)
+
+    print("Fetching Twitch clips...")
+    try:
+        clips = fetch_clips(user_id, token)
+        payload = {
+            "clips": clips,
+            "_schema_version": 1,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+        }
+        save("twitch_clips.json", payload)
+        print(f"Twitch clips: {len(clips)} recent highlights")
+    except Exception as e:
+        print(f"Could not fetch Twitch clips: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

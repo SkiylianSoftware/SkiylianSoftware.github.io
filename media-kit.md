@@ -92,6 +92,16 @@ permalink: /partners/media-kit/
     <p class="logos-placeholder">When partners are on board, their logos will appear here.</p>
   </div>
 
+  <div class="mk-section">
+    <h2>Share Card Samples</h2>
+    <p>Branded 1280x720 Open Graph cards are auto-generated for every upload; ask for the raw files and I'll send them over.</p>
+    <div class="mk-cards">
+      {% for v in videos limit: 3 %}
+      <img src="/assets/img/og/{{ v.video_id }}.jpg" alt="{{ v.title }}" loading="lazy">
+      {% endfor %}
+    </div>
+  </div>
+
   <div class="mk-footer">
     <p>Interested in working together?</p>
     <a href="mailto:skiyliansoftware@gmail.com?subject=Partnership%20Inquiry" class="btn btn-primary">skiyliansoftware@gmail.com</a>
@@ -212,6 +222,8 @@ permalink: /partners/media-kit/
   margin: 0;
   font-style: italic;
 }
+.mk-cards { display: flex; flex-direction: column; gap: 0.75rem; margin: 1rem 0; }
+.mk-cards img { width: 100%; border-radius: 8px; border: 1px solid rgba(45, 212, 191, 0.15); }
 .mk-footer {
   margin: 2rem 0;
   padding: 1.5rem;

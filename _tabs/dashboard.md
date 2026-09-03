@@ -9,6 +9,8 @@ group: stats
 
 {% include stale-banner.html %}
 
+<p class="stats-freshness"><a href="/history/">Full history &amp; milestones</a> &middot; <a href="/year/">Year in Review</a></p>
+
 {% assign meta = site.data.site_meta %}
 {% assign videos = site.data.youtube_main.videos %}
 {% assign vods_list = site.data.youtube_vods.videos %}

@@ -32,9 +32,11 @@ group: media
     {% assign img_url = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/" | append: steam_appid | append: "/header.jpg" %}
   {% endif %}
   {% assign card_link = link.steam | default: link.website %}
+  {% assign gslug = gname | slugify %}
+  {% assign internal_page = "/games/" | append: gslug | append: "/" %}
   {% assign ac = link.color | default: g.accent_color | default: "#2dd4bf" %}
   <div class="game-card" style="--game-accent: {{ ac }}">
-    {% if card_link %}<a href="{{ card_link }}" class="game-card-stretched-link" target="_blank" rel="noopener"></a>{% endif %}
+    {% if internal_page %}<a href="{{ internal_page }}" class="game-card-stretched-link"></a>{% elsif card_link %}<a href="{{ card_link }}" class="game-card-stretched-link" target="_blank" rel="noopener"></a>{% endif %}
     {% if img_url %}
     <div class="game-card-img" style="background-image: url('{{ img_url }}')"></div>
     {% endif %}
@@ -94,7 +96,8 @@ group: media
           {% break %}
           {% endif %}
         {% endfor %}
-        <a href="/videos#{{ sname | url_encode }}" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
+        {% assign sslug = sname | slugify %}
+        <a href="/series/{{ sslug }}/" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
         {% endfor %}
       </div>
     </div>

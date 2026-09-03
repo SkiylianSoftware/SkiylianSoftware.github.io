@@ -181,7 +181,29 @@ def _modal_include():
     return "{% include video-modal.html %}"
 
 
-def write_series_page(sname, svideos, game_name, playlists):
+def game_art_url(gname, game_links):
+    """Resolve a game's artwork, mirroring the /games tab logic:
+    game_links.yml 'icon' wins, else Steam header jpg from the app id."""
+    links = (game_links or {}).get(gname) or {}
+    icon = links.get("icon")
+    if icon:
+        return icon
+    steam = links.get("steam") or ""
+    parts = steam.split("/")
+    if len(parts) >= 6 and parts[4]:
+        return f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{parts[4]}/header.jpg"
+    return ""
+
+
+def playlist_cover_for(sname, playlists):
+    """Find a downloaded playlist cover for this series (assets/img/playlists/)."""
+    for pl in playlists:
+        if sname in pl.get("title", "") or (pl.get("title") or "") in sname:
+            return pl.get("thumbnail") or pl.get("cover") or ""
+    return ""
+
+
+def write_series_page(sname, svideos, game_name, playlists, game_links):
     sslug = slugify(sname)
     frontmatter = {
         "layout": "page",
@@ -192,6 +214,14 @@ def write_series_page(sname, svideos, game_name, playlists):
     }
     if game_name:
         frontmatter["game"] = game_name
+    # Art comes from the matching playlist cover when we have one, else the game art
+    cover = playlist_cover_for(sname, playlists)
+    if cover:
+        frontmatter["game_art"] = cover
+    elif game_name:
+        art = game_art_url(game_name, game_links)
+        if art:
+            frontmatter["game_art"] = art
 
     body = ["{% include game-art.html %}", ""]
 
@@ -243,6 +273,9 @@ def write_game_page(gname, g, games_data, playlists, game_links):
         "group": "media",
     }
     frontmatter["game"] = gname
+    art = game_art_url(gname, game_links)
+    if art:
+        frontmatter["game_art"] = art
 
     body = ["{% include game-art.html %}", ""]
 
@@ -423,7 +456,7 @@ def main():
 
     print("Generating series pages...")
     for sname in sorted(series_parents, key=lambda n: (series_parents[n] or "", n)):
-        write_series_page(sname, series_videos[sname], series_parents[sname], playlists)
+        write_series_page(sname, series_videos[sname], series_parents[sname], playlists, game_links)
 
     print("Generating game pages...")
     for gname in sorted(games_data):

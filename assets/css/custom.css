@@ -1084,20 +1084,14 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
   background-position: center 30%; background-color: #0a0a14;
   display: flex; align-items: flex-end; margin-bottom: 1.5rem;
   border-radius: 10px; overflow: hidden; aspect-ratio: 3.3 / 1;
+  /* Fade the bottom edge of the artwork into the page background */
+  -webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
 }
 .channel-hero::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(10, 10, 20, 0.12) 0%,
-    transparent 25%,
-    transparent 55%,
-    rgba(10, 10, 20, 0.45) 75%,
-    rgba(10, 10, 20, 0.85) 92%,
-    rgba(10, 10, 20, 0.98) 100%
-  );
   pointer-events: none;
 }
 .channel-hero:not([style*="background-image"]) { min-height: 0; margin: 0; padding: 0; border-radius: 0; }
@@ -1691,3 +1685,9 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 .history-toolbar { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 1rem; flex-wrap: wrap; }
 .history-toolbar-label { font-size: 0.85rem; opacity: 0.6; margin-right: auto; }
 .history-toolbar .tag-btn { font-size: 0.78rem; }
+
+/* Game/series art banner also fades at the bottom edge */
+.game-hero {
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+}

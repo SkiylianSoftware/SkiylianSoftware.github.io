@@ -272,8 +272,18 @@ def main():
         return
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    start = "2010-01-01"
+    # Start from the earliest of: existing history, first video publish,
+    # first analytics entry, or a sensible default (channel created ~2020).
     history = load_history()
+    start = "2020-01-01"
+    if history:
+        try:
+            earliest_hist = min(e["date"] for e in history if e.get("date"))
+            if earliest_hist < start:
+                start = earliest_hist
+        except (ValueError, KeyError):
+            pass
+    print(f"Fetching analytics from {start} to {today}")
     print(f"Loaded existing history: {len(history)} entries")
     total_new = 0
 

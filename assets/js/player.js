@@ -68,7 +68,6 @@
     var published = el.getAttribute('data-published');
     var views = parseInt(el.getAttribute('data-views')) || 0;
     var duration = parseInt(el.getAttribute('data-duration')) || 0;
-    var views2 = views;
     if (published) parts.push('<span class="meta-date"><time datetime="' + published + '">' + new Date(published).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '</time></span>');
     if (views > 0) parts.push('<span class="meta-views">' + Number(views).toLocaleString() + ' views</span>');
     if (duration > 0) parts.push('<span class="meta-duration">' + formattedDuration(duration) + '</span>');

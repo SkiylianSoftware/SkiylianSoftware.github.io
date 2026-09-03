@@ -40,6 +40,9 @@ group: stats
   {% if history.last.youtube_main.videos > 0 %}
   <button class="chart-btn" onclick="toggleMetric('uploads')" id="btn-uploads">Uploads/Month</button>
   {% endif %}
+  {% if history.last.youtube_main.likes > 0 or history.last.youtube_main.comments > 0 %}
+  <button class="chart-btn" onclick="toggleMetric('engagement')" id="btn-engagement">Engagement</button>
+  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>

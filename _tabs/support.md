@@ -77,6 +77,23 @@ permalink: /support/
   {% endif %}
 </div>
 
+{% if site.data.fourthwall.products.size > 0 %}
+<div class="support-products">
+  <h2>Merchandise</h2>
+  <div class="product-grid">
+    {% for p in site.data.fourthwall.products %}
+    <a href="{{ p.url }}" target="_blank" rel="noopener" class="product-card btn">
+      {% if p.thumbnail %}<div class="product-thumb" style="background-image: url('{{ p.thumbnail }}')"></div>{% endif %}
+      <div class="product-info">
+        <span class="product-name">{{ p.name }}</span>
+        {% if p.price %}<span class="product-price">{{ p.price }} {{ p.currency }}</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 <div class="support-free">
   <h2>Free ways to support</h2>
   <div class="free-grid">

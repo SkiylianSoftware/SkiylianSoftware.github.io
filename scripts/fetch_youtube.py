@@ -825,7 +825,7 @@ def detect_milestones(
 
     active = [v for v in current.values() if v.get("priority", 0) > 0]
     best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}
-    save("milestones.json", {"current": best, "reached": prev_reached})
+    save("milestones.json", {"current": best, "reached": prev_reached, "_schema_version": 1})
 
 
 def compute_series_recency(videos):
@@ -1157,12 +1157,16 @@ def main():
     videos = fetch_uploads(UPLOADS_PLAYLIST_ID, "main channel uploads")
     if videos is not None:
         series_recency = compute_series_recency(videos)
-        save("youtube_main.json", {"videos": videos, "series_recency": series_recency})
+        d = {"videos": videos, "series_recency": series_recency, "_schema_version": 1}
+        save("youtube_main.json", d)
 
     print("Fetching YouTube VODs...")
     vods = fetch_uploads(VODS_PLAYLIST_ID, "VODs channel uploads")
     if vods is not None:
-        save("youtube_vods.json", {"videos": vods})
+        for v in vods:
+            v["platform"] = "youtube"
+        d = {"videos": vods, "_schema_version": 1}
+        save("youtube_vods.json", d)
 
     all_videos = (videos or []) + (vods or [])
     game_stats = None
@@ -1170,6 +1174,7 @@ def main():
         game_stats = compute_game_stats(
             all_videos, alias_map=ALIAS_MAP, content_types=CONTENT_TYPES, valid_games=VALID_GAMES
         )
+        game_stats["_schema_version"] = 1
         save("games.json", game_stats)
 
     print("Fetching YouTube playlists...")
@@ -1177,7 +1182,8 @@ def main():
     if playlists is not None:
         print("Enriching playlist stats...")
         playlists = enrich_playlist_stats(playlists)
-        save("playlists.json", {"playlists": playlists})
+        d = {"playlists": playlists, "_schema_version": 1}
+        save("playlists.json", d)
 
     print("Fetching livestream status...")
     live = fetch_livestream()
@@ -1195,6 +1201,7 @@ def main():
         info["vods_view_count"] = vods_info.get("view_count", 0)
         info["vods_published_at"] = vods_info.get("published_at", "")
 
+    info["_schema_version"] = 1
     save("site_meta.json", info)
     update_config_avatar(info.get("avatar_url", ""))
 

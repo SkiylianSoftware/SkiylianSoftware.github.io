@@ -4,9 +4,23 @@ icon: "fa-solid fa-user"
 title: About
 order: 1
 permalink: /about/
+jsonld:
+  "@context": https://schema.org
+  "@type": Person
+  name: Skye
+  alternateName: skiylia
+  url: https://skiylia.dev
+  sameAs:
+    - https://www.youtube.com/@skiylia
+    - https://www.twitch.tv/skiylia
+    - https://github.com/SkiylianSoftware
+    - https://ko-fi.com/skiylia
+  image: https://yt3.ggpht.com/BtNidDhSb_vNcUXQALblvcBNOdYXF3iqI3Nj6m3nTaoVmunOum2B7aFXQACtuFt1f5YDFOGP5Q=s800-c-k-c0x00ffffff-no-rj
 ---
 
 {% include banner.html %}
+
+{% assign store = site.data.fourthwall %}
 
 {% if site.data.site_meta.description %}
   <p class="about-intro">{{ site.data.site_meta.description }}</p>

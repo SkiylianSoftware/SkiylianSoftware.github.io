@@ -1395,7 +1395,7 @@ def main():
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)
     sorted_reached = dict(sorted(new_reached.items(), key=sort_key, reverse=True))
-    result = {"current": current_list, "reached": sorted_reached}
+    result = {"current": current_list, "reached": sorted_reached, "_schema_version": 1}
     if milestone_links:
         result["links"] = milestone_links
     with open(MILESTONES_FILE, "w") as f:

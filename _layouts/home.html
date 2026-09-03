@@ -85,6 +85,17 @@ layout: default
             <p class="schedule-none">No streams scheduled this week.</p>
             {% endif %}
         </div>
+        {% assign next_stream = nil %}
+        {% for s in twitch_sched %}
+        {% assign s_epoch = s.start_time | date: "%s" | plus: 0 %}
+        {% if s_epoch > now_epoch and s_epoch < week_from_now %}
+        {% assign next_stream = s %}
+        {% break %}
+        {% endif %}
+        {% endfor %}
+        {% if next_stream %}
+        <p class="schedule-countdown">Next stream in <strong id="stream-countdown" data-countdown="{{ next_stream.start_time }}">...</strong></p>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -117,7 +128,15 @@ layout: default
     {% assign videos = site.data.youtube_main.videos %}
     {% for video in videos limit: 6 %}
     <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}"
-        onclick="openPlayer(this)">
+         data-published="{{ video.published | default: '' }}"
+         data-views="{{ video.view_count | default: 0 }}"
+         data-duration="{{ video.duration_seconds | default: 0 }}"
+         data-series="{% if video.series %}{{ video.series.series_name | escape }}{% endif %}"
+         data-series-slug="{% if video.series %}{{ video.series.series_name | slugify }}{% endif %}"
+         data-game="{% if video.series %}{{ video.series.game | escape }}{% endif %}"
+         data-game-slug="{% if video.series %}{{ video.series.game | slugify }}{% endif %}"
+         data-description="{{ video.description | escape }}"
+         onclick="openPlayer(this)">
         <div class="thumb-wrap">
             <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy">
             <div class="play-overlay"><i class="fas fa-play"></i></div>
@@ -154,7 +173,15 @@ layout: default
     {% assign vods = site.data.youtube_vods.videos %}
     {% for vod in vods limit: 3 %}
     <div class="video-card vod-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}"
-        onclick="openPlayer(this)">
+         data-published="{{ vod.published | default: '' }}"
+         data-views="{{ vod.view_count | default: 0 }}"
+         data-duration="{{ vod.duration_seconds | default: 0 }}"
+         data-series="{% if vod.series %}{{ vod.series.series_name | escape }}{% endif %}"
+         data-series-slug="{% if vod.series %}{{ vod.series.series_name | slugify }}{% endif %}"
+         data-game="{% if vod.series %}{{ vod.series.game | escape }}{% endif %}"
+         data-game-slug="{% if vod.series %}{{ vod.series.game | slugify }}{% endif %}"
+         data-description="{{ vod.description | escape }}"
+         onclick="openPlayer(this)">
         <div class="thumb-wrap">
             <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
             <div class="play-overlay"><i class="fas fa-play"></i></div>
@@ -207,8 +234,9 @@ layout: default
     {% assign lu_epoch = pl.last_updated | truncate: 4, "" | plus: 0 %}
     {% if lu_epoch > 2000 %}
     {% assign current_year = site.time | date: "%Y" | plus: 0 %}
+    {% assign prev_year = current_year | minus: 1 %}
     {% if lu_epoch == current_year %}{% assign recency = "recent" %}
-    {% elsif lu_epoch == current_year | minus: 1 %}{% assign recency = "recent" %}
+    {% elsif lu_epoch == prev_year %}{% assign recency = "recent" %}
     {% endif %}
     {% endif %}
     {% endif %}
@@ -257,401 +285,7 @@ layout: default
 <p class="text-center"><a href="/playlists" class="btn">View All Playlists</a></p>
 {% endif %}
 
-<div id="video-modal" class="modal" onclick="if(event.target==this)closePlayer()">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closePlayer()">&times;</button>
-        <div id="player-wrap"></div>
-        <p id="modal-title" class="modal-title"></p>
-        <a id="modal-link" href="#" target="_blank" class="btn">Watch on YouTube</a>
-    </div>
-</div>
+{% include video-modal.html %}
 
-<script>
-    function openPlayer(el) {
-        var id = el.getAttribute('data-video-id');
-        var title = el.getAttribute('data-title');
-        var wrap = document.getElementById('player-wrap');
-        wrap.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + id + '?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
-        document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-link').href = 'https://www.youtube.com/watch?v=' + id;
-        document.getElementById('video-modal').classList.add('open');
-    }
-    function closePlayer() {
-        document.getElementById('player-wrap').innerHTML = '';
-        document.getElementById('video-modal').classList.remove('open');
-    }
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePlayer(); });
 
-    (function() {
-        var track = document.getElementById('milestone-track');
-        if (!track) return;
-        var halfWidth = 0;
-        var items = track.children;
-        var half = Math.floor(items.length / 2);
-        for (var i = 0; i < half; i++) {
-            halfWidth += items[i].offsetWidth;
-        }
-        if (halfWidth > 0) {
-            var speed = 50;
-            var duration = Math.max(15, halfWidth / speed);
-            track.style.animationDuration = duration + 's';
-        }
-    })();
 
-    var scheduleTimes = document.querySelectorAll('.schedule-utc');
-    for (var i = 0; i < scheduleTimes.length; i++) {
-        var el = scheduleTimes[i];
-        var utc = el.getAttribute('datetime');
-        if (utc) {
-            var d = new Date(utc);
-            var utcH = d.getUTCHours().toString().padStart(2, '0');
-            var utcM = d.getUTCMinutes().toString().padStart(2, '0');
-            var locH = d.getHours().toString().padStart(2, '0');
-            var locM = d.getMinutes().toString().padStart(2, '0');
-            var tzParts = Intl.DateTimeFormat('en', { timeZoneName: 'short' }).formatToParts(d);
-            var locTz = '';
-            for (var j = 0; j < tzParts.length; j++) {
-                if (tzParts[j].type === 'timeZoneName') {
-                    locTz = ' ' + tzParts[j].value;
-                    break;
-                }
-            }
-            el.textContent = utcH + ':' + utcM + ' UTC (' + locH + ':' + locM + locTz + ')';
-        }
-    }
-</script>
-
-<style>
-    #topbar-wrapper {
-        background: var(--topbar-bg) !important;
-    }
-
-    @media (min-width: 1200px) {
-        #main-wrapper {
-            position: relative;
-        }
-
-.hero-stage {
-    min-height: calc((100vw - 260px) / 3.3 - 1.5rem - 48px);
-    display: flex; flex-direction: column;
-    justify-content: flex-start;
-  }
-
-        .live-section {
-            margin-top: auto;
-            margin-bottom: 0;
-        }
-
-        .channel-hero {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: -60px;
-            min-height: calc((100vw - 260px) / 3.3 + 60px);
-            margin: 0;
-            border-radius: 0;
-            background-position: center;
-            z-index: -1;
-            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-        }
-    }
-
-    @media (max-width: 767px) {
-        main {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-    }
-
-    .channel-hero+* {
-        margin-top: 0 !important;
-    }
-    }
-
-    @media (max-width: 767px) {
-        main {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-    }
-
-    .milestone-marquee {
-        overflow: hidden;
-        position: relative;
-        margin: 0;
-        padding: 0.5rem 0;
-        background: linear-gradient(90deg, rgba(45, 212, 191, 0.06), rgba(192, 132, 252, 0.06));
-        border-top: 1px solid rgba(45, 212, 191, 0.1);
-        border-bottom: 1px solid rgba(45, 212, 191, 0.1);
-        white-space: nowrap;
-    }
-
-    .milestone-track {
-        display: flex;
-        width: max-content;
-        animation: marquee-scroll 30s linear infinite;
-    }
-
-    @keyframes marquee-scroll {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-    }
-
-    .milestone-item {
-        padding: 0 2rem;
-        font-size: 0.85rem;
-        opacity: 0.85;
-        white-space: nowrap;
-    }
-
-    .hero-links {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin: 1.5rem auto;
-        max-width: 500px;
-    }
-
-    .hero-links .btn {
-        font-size: 0.85rem;
-        padding: 0.4rem 1rem;
-    }
-
-    .section-break {
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.2), transparent);
-        margin: 1.5rem 0;
-    }
-
-    .live-section {
-        margin: 2rem 0;
-        text-align: center;
-    }
-
-    .live-section .live-embed {
-        background: var(--card-bg);
-        border-radius: 12px;
-        padding: 1.5rem;
-        position: relative;
-    }
-
-    .live-badge {
-        position: absolute;
-        top: 0.5rem;
-        left: 0.5rem;
-        background: #ff0000;
-        color: #fff;
-        font-weight: 700;
-        font-size: 0.8rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 4px;
-        animation: pulse 2s infinite;
-        z-index: 1;
-    }
-
-    @keyframes pulse {
-        0% {
-            opacity: 1
-        }
-
-        50% {
-            opacity: 0.6
-        }
-
-        100% {
-            opacity: 1
-        }
-    }
-
-    .live-platform-tabs {
-        display: flex;
-        gap: 0;
-        margin-bottom: 1rem;
-        justify-content: center;
-    }
-
-    .live-tab {
-        padding: 0.5rem 1.5rem;
-        border: 1px solid rgba(45, 212, 191, 0.2);
-        background: transparent;
-        color: inherit;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: all 0.2s;
-    }
-
-    .live-tab:first-child {
-        border-radius: 8px 0 0 8px;
-    }
-
-    .live-tab:last-child {
-        border-radius: 0 8px 8px 0;
-    }
-
-    .live-tab.active {
-        background: rgba(45, 212, 191, 0.15);
-        border-color: rgba(45, 212, 191, 0.4);
-    }
-
-    .live-tab:hover {
-        background: rgba(45, 212, 191, 0.08);
-    }
-
-    .live-title {
-        margin: 0.75rem 0;
-        font-weight: 500;
-    }
-
-    .offline-panel {
-        margin: 2rem auto;
-        padding: 2rem;
-        border-radius: 12px;
-        background: var(--clr-card-bg);
-        border: 1px solid rgba(45, 212, 191, 0.08);
-        text-align: center;
-        max-width: 500px;
-    }
-
-    .offline-panel .offline-icon i {
-        font-size: 2rem;
-        color: #555577;
-        animation: offline-pulse 3s ease-in-out infinite;
-    }
-
-    @keyframes offline-pulse {
-
-        0%,
-        100% {
-            opacity: 0.4
-        }
-
-        50% {
-            opacity: 0.8
-        }
-    }
-
-    .offline-panel h2 {
-        font-size: 1.1rem;
-        margin: 0.5rem 0;
-    }
-
-    .offline-panel p {
-        font-size: 0.9rem;
-        opacity: 0.7;
-        margin: 0;
-    }
-
-    .offline-panel .btn {
-        font-size: 0.85rem;
-    }
-
-    .section-break {
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.2), transparent);
-        margin: 1.5rem 0;
-    }
-
-    .sidebar-widgets {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .widget-card {
-        flex: 1;
-        min-width: 200px;
-        background: var(--card-bg);
-        border: 1px solid rgba(45, 212, 191, 0.1);
-        border-radius: 10px;
-        padding: 1rem;
-    }
-
-    .widget-title {
-        font-size: 0.85rem;
-        margin: 0 0 0.75rem;
-        opacity: 0.8;
-        border-bottom: 1px solid rgba(45, 212, 191, 0.1);
-        padding-bottom: 0.4rem;
-    }
-
-    .widget-title i {
-        margin-right: 0.35rem;
-        color: #c084fc;
-    }
-
-    .widget-body {
-        font-size: 0.85rem;
-    }
-
-    .schedule-item {
-        margin-bottom: 0.6rem;
-    }
-
-    .schedule-row {
-        display: flex;
-        gap: 0.5rem;
-        align-items: baseline;
-    }
-
-    .schedule-day {
-        font-weight: 600;
-        color: #2dd4bf;
-        min-width: 4em;
-    }
-
-    .schedule-time {
-        opacity: 0.8;
-    }
-
-    .schedule-type {
-        display: block;
-        opacity: 0.6;
-        font-size: 0.8rem;
-        margin-top: 0.1rem;
-    }
-
-    .obsession-item {
-        margin-bottom: 0.5rem;
-    }
-
-    .obsession-item a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .obsession-item a:hover {
-        color: #2dd4bf;
-    }
-
-    .obsession-title {
-        display: block;
-        font-weight: 500;
-    }
-
-    .obsession-reason {
-        display: block;
-        font-size: 0.75rem;
-        opacity: 0.6;
-    }
-
-    .section-title {
-        margin: 2rem 0 0.5rem;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 0.4rem;
-        font-size: 1.1rem;
-    }
-
-    .schedule-none {
-        text-align: center;
-        opacity: 0.5;
-        font-size: 0.85rem;
-        margin: 0.5rem 0;
-    }
-
-    .text-center {
-        text-align: center;
-    }
-</style>

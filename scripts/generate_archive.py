@@ -1,0 +1,332 @@
+"""
+Generate Jekyll archive pages: one page per series and per game.
+
+Reads games.json, youtube_main.json, playlists.json, and game_links.yml from
+_data/ and writes static markdown pages under archive/ (series/ and games/).
+
+- Series pages live at archive/series/<slug>.md -> permalink /series/<slug>/
+- Game pages live at archive/games/<slug>.md -> permalink /games/<slug>/
+
+Missing games.json or youtube_main.json exits gracefully without writing
+anything. The whole archive/ directory is cleared before generation.
+"""
+
+import html
+import json
+import os
+import re
+import shutil
+from datetime import datetime
+
+import yaml
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(ROOT, "_data")
+ARCHIVE_DIR = os.path.join(ROOT, "archive")
+SERIES_DIR = os.path.join(ARCHIVE_DIR, "series")
+GAMES_DIR = os.path.join(ARCHIVE_DIR, "games")
+
+
+def slugify(name):
+    """Match Liquid's default slugify so links line up with videos.md data-slug attrs."""
+    return re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
+
+
+def esc(text):
+    return html.escape(str(text), quote=True)
+
+
+def read_json(filename):
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
+def read_yaml(filename):
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return yaml.safe_load(f) or {}
+
+
+def write_page(path, frontmatter, body):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write("---\n")
+        yaml.safe_dump(
+            frontmatter,
+            f,
+            allow_unicode=True,
+            sort_keys=False,
+            default_flow_style=False,
+            width=1000,
+        )
+        f.write("---\n\n")
+        f.write(body + "\n")
+    print(f"  {os.path.relpath(path, ROOT)}")
+
+
+def fmt_duration(seconds):
+    seconds = int(seconds or 0)
+    h, rem = divmod(seconds, 3600)
+    m, s = divmod(rem, 60)
+    if h:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m}:{s:02d}"
+
+
+def fmt_hours(seconds):
+    seconds = int(seconds or 0)
+    h, rem = divmod(seconds, 3600)
+    m = rem // 60
+    if h and m:
+        return f"{h}h {m}m"
+    if h:
+        return f"{h}h"
+    return f"{m}m"
+
+
+def fmt_date(published):
+    day = (published or "").strip()[:10]
+    if len(day) == 10:
+        try:
+            return datetime.strptime(day, "%Y-%m-%d").strftime("%d %b %Y")
+        except ValueError:
+            pass
+    return day
+
+
+def canonical_game(name, games_data, game_links):
+    """Map a video's game field (e.g. 'KSP', 'StationFlow') to the games.json key."""
+    if name in games_data:
+        return name
+    for gname, g in games_data.items():
+        aliases = set(g.get("original_names") or [])
+        aliases.update((game_links.get(gname) or {}).get("aliases") or [])
+        if name in aliases:
+            return gname
+    return None
+
+
+def episode_card(video):
+    vid = video.get("video_id", "")
+    title = video.get("title", "Untitled")
+    thumb = video.get("thumbnail", "")
+    views = int(video.get("view_count") or 0)
+    dur = int(video.get("duration_seconds") or 0)
+    date = fmt_date(video.get("published"))
+    series = video.get("series") or {}
+    ep = series.get("episode_number")
+
+    parts = [f'<a href="/videos#{vid}" class="video-card" style="color: inherit; text-decoration: none;">']
+    parts.append('<div class="thumb-wrap">')
+    if thumb:
+        onerror = f"this.onerror=null;this.src='https://i.ytimg.com/vi/{vid}/hqdefault.jpg'"
+        parts.append(f'<img src="{esc(thumb)}" alt="{esc(title)}" loading="lazy" onerror="{esc(onerror)}">')
+    parts.append('<div class="play-overlay"><i class="fas fa-play"></i></div>')
+    if dur:
+        parts.append(f'<span class="duration-badge">{fmt_duration(dur)}</span>')
+    parts.append("</div>")
+    parts.append('<div class="card-body">')
+    parts.append(f"<h3>{esc(title)}</h3>")
+    meta = []
+    if date:
+        meta.append(f'<span class="meta-date">{esc(date)}</span>')
+    if views:
+        meta.append(f'<span class="views">{views} views</span>')
+    if meta:
+        parts.append(f'<div class="meta-row">{" ".join(meta)}</div>')
+    if ep:
+        parts.append(f'<div class="series-badge">Episode {esc(ep)}</div>')
+    parts.append("</div></a>")
+    return "\n".join(parts)
+
+
+def playlist_links(sname, playlists):
+    matched = [pl for pl in playlists if sname in (pl.get("title") or "")]
+    lines = []
+    for pl in matched:
+        title = pl.get("title") or sname
+        url = pl.get("url") or ""
+        lines.append(f"[Watch the {esc(title)} playlist on YouTube]({esc(url)})")
+    return lines
+
+
+def write_series_page(sname, svideos, game_name, playlists):
+    sslug = slugify(sname)
+    frontmatter = {
+        "layout": "page",
+        "title": sname,
+        "permalink": f"/series/{sslug}/",
+        "group": "media",
+    }
+
+    body = []
+    if game_name:
+        gslug = slugify(game_name)
+        overview = f'Part of the <a href="/games/{gslug}/"><strong>{esc(game_name)}</strong></a> series.'
+        body.append(f'<p class="series-overview">{overview}</p>')
+        body.append("")
+
+    ep_count = len(svideos)
+    total_secs = sum(int(v.get("duration_seconds") or 0) for v in svideos)
+    body.append("## Stats")
+    body.append("")
+    body.append(f"- **Episodes:** {ep_count}")
+    body.append(f"- **Total watch time:** {fmt_hours(total_secs)}")
+    body.append("")
+
+    pl_links = playlist_links(sname, playlists)
+    if pl_links:
+        body.append("## Playlist")
+        body.append("")
+        body.extend(pl_links)
+        body.append("")
+
+    body.append("## Episodes")
+    body.append("")
+    if svideos:
+        body.append('<div class="video-grid">')
+        for v in svideos:
+            body.append(episode_card(v))
+        body.append("</div>")
+    else:
+        body.append("No episodes listed yet.")
+
+    write_page(os.path.join(SERIES_DIR, f"{sslug}.md"), frontmatter, "\n".join(body))
+
+
+def write_game_page(gname, g, games_data, playlists, game_links):
+    gslug = slugify(gname)
+    frontmatter = {
+        "layout": "page",
+        "title": gname,
+        "permalink": f"/games/{gslug}/",
+        "group": "media",
+    }
+
+    body = []
+    links = game_links.get(gname) or {}
+    link_html = []
+    if links.get("steam"):
+        link_html.append(
+            f'<a href="{escape_url(links["steam"])}" class="btn game-link-btn" target="_blank" rel="noopener">'
+            '<i class="fab fa-steam"></i> Steam</a>'
+        )
+    if links.get("website"):
+        link_html.append(
+            f'<a href="{escape_url(links["website"])}" class="btn game-link-btn" target="_blank" rel="noopener">'
+            '<i class="fas fa-globe"></i> Website</a>'
+        )
+    if link_html:
+        body.append(f'<div class="game-links">{"".join(link_html)}</div>')
+        body.append("")
+
+    ep_count = g.get("episode_count") or 0
+    total_secs = g.get("total_duration_seconds") or 0
+    total_views = g.get("total_views") or 0
+    body.append("## Stats")
+    body.append("")
+    body.append(f"- **Episodes:** {ep_count}")
+    body.append(f"- **Total watch time:** {fmt_hours(total_secs)}")
+    body.append(f"- **Total views:** {total_views}")
+    body.append("")
+
+    series_names = g.get("series") or []
+    series_data = g.get("series_data") or {}
+    if series_names:
+        body.append("## Series")
+        body.append("")
+        for sname in series_names:
+            sslug = slugify(sname)
+            years = (series_data.get(sname) or {}).get("active_years")
+            label = sname
+            if years:
+                label += f" ({years})"
+            body.append(f"- [{esc(label)}](/series/{sslug}/)")
+        body.append("")
+
+    body.append("[Back to all games](/games/)")
+
+    write_page(os.path.join(GAMES_DIR, f"{gslug}.md"), frontmatter, "\n".join(body))
+
+
+def escape_url(url):
+    # Keep URLs valid while still escaping quotes that would break the attribute.
+    return html.escape(str(url), quote=True)
+
+
+def main():
+    games = read_json("games.json")
+    if games is None:
+        print("games.json missing in _data/; skipping archive generation")
+        return
+    youtube = read_json("youtube_main.json")
+    if youtube is None:
+        print("youtube_main.json missing in _data/; skipping archive generation")
+        return
+
+    videos = youtube.get("videos") or []
+    playlists = (read_json("playlists.json") or {}).get("playlists") or []
+    game_links = read_yaml("game_links.yml")
+
+    games_data = games.get("games") or {}
+    non_game = games.get("non_game") or {}
+
+    series_parents = {}
+    for gname, g in games_data.items():
+        info = g.get("series_data") or {}
+        names = list(g.get("series") or []) + list(info.keys())
+        for sname in names:
+            series_parents.setdefault(sname, gname)
+    for cat in (non_game.get("categories") or {}).values():
+        for sname in cat.get("series_data") or {}:
+            series_parents.setdefault(sname, None)
+
+    for v in videos:
+        s = v.get("series") or {}
+        sname = s.get("series_name")
+        if not sname:
+            continue
+        if sname not in series_parents:
+            series_parents[sname] = canonical_game(s.get("game"), games_data, game_links)
+        else:
+            series_parents.setdefault(sname, None)
+
+    for pl in playlists:
+        title = (pl.get("title") or "").strip()
+        if not title:
+            continue
+        sname = title.split(" | ")[0].strip() if " | " in title else title
+        series_parents.setdefault(sname, None)
+
+    if os.path.isdir(ARCHIVE_DIR):
+        shutil.rmtree(ARCHIVE_DIR)
+    os.makedirs(SERIES_DIR, exist_ok=True)
+    os.makedirs(GAMES_DIR, exist_ok=True)
+    print(f"Cleared {os.path.relpath(ARCHIVE_DIR, ROOT)}/")
+
+    series_videos = {sname: [] for sname in series_parents}
+    for v in videos:
+        sname = (v.get("series") or {}).get("series_name")
+        if sname in series_videos:
+            series_videos[sname].append(v)
+    for lst in series_videos.values():
+        lst.sort(key=lambda v: v.get("published") or "")
+
+    print("Generating series pages...")
+    for sname in sorted(series_parents, key=lambda n: (series_parents[n] or "", n)):
+        write_series_page(sname, series_videos[sname], series_parents[sname], playlists)
+
+    print("Generating game pages...")
+    for gname in sorted(games_data):
+        write_game_page(gname, games_data[gname], games_data, playlists, game_links)
+
+    print(f"Done: {len(series_parents)} series, {len(games_data)} games.")
+
+
+if __name__ == "__main__":
+    main()

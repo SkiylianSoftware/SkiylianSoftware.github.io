@@ -9,7 +9,6 @@ group: stats
 
 {% assign history = site.data.history %}
 {% if history and history.size > 0 %}
-{{ history.size | prepend: 'History entries: ' | append: ' (first: ' | append: history.first.date | append: ', last: ' | append: history.last.date | append: ')' }}
 
 <div class="chart-container">
   <canvas id="growthChart"></canvas>
@@ -22,7 +21,8 @@ group: stats
   {% if site.data.fourthwall.products.size > 0 %}
   <button class="chart-btn" onclick="toggleMetric('orders')" id="btn-orders">Orders</button>
   {% endif %}
-  {% if history[0].github %}
+  {% assign has_github = history | map: "github" | compact | size %}
+  {% if has_github > 0 %}
   <button class="chart-btn" onclick="toggleMetric('github')" id="btn-github">GitHub</button>
   {% endif %}
   {% if history.last.youtube_main.likes > 0 %}
@@ -31,146 +31,22 @@ group: stats
   {% if history.last.youtube_main.comments > 0 %}
   <button class="chart-btn" onclick="toggleMetric('comments')" id="btn-comments">Comments</button>
   {% endif %}
+  {% assign has_watch = history | map: "_analytics" | compact | size %}
+  {% if has_watch > 0 %}
+  <button class="chart-btn" onclick="toggleMetric('watch')" id="btn-watch">Watch Time</button>
+  {% endif %}
+  {% if history.last.youtube_main.videos > 0 %}
+  <button class="chart-btn" onclick="toggleMetric('uploads')" id="btn-uploads">Uploads/Month</button>
+  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
-var histData = {{ history | jsonify }};
-console.log('Chart debug: entries=' + histData.length, 'first=' + histData[0].date, 'last=' + histData[histData.length-1].date);
-console.log('Sample entry:', JSON.stringify(histData[Math.floor(histData.length/2)]));
-
-Chart.defaults.elements.line.tension = 0.3;
-Chart.defaults.elements.point.radius = 0;
-
-var dates = histData.map(function(h) { return h.date; });
-
-function pluck(entry, platform, field) {
-  return (entry[platform] && entry[platform][field]) || 0;
-}
-
-var audienceDatasets = [
-  { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'subs'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'subs'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-  { label: 'Twitch', data: histData.map(function(h) { return pluck(h, 'twitch', 'followers'); }), borderColor: '#a970ff', backgroundColor: 'rgba(169,112,255,0.05)' },
-];
-audienceDatasets.push({
-  label: 'Total',
-  data: histData.map(function(h) {
-    return (pluck(h, 'youtube_main', 'subs') || 0) + (pluck(h, 'youtube_vods', 'subs') || 0) + (pluck(h, 'twitch', 'followers') || 0);
-  }),
-  borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
-  borderWidth: 3, pointRadius: 0,
-});
-
-var viewsDatasets = [
-  { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'views'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'views'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-  { label: 'Twitch', data: histData.map(function(h) { return pluck(h, 'twitch', 'views'); }), borderColor: '#a970ff', backgroundColor: 'rgba(169,112,255,0.05)' },
-];
-viewsDatasets.push({
-  label: 'Total',
-  data: histData.map(function(h) {
-    return (pluck(h, 'youtube_main', 'views') || 0) + (pluck(h, 'youtube_vods', 'views') || 0) + (pluck(h, 'twitch', 'views') || 0);
-  }),
-  borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
-  borderWidth: 3, pointRadius: 0,
-});
-
-var contentDatasets = [
-  { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'videos'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-  { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'videos'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-];
-contentDatasets.push({
-  label: 'Total',
-  data: histData.map(function(h) {
-    return (pluck(h, 'youtube_main', 'videos') || 0) + (pluck(h, 'youtube_vods', 'videos') || 0);
-  }),
-  borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)',
-  borderWidth: 3, pointRadius: 0,
-});
-
-{% if site.data.fourthwall.products.size > 0 %}
-var ordersDatasets = [
-  { label: 'Fourthwall', data: histData.map(function(h) { return pluck(h, 'fourthwall', 'orders'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
-];
-{% else %}
-var ordersDatasets = [];
-{% endif %}
-
-var githubDatasets = [];
-{% if history[0].github %}
-githubDatasets = [
-  { label: 'Stars', data: histData.map(function(h) { return pluck(h, 'github', 'stars'); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.05)' },
-  { label: 'Followers', data: histData.map(function(h) { return pluck(h, 'github', 'followers'); }), borderColor: '#888', backgroundColor: 'rgba(136,136,136,0.05)' },
-  { label: 'Forks', data: histData.map(function(h) { return pluck(h, 'github', 'forks'); }), borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.05)' },
-];
-{% endif %}
-
-var allMetrics = {
-  audience: audienceDatasets,
-  views: viewsDatasets,
-  content: contentDatasets,
-  orders: ordersDatasets,
-  github: githubDatasets,
-  likes: [
-    { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'likes'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-    { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'likes'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-    { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'likes') || 0) + (pluck(h, 'youtube_vods', 'likes') || 0); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
-  ],
-  comments: [
-    { label: 'YouTube', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'comments'); }), borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.05)' },
-    { label: 'VODs', data: histData.map(function(h) { return pluck(h, 'youtube_vods', 'comments'); }), borderColor: '#ff8844', backgroundColor: 'rgba(255,136,68,0.05)' },
-    { label: 'Total', data: histData.map(function(h) { return (pluck(h, 'youtube_main', 'comments') || 0) + (pluck(h, 'youtube_vods', 'comments') || 0); }), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 3, pointRadius: 0 },
-  ],
-};
-
-console.log('Audience dataset length:', audienceDatasets[0].data.length, 'sample:', audienceDatasets[0].data.slice(0,5));
-console.log('Dates length:', dates.length, 'sample:', dates.slice(0,5));
-console.log('Non-zero subs count:', audienceDatasets[0].data.filter(function(v){return v>0;}).length);
-console.log('Max subs:', Math.max.apply(null, audienceDatasets[0].data));
-
-var ctx = document.getElementById('growthChart').getContext('2d');
-var chart = new Chart(ctx, {
-  type: 'line',
-  data: { labels: dates, datasets: audienceDatasets },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: {
-        labels: { color: '#8888aa', font: { size: 12 }, usePointStyle: true, padding: 16 },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(13,13,30,0.9)',
-        titleColor: '#c8c8d4',
-        bodyColor: '#c8c8d4',
-        borderColor: 'rgba(45,212,191,0.3)',
-        borderWidth: 1,
-        padding: 10,
-      }
-    },
-    scales: {
-      x: {
-        ticks: { color: '#8888aa', maxTicksLimit: 12 },
-        grid: { color: 'rgba(45,212,191,0.05)' }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { color: '#8888aa' },
-        grid: { color: 'rgba(45,212,191,0.05)' }
-      }
-    }
-  }
-});
-
-function toggleMetric(metric) {
-  document.querySelectorAll('.chart-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.getElementById('btn-' + metric).classList.add('active');
-  chart.data.datasets = allMetrics[metric];
-  chart.update();
-}
+window.HIST_DATA = {{ history | jsonify }};
+window.HIST_GITHUB = {% if has_github > 0 %}true{% else %}false{% endif %};
+window.HIST_ORDERS = {% if site.data.fourthwall.products.size > 0 %}true{% else %}false{% endif %};
 </script>
+<script src="{{ '/assets/js/history.js' | relative_url }}" defer></script>
 
 <h2 class="milestones-heading">Milestones</h2>
 <p class="milestones-note">&#9881;&#65039; Powers of three (ternary) are my primary counting system. Powers of two (binary) and round numbers also tracked. <a href="/about">Why ternary?</a></p>
@@ -189,25 +65,6 @@ function toggleMetric(metric) {
 </div>
 
 <script>
-function filterMilestones(type) {
-  document.querySelectorAll('.ms-filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.filter === type); });
-  var items = document.querySelectorAll('.timeline-item.milestone');
-  items.forEach(function(item) {
-    if (type === 'all') { item.classList.remove('hidden'); return; }
-    var dtype = item.getAttribute('data-type');
-    item.classList.toggle('hidden', dtype !== type);
-  });
-  /* Hide month dividers with no visible milestones */
-  document.querySelectorAll('.month-divider').forEach(function(div) {
-    var sib = div.nextElementSibling;
-    var hasVisible = false;
-    while (sib && !sib.classList.contains('month-divider')) {
-      if (!sib.classList.contains('hidden')) { hasVisible = true; break; }
-      sib = sib.nextElementSibling;
-    }
-    div.style.display = hasVisible ? '' : 'none';
-  });
-}
 document.getElementById('ms-filter-bar').addEventListener('click', function(e) {
   var btn = e.target.closest('.ms-filter-btn');
   if (btn) filterMilestones(btn.getAttribute('data-filter'));

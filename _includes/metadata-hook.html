@@ -1,2 +1,13 @@
 <link rel="stylesheet" href="{{ '/assets/css/custom.css' | relative_url }}">
 <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+{% if page.layout == "post" and page.categories contains "videos" and page.slug %}
+<meta property="og:video" content="https://www.youtube.com/embed/{{ page.slug }}">
+<meta property="og:video:type" content="text/html">
+<meta property="og:video:width" content="1280">
+<meta property="og:video:height" content="720">
+<meta name="twitter:card" content="player">
+<meta name="twitter:player" content="https://www.youtube.com/embed/{{ page.slug }}">
+{% endif %}
+{% if page.jsonld %}
+<script type="application/ld+json">{{ page.jsonld | jsonify }}</script>
+{% endif %}

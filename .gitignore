@@ -41,3 +41,5 @@ _data/*.json
 assets/img/playlists/
 # Posts (generated for RSS feed)
 _posts/
+# Archive pages (generated for series/game landing pages)
+archive/

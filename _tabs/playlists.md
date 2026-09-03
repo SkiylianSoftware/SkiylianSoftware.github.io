@@ -90,24 +90,4 @@ group: media
 <p>No playlists loaded yet.</p>
 {% endif %}
 
-<script>
-function sortPlaylists(btn, mode) {
-  document.querySelectorAll('.sort-btn').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-  var container = document.getElementById('playlist-rows');
-  if (!container) return;
-  var rows = Array.from(container.querySelectorAll('.playlist-row'));
-  rows.sort(function(a, b) {
-    if (mode === 'date' || mode === 'last-updated') {
-      var attr = mode === 'date' ? 'data-published' : 'data-last-updated';
-      var da = a.getAttribute(attr) || '';
-      var db = b.getAttribute(attr) || '';
-      return db.localeCompare(da);
-    }
-    var va = parseInt(a.getAttribute('data-' + mode)) || 0;
-    var vb = parseInt(b.getAttribute('data-' + mode)) || 0;
-    return vb - va;
-  });
-  rows.forEach(function(r) { container.appendChild(r); });
-}
-</script>
+<script src="{{ '/assets/js/player.js' | relative_url }}" defer></script>

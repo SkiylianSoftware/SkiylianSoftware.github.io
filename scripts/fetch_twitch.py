@@ -136,6 +136,7 @@ def fetch_vods(user_id, token):
             vods.append(
                 {
                     "video_id": item["id"],
+                    "platform": "twitch",
                     "title": item.get("title", ""),
                     "url": item.get("url", ""),
                     "thumbnail": item.get("thumbnail_url", "").replace("{width}", "640").replace("{height}", "360"),
@@ -174,6 +175,7 @@ def main():
             "view_count": twitch_views,
             "created_at": twitch_created,
             "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "_schema_version": 1,
         }
         save("twitch_stats.json", stats)
         print(f"Twitch followers: {followers}")
@@ -191,7 +193,7 @@ def main():
     print("Fetching Twitch VODs...")
     try:
         vods = fetch_vods(user_id, token)
-        save("twitch_vods.json", {"videos": vods})
+        save("twitch_vods.json", {"videos": vods, "_schema_version": 1})
         print(f"Twitch VODs: {len(vods)} past broadcasts")
     except Exception as e:
         print(f"Could not fetch Twitch VODs: {e}", file=sys.stderr)

@@ -6,6 +6,9 @@
     'v': function() { goTo('/videos/'); },
     's': function() { goTo('/streams/'); },
     'p': function() { goTo('/playlists/'); },
+    'g': function() { goTo('/games/'); },
+    'd': function() { goTo('/dashboard/'); },
+    'i': function() { goTo('/history/'); },
     'a': function() { goTo('/about/'); },
   };
 
@@ -20,7 +23,7 @@
     if (existing) { existing.remove(); return; }
     var overlay = document.createElement('div');
     overlay.id = 'kb-help';
-    overlay.innerHTML = '<div class="kb-help-content"><h2>Keyboard Shortcuts</h2><table><tr><td><kbd>?</kbd></td><td>Toggle this help</td></tr><tr><td><kbd>H</kbd></td><td>Home</td></tr><tr><td><kbd>V</kbd></td><td>Videos</td></tr><tr><td><kbd>S</kbd></td><td>Streams</td></tr><tr><td><kbd>P</kbd></td><td>Playlists</td></tr><tr><td><kbd>A</kbd></td><td>About</td></tr><tr><td><kbd>Esc</kbd></td><td>Close modals / help</td></tr></table><p class="kb-hint">Press <kbd>?</kbd> again to close</p></div>';
+    overlay.innerHTML = '<div class="kb-help-content"><h2>Keyboard Shortcuts</h2><table><tr><td><kbd>?</kbd></td><td>Toggle this help</td></tr><tr><td><kbd>H</kbd></td><td>Home</td></tr><tr><td><kbd>V</kbd></td><td>Videos</td></tr><tr><td><kbd>S</kbd></td><td>Streams</td></tr><tr><td><kbd>P</kbd></td><td>Playlists</td></tr><tr><td><kbd>G</kbd></td><td>Games</td></tr><tr><td><kbd>D</kbd></td><td>Dashboard</td></tr><tr><td><kbd>I</kbd></td><td>History</td></tr><tr><td><kbd>A</kbd></td><td>About</td></tr><tr><td><kbd>Esc</kbd></td><td>Close modals / help</td></tr></table><p class="kb-hint">Press <kbd>?</kbd> again to close</p></div>';
     overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
     document.body.appendChild(overlay);
   }
@@ -43,9 +46,13 @@
   });
 })();
 
-/* Random video */
+/* Random video (visible cards only, so series filters are respected) */
 function randomVideo() {
-  var cards = document.querySelectorAll('[data-video-id]');
+  var all = document.querySelectorAll('[data-video-id]');
+  var cards = [];
+  Array.prototype.forEach.call(all, function(c) {
+    if (c.offsetParent !== null) cards.push(c);
+  });
   if (!cards.length) return;
   var pick = cards[Math.floor(Math.random() * cards.length)];
   if (typeof openPlayer === 'function') {
@@ -73,13 +80,14 @@ document.addEventListener('click', function(e) {
 });
 
 /* Series filter */
-function filterSeries(btn, name) {
+function filterSeries(btn) {
   // Close the More dropdown if open
   var dd = document.getElementById('filter-more-dropdown');
   if (dd) dd.classList.remove('open');
 
   var grid = document.getElementById('video-grid');
   if (!grid) return;
+  var name = btn ? btn.getAttribute('data-series-name') : null;
   var cards = grid.querySelectorAll('.video-card');
   document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
@@ -121,15 +129,6 @@ function findWatchNext(currentCard) {
   var idx = cards.indexOf(currentCard);
   return (idx >= 0 && idx < cards.length - 1) ? cards[idx + 1] : null;
 }
-
-/* Parallax stars on scroll */
-var scrollPos = 0;
-window.addEventListener('scroll', function() {
-  scrollPos = window.scrollY;
-  var bg = document.body;
-  var offset = scrollPos * 0.05;
-  bg.style.setProperty('--star-offset', offset + 'px');
-});
 
 /* Relative time display */
 document.addEventListener('DOMContentLoaded', function() {

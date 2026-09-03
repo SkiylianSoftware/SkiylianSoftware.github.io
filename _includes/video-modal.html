@@ -1,0 +1,24 @@
+<!-- Shared video/VOD player modal -->
+<div id="video-modal" class="modal" onclick="if(event.target==this)closePlayer()">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closePlayer()" aria-label="Close">&times;</button>
+    <div class="modal-top">
+      <div class="modal-video-col">
+        <div id="player-wrap"></div>
+      </div>
+      <div class="modal-info-col">
+        <p id="modal-title" class="modal-title"></p>
+        <div id="modal-series-link" class="modal-series-link"></div>
+        <div id="modal-description" class="modal-description"></div>
+      </div>
+    </div>
+    <div class="modal-bottom">
+      <div id="modal-meta" class="modal-meta"></div>
+      <div id="modal-chapters" class="modal-chapters"></div>
+      <div id="modal-next" class="modal-next"></div>
+      <div id="modal-series-more" class="modal-series-more"></div>
+      <a id="modal-link" href="#" target="_blank" class="btn">Watch on YouTube</a>
+    </div>
+  </div>
+</div>
+<script src="{{ '/assets/js/player.js' | relative_url }}" defer></script>

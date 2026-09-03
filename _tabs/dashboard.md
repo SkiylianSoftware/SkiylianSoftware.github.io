@@ -54,6 +54,7 @@ group: stats
 {% endif %}
 
 <!-- Combined Overview -->
+<p class="stats-freshness">Data refreshed {{ site.data.history.last.date | default: "" | truncate: 10, "" }}</p>
 <h2 class="stats-subtitle">Overview</h2>
 {% assign yt_subs = meta.subscriber_count | default: 0 %}
 {% assign vods_subs = meta.vods_subscriber_count | default: 0 %}
@@ -94,6 +95,54 @@ group: stats
   </div>
   {% endif %}
 </div>
+
+<!-- Last 30 Days delta -->
+{% assign history = site.data.history %}
+{% if history.size > 1 %}
+{% assign thirty_ago = site.time | date: "%s" | minus: 2592000 %}
+{% assign last_entry = history.last %}
+{% assign anchor_entry = nil %}
+{% for e in history reversed %}
+  {% assign e_epoch = e.date | date: "%s" | plus: 0 %}
+  {% if e_epoch >= thirty_ago %}
+    {% assign anchor_entry = e %}
+  {% else %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+{% if anchor_entry == nil %}{% assign anchor_entry = history.first %}{% endif %}
+{% assign delta_subs = last_entry.youtube_main.subs | minus: anchor_entry.youtube_main.subs %}
+{% assign delta_views = last_entry.youtube_main.views | minus: anchor_entry.youtube_main.views %}
+{% assign delta_videos = last_entry.youtube_main.videos | minus: anchor_entry.youtube_main.videos %}
+{% assign delta_watch = 0 %}
+{% for e in site.data.history reversed %}
+  {% assign e_epoch = e.date | date: "%s" | plus: 0 %}
+  {% if e_epoch < thirty_ago %}{% break %}{% endif %}
+  {% if e._analytics.watch_time_minutes %}
+    {% assign delta_watch = delta_watch | plus: e._analytics.watch_time_minutes %}
+  {% endif %}
+{% endfor %}
+{% assign delta_watch_h = delta_watch | divided_by: 60 %}
+<h2 class="stats-subtitle">Last 30 Days</h2>
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-value{% if delta_subs >= 0 %} stat-positive{% else %} stat-negative{% endif %}">{% if delta_subs >= 0 %}+{% endif %}{{ delta_subs }}</span>
+    <span class="stat-label">Subs</span>
+  </div>
+  <div class="stat-card accent-purple">
+    <span class="stat-value{% if delta_views >= 0 %} stat-positive{% else %} stat-negative{% endif %}">{% if delta_views >= 0 %}+{% endif %}{{ delta_views }}</span>
+    <span class="stat-label">Views</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value{% if delta_videos >= 0 %} stat-positive{% else %} stat-negative{% endif %}">{% if delta_videos >= 0 %}+{% endif %}{{ delta_videos }}</span>
+    <span class="stat-label">Videos</span>
+  </div>
+  <div class="stat-card accent-purple">
+    <span class="stat-value">{{ delta_watch_h }}h</span>
+    <span class="stat-label">Watch Time</span>
+  </div>
+</div>
+{% endif %}
 
 <!-- YouTube -->
 {% if videos.size > 0 %}
@@ -199,7 +248,7 @@ group: stats
     <span class="stat-label">Channel Views</span>
   </div>
   {% endif %}
-  {% if twitch.broadcaster_type %}
+  {% if twitch.broadcaster_type and twitch.broadcaster_type != "" %}
   <div class="stat-card">
     <span class="stat-value">{{ twitch.broadcaster_type | capitalize }}</span>
     <span class="stat-label">Status</span>

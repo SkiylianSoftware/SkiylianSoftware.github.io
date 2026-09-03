@@ -6,6 +6,10 @@ recency_thresholds:
   current_days: 180
   recent_days: 365
 
+# Number of recent posts to expose in feed.xml
+feed:
+  posts_limit: 30
+
 theme: jekyll-theme-chirpy
 
 lang: en
@@ -81,6 +85,11 @@ defaults:
 
 sass:
   style: compressed
+
+# Fail the build on invalid front matter instead of silently dropping it.
+# A corrupt frontmatter block previously nuked post titles/dates from the
+# RSS feed without any error; with this enabled CI breaks loudly instead.
+strict_front_matter: true
 
 compress_html:
   clippings: all

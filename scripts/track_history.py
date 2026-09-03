@@ -23,7 +23,10 @@ def read_json(filename):
 
 
 def build_snapshot():
-    snapshot = {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d")}
+    snapshot = {
+        "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "_schema_version": 1,
+    }
 
     meta = read_json("site_meta.json")
     snapshot["youtube_main"] = {

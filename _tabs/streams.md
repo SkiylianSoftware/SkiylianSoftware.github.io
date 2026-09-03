@@ -98,13 +98,24 @@ group: media
 
 <h2 class="section-title">Stream Archives</h2>
 
+{% assign vods = "" | split: "," %}
 {% assign yt_vods = site.data.youtube_vods.videos %}
 {% assign tw_vods = site.data.twitch_vods.videos %}
-{% assign vods = yt_vods | concat: tw_vods | sort: "published" | reverse %}
+{% if yt_vods %}{% assign vods = vods | concat: yt_vods %}{% endif %}
+{% if tw_vods %}{% assign vods = vods | concat: tw_vods %}{% endif %}
+{% assign vods = vods | sort: "published" | reverse %}
 {% if vods.size > 0 %}
 <div class="video-grid">
   {% for vod in vods %}
-  <div class="video-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}" onclick="openPlayer(this)">
+  <div class="video-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}" data-url="{{ vod.url }}" data-platform="{{ vod.platform | default: 'youtube' }}"
+      data-published="{{ vod.published }}" data-views="{{ vod.view_count | default: 0 }}"
+      data-duration="{{ vod.duration_seconds | default: 0 }}"
+      data-series="{% if vod.series %}{{ vod.series.series_name | escape }}{% endif %}"
+      data-series-slug="{% if vod.series %}{{ vod.series.series_name | slugify }}{% endif %}"
+      data-game="{% if vod.series %}{{ vod.series.game | escape }}{% endif %}"
+      data-game-slug="{% if vod.series %}{{ vod.series.game | slugify }}{% endif %}"
+      data-description="{{ vod.description | escape }}"
+      onclick="openPlayer(this)">
     <div class="thumb-wrap">
       <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
       <div class="play-overlay"><i class="fas fa-play"></i></div>
@@ -142,251 +153,6 @@ group: media
 </div>
 {% endif %}
 
-<div id="video-modal" class="modal" onclick="if(event.target==this)closePlayer()">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closePlayer()">&times;</button>
-    <div id="player-wrap"></div>
-    <p id="modal-title" class="modal-title"></p>
-    <a id="modal-link" href="#" target="_blank" class="btn">Watch on YouTube</a>
-  </div>
-</div>
+{% include video-modal.html %}
 
-<script>
-function openPlayer(el) {
-  var id = el.getAttribute('data-video-id');
-  var title = el.getAttribute('data-title');
-  var wrap = document.getElementById('player-wrap');
-  wrap.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + id + '?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-link').href = 'https://www.youtube.com/watch?v=' + id;
-  document.getElementById('video-modal').classList.add('open');
-}
-function closePlayer() {
-  document.getElementById('player-wrap').innerHTML = '';
-  document.getElementById('video-modal').classList.remove('open');
-}
-document.addEventListener('keydown', function(e) { if(e.key === 'Escape') closePlayer(); });
 
-var scheduleTimes = document.querySelectorAll('.schedule-utc');
-for (var i = 0; i < scheduleTimes.length; i++) {
-    var el = scheduleTimes[i];
-    var utc = el.getAttribute('datetime');
-    if (utc) {
-        var d = new Date(utc);
-        var utcH = d.getUTCHours().toString().padStart(2, '0');
-        var utcM = d.getUTCMinutes().toString().padStart(2, '0');
-        var locH = d.getHours().toString().padStart(2, '0');
-        var locM = d.getMinutes().toString().padStart(2, '0');
-        var tzParts = Intl.DateTimeFormat('en', { timeZoneName: 'short' }).formatToParts(d);
-        var locTz = '';
-        for (var j = 0; j < tzParts.length; j++) {
-            if (tzParts[j].type === 'timeZoneName') {
-                locTz = ' ' + tzParts[j].value;
-                break;
-            }
-        }
-        el.textContent = utcH + ':' + utcM + ' UTC (' + locH + ':' + locM + locTz + ')';
-    }
-}
-</script>
-
-<style>
-.streams-empty {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: 12px;
-  background: var(--card-bg);
-  border: 1px solid rgba(45, 212, 191, 0.08);
-}
-
-.streams-empty .empty-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  opacity: 0.4;
-}
-
-.streams-empty h3 {
-  font-size: 1.1rem;
-  margin: 0.5rem 0;
-  opacity: 0.8;
-}
-
-.streams-empty p {
-  font-size: 0.9rem;
-  opacity: 0.6;
-  margin: 0 0 1rem;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.streams-empty-links {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.streams-empty-links .btn {
-  font-size: 0.85rem;
-}
-
-.live-section {
-  margin: 2rem 0;
-  text-align: center;
-}
-
-.live-section .live-embed {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 1.5rem;
-  position: relative;
-}
-
-.live-badge {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: #ff0000;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  animation: pulse 2s infinite;
-  z-index: 1;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.live-title {
-  margin: 0.75rem 0;
-  font-weight: 500;
-}
-
-.offline-schedule {
-  margin: 2rem auto;
-  padding: 2rem;
-  border-radius: 12px;
-  background: var(--clr-card-bg);
-  border: 1px solid rgba(45, 212, 191, 0.08);
-  text-align: center;
-  max-width: 500px;
-}
-
-.offline-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #555577;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.offline-badge i {
-  font-size: 0.5rem;
-  vertical-align: middle;
-  margin-right: 0.3rem;
-}
-
-.offline-schedule-icon i {
-  font-size: 2rem;
-  color: #555577;
-  opacity: 0.6;
-}
-
-.offline-schedule h2 {
-  font-size: 1.1rem;
-  margin: 0.5rem 0;
-}
-
-.offline-schedule .schedule-row {
-  justify-content: center;
-}
-
-.offline-schedule-cta {
-  margin: 1rem 0 0;
-}
-
-.offline-schedule-cta .btn {
-  font-size: 0.85rem;
-}
-
-.section-break {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.2), transparent);
-  margin: 1.5rem 0;
-}
-
-.section-title {
-  margin: 2rem 0 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.4rem;
-  font-size: 1.1rem;
-}
-
-.widget-card {
-  flex: 1;
-  min-width: 200px;
-  background: var(--card-bg);
-  border: 1px solid rgba(45, 212, 191, 0.1);
-  border-radius: 10px;
-  padding: 1rem;
-}
-
-.widget-title {
-  font-size: 0.85rem;
-  margin: 0 0 0.75rem;
-  opacity: 0.8;
-  border-bottom: 1px solid rgba(45, 212, 191, 0.1);
-  padding-bottom: 0.4rem;
-}
-
-.widget-title i {
-  margin-right: 0.35rem;
-  color: #c084fc;
-}
-
-.widget-body {
-  font-size: 0.85rem;
-}
-
-.schedule-item {
-  margin-bottom: 0.6rem;
-}
-
-.schedule-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
-}
-
-.schedule-day {
-  font-weight: 600;
-  color: #2dd4bf;
-  min-width: 4em;
-}
-
-.schedule-time {
-  opacity: 0.8;
-}
-
-.schedule-type {
-  display: block;
-  opacity: 0.6;
-  font-size: 0.8rem;
-  margin-top: 0.1rem;
-}
-
-.schedule-none {
-  text-align: center;
-  opacity: 0.5;
-  font-size: 0.85rem;
-  margin: 0.5rem 0;
-}
-</style>

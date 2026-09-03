@@ -188,7 +188,17 @@
     ];
     /* Engagement % over time: (likes + comments) / views, cumulative per snapshot */
     window.__allMetrics.engagement = [
-      { label: 'Engagement (%)', data: histData.map(function(h) { return pluck(h, 'youtube_main', 'engagement_rate'); }), borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.05)', borderWidth: 2 },
+      { label: 'Engagement (%)', data: histData.map(function(h) {
+        var er = pluck(h, 'youtube_main', 'engagement_rate');
+        // Fallback for entries that predate the field: compute from likes/comments/views
+        if (er === 0) {
+          var likes = pluck(h, 'youtube_main', 'likes');
+          var comments = pluck(h, 'youtube_main', 'comments');
+          var views = pluck(h, 'youtube_main', 'views');
+          if (views > 0) er = parseFloat(((likes + comments) / views * 100).toFixed(1));
+        }
+        return er;
+      }), borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.05)', borderWidth: 2 },
     ];
 
     window.__labelsByMetric = {

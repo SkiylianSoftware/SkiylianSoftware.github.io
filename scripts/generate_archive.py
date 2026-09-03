@@ -190,8 +190,10 @@ def write_series_page(sname, svideos, game_name, playlists):
         "group": "media",
         "series_feed": f"/feed/series/{sslug}.xml",
     }
+    if game_name:
+        frontmatter["game"] = game_name
 
-    body = ["{% include banner.html %}", ""]
+    body = ["{% include game-art.html %}", ""]
 
     if game_name:
         gslug = slugify(game_name)
@@ -240,8 +242,9 @@ def write_game_page(gname, g, games_data, playlists, game_links):
         "permalink": f"/games/{gslug}/",
         "group": "media",
     }
+    frontmatter["game"] = gname
 
-    body = ["{% include banner.html %}", ""]
+    body = ["{% include game-art.html %}", ""]
 
     links = game_links.get(gname) or {}
     link_html = []

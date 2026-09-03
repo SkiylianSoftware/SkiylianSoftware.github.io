@@ -127,37 +127,58 @@ def build_year(year):
 def render(r):
     y = r["year"]
     lines = []
-    lines.append(f"# {y} in Review")
+    lines.append("{% include banner.html %}")
     lines.append("")
     subs_delta = r["subs_end"] - r["subs_start"]
     views_delta = r["views_end"] - r["views_start"]
     vids_delta = r["videos_end"] - r["videos_start"]
-    lines.append("## Growth")
-    lines.append("")
-    lines.append(f"- **Subscribers:** {r['subs_start']:,} &rarr; {r['subs_end']:,} ({subs_delta:+,})")
-    lines.append(f"- **Views:** {r['views_start']:,} &rarr; {r['views_end']:,} ({views_delta:+,})")
-    lines.append(f"- **Videos:** {r['videos_start']:,} &rarr; {r['videos_end']:,} (+{vids_delta})")
-    lines.append(f"- **Uploads this year:** {r['uploads']}")
-    lines.append(f"- **Watch time this year:** {r['watch_h']:,}h")
-    lines.append(f"- **Views on {y} uploads:** {r['total_views_year']:,}")
+
+    def sc(val):
+        prefix = "+" if val >= 0 else ""
+        return prefix + f"{val:,}" if isinstance(val, int) else str(val)
+
+    lines.append("<h1 class='dynamic-title'>" + y + " in Review</h1>")
+    _c = '<div class="stat-cell">'
+    _ec = "</div>"
+    lines.append('<div class="card-stats">')
+    lines.append(
+        _c + f'<span class="stat-value">{sc(subs_delta)}</span>' + '<span class="stat-label">Subs</span>' + _ec
+    )
+    lines.append(
+        _c + f'<span class="stat-value">{sc(views_delta)}</span>' + '<span class="stat-label">Views</span>' + _ec
+    )
+    lines.append(_c + f'<span class="stat-value">+{vids_delta}</span>' + '<span class="stat-label">Videos</span>' + _ec)
+    lines.append(
+        _c + f'<span class="stat-value">{r["uploads"]}</span>' + '<span class="stat-label">Uploads</span>' + _ec
+    )
+    lines.append(
+        _c + f'<span class="stat-value">{r["watch_h"]:,}h</span>' + '<span class="stat-label">Watch time</span>' + _ec
+    )
+    lines.append("</div>")
+
+    lines.append("<h2 class='section-title'>Highlights</h2>")
     if r["busiest"]:
-        lines.append(f"- **Busiest month:** {r['busiest']} ({r['busiest_count']} uploads)")
-    lines.append("")
-    lines.append("## Highlights")
-    lines.append("")
+        bc = r["busiest"]
+        bcount = r["busiest_count"]
+        lines.append(f'<div class="insight-box">Busiest month: <strong>{bc}</strong> ({bcount} uploads)</div>')
+        lines.append("")
     if r["most_viewed"]:
         mv = r["most_viewed"]
-        lines.append(f"- **Most watched:** {mv.get('title')} ({mv.get('view_count', 0):,} views)")
+        vid = mv.get("video_id", "")
+        vt = mv.get("title", "")
+        vc = mv.get("view_count", 0)
+        lines.append(f'<p>Most watched: <a href="/videos#{vid}"><strong>{vt}</strong></a> ({vc:,} views)</p>')
     if r["top_game"]:
-        lines.append(f"- **Top game by watch time:** {r['top_game']} ({r['top_game_h']}h)")
+        lines.append(f"<p>Top game by watch time: <strong>{r['top_game']}</strong> ({r['top_game_h']}h)</p>")
     if r["eng_leader"]:
         el = r["eng_leader"]
-        lines.append(f"- **Engagement leader:** {el.get('title')}")
+        evid = el.get("video_id", "")
+        etitle = el.get("title", "")
+        lines.append(f'<p>Engagement leader: <a href="/videos#{evid}"><strong>{etitle}</strong></a></p>')
     if r["ms_count"]:
-        lines.append(f"- **Milestones crossed:** {r['ms_count']}")
+        lines.append(f"<p>Milestones crossed: <strong>{r['ms_count']}</strong></p>")
     lines.append("")
-    lines.append("Part of the full [stream history](/history/).")
-    lines.append("")
+    lines.append('<p class="back-link"><a href="/year/" class="btn">&larr; All years</a></p>')
     return "\n".join(lines)
 
 

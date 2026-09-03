@@ -9,6 +9,12 @@ group: stats
 
 {% include stale-banner.html %}
 
+<div class="history-toolbar">
+  <span class="history-toolbar-label">Growth over time</span>
+  <a href="/year/" class="btn btn-outline-primary tag-btn">Year in Review</a>
+  <a href="/dashboard/" class="btn btn-outline-primary tag-btn">Dashboard</a>
+</div>
+
 {% assign history = site.data.history %}
 {% if history and history.size > 0 %}
 

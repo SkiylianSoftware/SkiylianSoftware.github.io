@@ -1,0 +1,9 @@
+<!-- Game / series art banner. Uses the game's icon image from game_links.yml
+     as a wide banner, falling back to the channel banner when no icon exists. -->
+{% assign gl = site.data.game_links[page.game] %}
+{% if gl and gl.icon %}
+<div class="game-hero" style="background-image: url('{{ gl.icon }}'); background-size: cover; background-position: center;"></div>
+<div class="game-hero-scrim"></div>
+{% else %}
+{% include banner.html %}
+{% endif %}

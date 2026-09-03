@@ -109,13 +109,16 @@
     if (!box) return;
     if (desc) {
       var text = String(desc);
-      // Jekyll's | escape filter turns newlines into literal \n sequences.
-      // Also handle HTML line-breaks if they made it through.
-      text = text.replace(/\\n/g, '\n').replace(/<br\s*\/?>/gi, '\n');
-      // Format chapter-style timestamps as clickable chips
+      // Jekyll's | escape filter turns newlines into literal \n sequences
+      text = text.replace(/\\n/g, '\n');
+      // Escape HTML first, then replace newlines with <br>, then linkify URLs
+      text = escapeHtml(text);
+      text = text.replace(/\n/g, '<br>');
+      // Format chapter timestamps into clickable chips (after escaping)
       text = text.replace(/(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*/g,
-        '<span class="chap-inline" data-chap-time="$1">$1 - </span>');
-      box.innerHTML = '<div class="desc-text">' + linkify(escapeHtml(text).replace(/\n/g, '<br>')) + '</div>';
+        '<span class="chap-inline" data-chap-time="$1">$1 &ndash; </span>');
+      text = linkify(text);
+      box.innerHTML = '<div class="desc-text">' + text + '</div>';
       box.style.display = '';
     } else {
       box.innerHTML = '';

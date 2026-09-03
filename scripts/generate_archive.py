@@ -25,6 +25,7 @@ DATA_DIR = os.path.join(ROOT, "_data")
 ARCHIVE_DIR = os.path.join(ROOT, "archive")
 SERIES_DIR = os.path.join(ARCHIVE_DIR, "series")
 GAMES_DIR = os.path.join(ARCHIVE_DIR, "games")
+RSS_DIR = os.path.join(ARCHIVE_DIR, "rss", "series")
 
 
 def slugify(name):
@@ -162,6 +163,7 @@ def write_series_page(sname, svideos, game_name, playlists):
         "title": sname,
         "permalink": f"/series/{sslug}/",
         "group": "media",
+        "series_feed": f"/feed/series/{sslug}.xml",
     }
 
     body = []
@@ -197,6 +199,7 @@ def write_series_page(sname, svideos, game_name, playlists):
         body.append("No episodes listed yet.")
 
     write_page(os.path.join(SERIES_DIR, f"{sslug}.md"), frontmatter, "\n".join(body))
+    write_series_feed(sname, sslug, svideos)
 
 
 def write_game_page(gname, g, games_data, playlists, game_links):
@@ -257,6 +260,70 @@ def write_game_page(gname, g, games_data, playlists, game_links):
 def escape_url(url):
     # Keep URLs valid while still escaping quotes that would break the attribute.
     return html.escape(str(url), quote=True)
+
+
+def iso_date(published):
+    day = (published or "").strip()[:10]
+    if len(day) == 10:
+        try:
+            datetime.strptime(day, "%Y-%m-%d")
+            return day + "T00:00:00Z"
+        except ValueError:
+            pass
+    return None
+
+
+def truncate(text, length=400):
+    t = str(text or "")
+    if len(t) <= length:
+        return t
+    return t[:length].rsplit(" ", 1)[0] + "..."
+
+
+def write_series_feed(sname, sslug, svideos):
+    feed_path = os.path.join(RSS_DIR, f"{sslug}.xml")
+    os.makedirs(RSS_DIR, exist_ok=True)
+
+    sorted_videos = sorted(svideos, key=lambda v: v.get("published") or "", reverse=True)
+
+    entries = []
+    for v in sorted_videos:
+        vid = v.get("video_id", "")
+        title = v.get("title", "Untitled")
+        published = iso_date(v.get("published"))
+        if not published:
+            continue
+        desc = v.get("description", "")
+        thumb = v.get("thumbnail", "")
+        summary = truncate(desc)
+
+        entry = f"""  <entry>
+    <title>{esc(title)}</title>
+    <link href="https://skiylia.dev/videos#{esc(vid)}"/>
+    <published>{published}</published>
+    <id>https://skiylia.dev/videos#{esc(vid)}</id>
+    <summary>{esc(summary)}</summary>"""
+        if thumb:
+            entry += f'\n    <media:thumbnail url="{esc(thumb)}"/>'
+        entry += "\n  </entry>"
+        entries.append(entry)
+
+    feed_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:media="http://search.yahoo.com/mrss/">
+  <title>{esc(sname)} - Skye</title>
+  <link href="https://skiylia.dev/series/{esc(sslug)}/"/>
+  <updated>{(sorted_videos[0].get("published") or "")[:10] + "T00:00:00Z" if sorted_videos else ""}</updated>
+  <id>https://skiylia.dev/feed/series/{esc(sslug)}.xml</id>
+{chr(10).join(entries)}
+</feed>
+"""
+
+    frontmatter = {
+        "layout": None,
+        "permalink": f"/feed/series/{sslug}.xml",
+    }
+    write_page(feed_path, frontmatter, feed_body)
 
 
 def main():

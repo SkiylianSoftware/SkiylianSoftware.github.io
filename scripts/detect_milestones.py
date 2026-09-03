@@ -67,6 +67,16 @@ def main():
     # Load previous milestones for comparison
     prev = read_json("milestones.json") or {}
     prev_reached = prev.get("reached", {})
+
+    # Skip if youtube_main.json hasn't changed and we already have milestones
+    import hashlib
+
+    fhash = None
+    with contextlib.suppress(Exception), open("_data/youtube_main.json", "rb") as _f:
+        fhash = hashlib.md5(_f.read()).hexdigest()
+    if fhash and prev.get("_site_hash") == fhash and len(prev.get("reached", {})) > 0:
+        print("Milestone detection skipped (_data/youtube_main.json unchanged)")
+        return
     new_reached = {}
     _vf_before = [k for k in prev_reached if k.startswith("video_first_")]
     if _vf_before:
@@ -1392,12 +1402,31 @@ def main():
     else:
         print("  DEBUG: no video_first keys in new_reached at save time")
 
+    # Per-video badge map: video_id -> {msg, thumb} for the first-video milestones
+    video_badges = {}
+    for _key in sorted(milestone_links):
+        if not _key.startswith("video_first_"):
+            continue
+        _lk = milestone_links[_key]
+        _url = _lk.get("url", "") or ""
+        if "#vid-" not in _url:
+            continue
+        _vid = _url.split("#vid-", 1)[1]
+        _msg = _lk.get("msg") or _lk.get("text") or _key
+        if _vid not in video_badges:
+            video_badges[_vid] = {"msg": "", "thumb": _lk.get("thumb", "")}
+        # Keep the smallest threshold's message (most notable first milestone)
+        if not video_badges[_vid]["msg"] or len(video_badges[_vid]["msg"]) >= len(_msg):
+            video_badges[_vid]["msg"] = _msg
+
     # Save
     os.makedirs(DATA_DIR, exist_ok=True)
     sorted_reached = dict(sorted(new_reached.items(), key=sort_key, reverse=True))
-    result = {"current": current_list, "reached": sorted_reached, "_schema_version": 1}
+    result = {"current": current_list, "reached": sorted_reached, "_schema_version": 1, "_site_hash": fhash}
     if milestone_links:
         result["links"] = milestone_links
+    if video_badges:
+        result["video_badges"] = video_badges
     with open(MILESTONES_FILE, "w") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
     print(f"Written {MILESTONES_FILE} ({len(new_reached)} milestones, {len(current_list)} current)")

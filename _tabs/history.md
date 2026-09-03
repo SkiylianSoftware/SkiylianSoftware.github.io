@@ -7,6 +7,8 @@ permalink: /history/
 group: stats
 ---
 
+{% include stale-banner.html %}
+
 {% assign history = site.data.history %}
 {% if history and history.size > 0 %}
 
@@ -38,6 +40,11 @@ group: stats
   {% if history.last.youtube_main.videos > 0 %}
   <button class="chart-btn" onclick="toggleMetric('uploads')" id="btn-uploads">Uploads/Month</button>
   {% endif %}
+</div>
+
+<div class="heatmap-wrap">
+  <h2 class="milestones-heading">Upload Heatmap</h2>
+  <div id="upload-heatmap" class="upload-heatmap"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>

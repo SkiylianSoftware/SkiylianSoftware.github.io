@@ -1,0 +1,13 @@
+<!-- Stale data warning banner -->
+{% assign last_data = site.data.history.last.date | default: "" %}
+{% if last_data %}
+{% assign last_epoch = last_data | date: "%s" | plus: 0 %}
+{% assign now_epoch = site.time | date: "%s" | plus: 0 %}
+{% assign age_hours = now_epoch | minus: last_epoch | divided_by: 3600 %}
+{% if age_hours > 48 %}
+<div class="stale-banner" role="alert">
+  <i class="fas fa-triangle-exclamation"></i>
+  <span>Stats are stale (last update {{ last_data | truncate: 10, "" }}, {{ age_hours | divided_by: 24 }}d ago). The tracking pipeline may have stalled.</span>
+</div>
+{% endif %}
+{% endif %}

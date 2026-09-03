@@ -8,6 +8,9 @@
 <meta name="twitter:card" content="player">
 <meta name="twitter:player" content="https://www.youtube.com/embed/{{ page.slug }}">
 {% endif %}
+{% if page.series_feed %}
+<link rel="alternate" type="application/atom+xml" href="{{ page.series_feed | relative_url }}" title="{{ page.title }} - RSS">
+{% endif %}
 {% if page.jsonld %}
 <script type="application/ld+json">{{ page.jsonld | jsonify }}</script>
 {% endif %}

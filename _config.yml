@@ -10,6 +10,12 @@ recency_thresholds:
 feed:
   posts_limit: 30
 
+# Progressive Web App (offline edge caching via service worker)
+pwa:
+  enabled: true
+  cache:
+    enabled: true
+
 theme: jekyll-theme-chirpy
 
 lang: en

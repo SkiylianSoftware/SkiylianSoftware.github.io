@@ -1,3 +1,5 @@
+import contextlib
+import hashlib
 import json
 import os
 import re
@@ -222,6 +224,11 @@ def fetch_uploads(playlist_id, label="uploads"):
             if d.get("game") and v.get("series"):
                 v["series"]["game"] = d["game"]
                 v["series"]["game_source"] = "api"
+        # Engage = (likes + comments) / views. 0 when no views yet.
+        views = v.get("view_count", 0)
+        if views > 0:
+            engage = (v.get("like_count", 0) + v.get("comment_count", 0)) / views * 100
+            v["engagement_rate"] = round(engage, 1)
 
     print(f"  Total: {len(videos)} videos fetched for {label}")
     return videos
@@ -825,7 +832,11 @@ def detect_milestones(
 
     active = [v for v in current.values() if v.get("priority", 0) > 0]
     best = max(active, key=lambda x: (x["priority"], x["count"])) if active else {}
-    save("milestones.json", {"current": best, "reached": prev_reached, "_schema_version": 1})
+    _site_hash = prev.get("_site_hash") or ""
+    if prev_reached:
+        with contextlib.suppress(Exception), open("_data/youtube_main.json", "rb") as _f:
+            _site_hash = hashlib.md5(_f.read()).hexdigest()
+    save("milestones.json", {"current": best, "reached": prev_reached, "_schema_version": 1, "_site_hash": _site_hash})
 
 
 def compute_series_recency(videos):
@@ -945,6 +956,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                 "total_duration_seconds": 0,
                 "total_views": 0,
                 "total_likes": 0,
+                "total_comments": 0,
                 "first_video": None,
                 "latest_video": None,
                 "series_data": {},
@@ -954,6 +966,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
         cat["total_duration_seconds"] += v.get("duration_seconds", 0)
         cat["total_views"] += v.get("view_count", 0)
         cat["total_likes"] += v.get("like_count", 0)
+        cat["total_comments"] += v.get("comment_count", 0)
         if published:
             if cat["first_video"] is None or published < cat["first_video"]:
                 cat["first_video"] = published
@@ -998,6 +1011,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                     "total_duration_seconds": 0,
                     "total_views": 0,
                     "total_likes": 0,
+                    "total_comments": 0,
                     "first_video": None,
                     "latest_video": None,
                     "series": set(),
@@ -1009,6 +1023,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
             g["total_duration_seconds"] += v.get("duration_seconds", 0)
             g["total_views"] += v.get("view_count", 0)
             g["total_likes"] += v.get("like_count", 0)
+            g["total_comments"] += v.get("comment_count", 0)
             if published:
                 if g["first_video"] is None or published < g["first_video"]:
                     g["first_video"] = published
@@ -1053,6 +1068,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                         "total_duration_seconds": 0,
                         "total_views": 0,
                         "total_likes": 0,
+                        "total_comments": 0,
                         "first_video": None,
                         "latest_video": None,
                         "series_data": {},
@@ -1062,6 +1078,7 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                 cat["total_duration_seconds"] += v.get("duration_seconds", 0)
                 cat["total_views"] += v.get("view_count", 0)
                 cat["total_likes"] += v.get("like_count", 0)
+                cat["total_comments"] += v.get("comment_count", 0)
                 if published:
                     if cat["first_video"] is None or published < cat["first_video"]:
                         cat["first_video"] = published
@@ -1115,6 +1132,11 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                 g["status"] = "historical"
         else:
             g["status"] = "historical"
+        total_v = g["total_views"]
+        if total_v > 0:
+            g["engagement_rate"] = round((g["total_likes"] + g["total_comments"]) / total_v * 100, 1)
+        else:
+            g["engagement_rate"] = 0
         result[name] = g
 
         if not g.get("accent_color"):
@@ -1142,6 +1164,17 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
     for _cat_name, cat in ordered.items():
         for _cs_name, csd in cat.get("series_data", {}).items():
             csd["active_years"] = format_years(csd["active_years"])
+
+    def _engagement(d):
+        tv = d.get("total_views", 0)
+        if tv > 0:
+            d["engagement_rate"] = round((d.get("total_likes", 0) + d.get("total_comments", 0)) / tv * 100, 1)
+        else:
+            d["engagement_rate"] = 0
+
+    _engagement(non_game_total)
+    for cat in ordered.values():
+        _engagement(cat)
 
     return {
         "games": result,

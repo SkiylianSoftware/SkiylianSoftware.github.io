@@ -234,5 +234,79 @@
         },
       },
     });
+
+    /* Upload heatmap: GitHub-style grid of last 12 months */
+    (function renderHeatmap() {
+      var container = document.getElementById('upload-heatmap');
+      if (!container || !histData || histData.length < 2) return;
+
+      var data = histData;
+      var dayVideos = {};
+      var prev = 0;
+      data.forEach(function(e) {
+        var date = (e.date || '').slice(0, 10);
+        if (!date) return;
+        var v = pluck(e, 'youtube_main', 'videos');
+        var delta = v - prev;
+        if (delta < 0) delta = 0;
+        dayVideos[date] = delta;
+        prev = v;
+      });
+
+      var now = new Date();
+      now.setHours(0, 0, 0, 0);
+      var end = new Date(now);
+      end.setDate(end.getDate() - (end.getDay() + 6) % 7);
+      var start = new Date(end);
+      start.setFullYear(start.getFullYear() - 1);
+      start.setDate(start.getDate() - start.getDay());
+
+      var maxVideos = 0;
+      var cells = {};
+      for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        var ds = d.toISOString().slice(0, 10);
+        var count = dayVideos[ds] || 0;
+        if (count > maxVideos) maxVideos = count;
+        cells[ds] = count;
+      }
+
+      if (maxVideos === 0) { container.textContent = 'No upload data yet.'; return; }
+
+      var monthGroups = {};
+      for (var d2 = new Date(start); d2 <= end; d2.setDate(d2.getDate() + 1)) {
+        var ds2 = d2.toISOString().slice(0, 10);
+        var m = ds2.slice(0, 7);
+        if (!monthGroups[m]) monthGroups[m] = [];
+        monthGroups[m].push(ds2);
+      }
+
+      var sortedMonths = Object.keys(monthGroups).sort();
+      sortedMonths.forEach(function(mon) {
+        var monthDiv = document.createElement('div');
+        monthDiv.className = 'heatmap-month';
+
+        var label = document.createElement('div');
+        label.className = 'heatmap-month-label';
+        var parts = mon.split('-');
+        label.textContent = new Date(parts[0], parts[1] - 1).toLocaleString('default', { month: 'short' });
+        monthDiv.appendChild(label);
+
+        var days = monthGroups[mon];
+        days.forEach(function(ds) {
+          var count = cells[ds] || 0;
+          var cell = document.createElement('span');
+          cell.className = 'heatmap-cell';
+          cell.setAttribute('data-date', ds);
+          cell.title = ds + ': ' + count + ' video' + (count !== 1 ? 's' : '');
+          if (count > 0) {
+            var intensity = 0.1 + (count / maxVideos) * 0.8;
+            cell.style.background = 'rgba(45,212,191,' + intensity + ')';
+          }
+          monthDiv.appendChild(cell);
+        });
+
+        container.appendChild(monthDiv);
+      });
+    })();
   });
 })();

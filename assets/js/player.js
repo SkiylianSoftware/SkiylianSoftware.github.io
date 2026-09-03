@@ -229,6 +229,12 @@
     if (btn) btn.classList.add('active');
     var grid = document.getElementById('video-grid');
     if (!grid) return;
+
+    // Reset pagination: reveal all cards
+    if (grid.__paginationReset) grid.__paginationReset();
+    var lmBtn = grid.parentNode.querySelector('.load-more-btn');
+    if (lmBtn) lmBtn.style.display = 'none';
+
     var cards = qa('.video-card');
     cards.sort(function(a, b) {
       if (mode === 'date') return new Date(b.getAttribute('data-published')) - new Date(a.getAttribute('data-published'));
@@ -403,16 +409,106 @@
     if (isSeriesHash) return;
 
     var card = q('[data-video-id="' + name + '"]');
+    if (!card && name.indexOf('vid-') === 0) {
+      card = q('[data-video-id="' + name.slice(4) + '"]');
+    }
     if (card) {
       openPlayer(card);
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 
+  /* ---- Infinite-scroll pagination ---- */
+  window.initPagination = function(gridId, batchSize) {
+    var grid = document.getElementById(gridId);
+    if (!grid) return;
+
+    if (!batchSize) {
+      batchSize = parseInt(grid.getAttribute('data-paged'), 10) || 30;
+    }
+
+    var cards = Array.prototype.slice.call(grid.children).filter(function(el) {
+      return el.classList.contains('video-card');
+    });
+    if (cards.length <= batchSize) return;
+
+    var loadMoreBtn = document.createElement('button');
+    loadMoreBtn.className = 'load-more-btn';
+    loadMoreBtn.textContent = 'Show more';
+    grid.parentNode.insertBefore(loadMoreBtn, grid.nextSibling);
+
+    var pageSize = batchSize;
+    var currentIndex = pageSize;
+
+    function hideAllBeyond(idx) {
+      for (var i = idx; i < cards.length; i++) {
+        cards[i].classList.add('paged-hidden');
+        cards[i].style.display = 'none';
+      }
+    }
+
+    function showBatch() {
+      var end = Math.min(currentIndex + pageSize, cards.length);
+      for (var i = currentIndex; i < end; i++) {
+        cards[i].classList.remove('paged-hidden');
+        cards[i].style.display = '';
+      }
+      currentIndex = end;
+      if (currentIndex >= cards.length) {
+        loadMoreBtn.style.display = 'none';
+      } else {
+        window.setTimeout(function() {
+          window.scrollBy(0, 80);
+        }, 50);
+      }
+    }
+
+    function resetPagination() {
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.remove('paged-hidden');
+        cards[i].style.display = '';
+      }
+      currentIndex = cards.length;
+      if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+    }
+
+    hideAllBeyond(pageSize);
+
+    loadMoreBtn.addEventListener('click', showBatch);
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && loadMoreBtn.style.display !== 'none') {
+          loadMoreBtn.click();
+        }
+      });
+    }, { rootMargin: '200px' });
+    observer.observe(loadMoreBtn);
+
+    // Expose reset so sort/filter can call it
+    grid.__paginationReset = resetPagination;
+  };
+
   document.addEventListener('DOMContentLoaded', function() {
     initScheduleTimes();
     initCountdown();
     initMarquee();
     initHashDeepLink();
+
+    // LQIP: fade thumbnails in on load
+    Array.prototype.forEach.call(document.querySelectorAll('.video-card img'), function(img) {
+      if (img.complete && img.naturalWidth > 0) {
+        img.classList.add('loaded');
+      } else {
+        img.addEventListener('load', function() { img.classList.add('loaded'); });
+        img.addEventListener('error', function() { img.classList.add('loaded'); });
+      }
+    });
+
+    // Paginate any grid with [data-paged]
+    var pagedGrids = document.querySelectorAll('[data-paged]');
+    Array.prototype.forEach.call(pagedGrids, function(g) {
+      initPagination(g.id);
+    });
   });
 })();

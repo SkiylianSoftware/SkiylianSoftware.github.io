@@ -7,6 +7,8 @@ permalink: /dashboard/
 group: stats
 ---
 
+{% include stale-banner.html %}
+
 {% assign meta = site.data.site_meta %}
 {% assign videos = site.data.youtube_main.videos %}
 {% assign vods_list = site.data.youtube_vods.videos %}
@@ -53,8 +55,42 @@ group: stats
   {% assign twitch_age_years = twitch_age_days | divided_by: 365 %}
 {% endif %}
 
+{% assign hist = site.data.history %}
+{% if hist.size > 1 %}
+{% assign last_hist = hist.last %}
+{% assign month_ago_ts = site.time | date: "%s" | minus: 2592000 %}
+{% assign anchor_h = nil %}
+{% for e in hist reversed %}
+  {% assign e_ts = e.date | date: "%s" | plus: 0 %}
+  {% if e_ts >= month_ago_ts %}{% assign anchor_h = e %}{% else %}{% break %}{% endif %}
+{% endfor %}
+{% if anchor_h == nil %}{% assign anchor_h = hist.first %}{% endif %}
+{% assign m_subs_d = last_hist.youtube_main.subs | minus: anchor_h.youtube_main.subs %}
+{% assign m_views_d = last_hist.youtube_main.views | minus: anchor_h.youtube_main.views %}
+{% assign m_videos_d = last_hist.youtube_main.videos | minus: anchor_h.youtube_main.videos %}
+{% assign m_watch = 0 %}
+{% for e in hist reversed %}
+  {% assign e_ts = e.date | date: "%s" | plus: 0 %}
+  {% if e_ts < month_ago_ts %}{% break %}{% endif %}
+  {% if e._analytics.watch_time_minutes %}{% assign m_watch = m_watch | plus: e._analytics.watch_time_minutes %}{% endif %}
+{% endfor %}
+{% assign m_watch_h = m_watch | divided_by: 60 %}
+{% assign m_avg_view = m_views_d | divided_by: 30 %}
+{% endif %}
+
 <!-- Combined Overview -->
 <p class="stats-freshness">Data refreshed {{ site.data.history.last.date | default: "" | truncate: 10, "" }}</p>
+<div class="motd-box">
+  <i class="fas fa-chart-line motd-icon"></i>
+  <span>
+    {% if hist and hist.size > 1 %}
+    In the last 30 days the channel gained <strong>{% if m_subs_d >= 0 %}+{% endif %}{{ m_subs_d }}</strong> subscribers, <strong>{% if m_views_d >= 0 %}+{% endif %}{{ m_views_d }}</strong> views ({% if m_avg_view >= 0 %}+{% endif %}{{ m_avg_view }}/day) and <strong>{% if m_videos_d >= 0 %}+{% endif %}{{ m_videos_d }}</strong> videos, for <strong>{{ m_watch_h }}h</strong> of watch time.
+    {% if most_viewed %}Currently most-watched: <strong>{{ most_viewed.title | truncate: 40 }}</strong> ({{ most_viewed.view_count }} views).{% endif %}
+    {% else %}
+    Stats will populate here as the tracking pipeline starts collecting history.
+    {% endif %}
+  </span>
+</div>
 <h2 class="stats-subtitle">Overview</h2>
 {% assign yt_subs = meta.subscriber_count | default: 0 %}
 {% assign vods_subs = meta.vods_subscriber_count | default: 0 %}

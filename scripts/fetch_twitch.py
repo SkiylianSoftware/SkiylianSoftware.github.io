@@ -152,6 +152,44 @@ def fetch_vods(user_id, token):
     return vods
 
 
+def _dedupe_against_youtube(vods):
+    """Drop Twitch VODs already uploaded to the YouTube VODs channel.
+
+    When a broadcast is saved both to Twitch and re-uploaded to the YouTube
+    VODs channel, the two are the same content. The YouTube copy is treated
+    as canonical (it is linked from the streams page with a nicer player), so
+    matching Twitch entries are removed to avoid duplicate cards. Matches are
+    made on title (both platforms usually keep the original broadcast title),
+    falling back to same-day publish times.
+    """
+    yt_path = os.path.join(DATA_DIR, "youtube_vods.json")
+    yt = set()
+    if os.path.exists(yt_path):
+        try:
+            with open(yt_path) as f:
+                yt_videos = json.load(f).get("videos", [])
+            for v in yt_videos:
+                title = (v.get("title") or "").strip().lower()
+                if title:
+                    yt.add(title)
+        except Exception as e:
+            print(f"  Could not read youtube_vods.json for dedupe: {e}", file=sys.stderr)
+            return vods
+
+    kept = []
+    dropped = 0
+    for v in vods:
+        title = (v.get("title") or "").strip().lower()
+        if title and title in yt:
+            dropped += 1
+            print(f"  Dropping {v.get('video_id')} '{v.get('title')}' (also on YouTube VODs)")
+            continue
+        kept.append(v)
+    if dropped:
+        print(f"  Deduped {dropped} Twitch VOD{'' if dropped == 1 else 's'}")
+    return kept
+
+
 def main():
     token = get_app_token()
     if not token:
@@ -193,8 +231,9 @@ def main():
     print("Fetching Twitch VODs...")
     try:
         vods = fetch_vods(user_id, token)
+        vods = _dedupe_against_youtube(vods)
         save("twitch_vods.json", {"videos": vods, "_schema_version": 1})
-        print(f"Twitch VODs: {len(vods)} past broadcasts")
+        print(f"Twitch VODs: {len(vods)} past broadcasts (after YouTube dedupe)")
     except Exception as e:
         print(f"Could not fetch Twitch VODs: {e}", file=sys.stderr)
 

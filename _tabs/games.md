@@ -58,6 +58,9 @@ group: media
         <span class="game-stat"><span class="game-stat-value">{{ g.episode_count }}</span> ep</span>
         <span class="game-stat"><span class="game-stat-value">{{ hours }}h {{ mins }}m</span></span>
         <span class="game-stat"><span class="game-stat-value">{{ g.total_views }}</span> views</span>
+        {% if g.engagement_rate and g.engagement_rate > 0 %}
+        <span class="game-stat"><span class="game-stat-value">{{ g.engagement_rate }}%</span> engagement</span>
+        {% endif %}
         {% if g.series.size > 1 %}
         <span class="game-stat"><span class="game-stat-value">{{ g.series | size }}</span> series</span>
         {% endif %}
@@ -112,6 +115,9 @@ group: media
           <span class="game-stat"><span class="game-stat-value">{{ cat.episode_count }}</span> video{% if cat.episode_count > 1 %}s{% endif %}</span>
           <span class="game-stat"><span class="game-stat-value">{{ cat_hours }}h {{ cat_mins }}m</span></span>
           <span class="game-stat"><span class="game-stat-value">{{ cat.total_views }}</span> views</span>
+          {% if cat.engagement_rate and cat.engagement_rate > 0 %}
+          <span class="game-stat"><span class="game-stat-value">{{ cat.engagement_rate }}%</span> engagement</span>
+          {% endif %}
         </div>
         {% if cat.series_data %}
         <div class="game-series">

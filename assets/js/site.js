@@ -85,6 +85,20 @@ function filterSeries(btn) {
   var dd = document.getElementById('filter-more-dropdown');
   if (dd) dd.classList.remove('open');
 
+  // Reset pagination: reveal all cards and remove the load-more button
+  var pagedGrids = document.querySelectorAll('[data-paged]');
+  Array.prototype.forEach.call(pagedGrids, function(g) {
+    if (g.__paginationReset) g.__paginationReset();
+    // Also remove any load-more-btn
+    var btn2 = g.parentNode.querySelector('.load-more-btn');
+    if (btn2) btn2.style.display = 'none';
+  });
+  // Remove paged-hidden from any orphaned cards
+  Array.prototype.forEach.call(document.querySelectorAll('.paged-hidden'), function(el) {
+    el.classList.remove('paged-hidden');
+    el.style.display = '';
+  });
+
   var grid = document.getElementById('video-grid');
   if (!grid) return;
   var name = btn ? btn.getAttribute('data-series-name') : null;

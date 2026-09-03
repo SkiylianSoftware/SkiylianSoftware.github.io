@@ -18,6 +18,7 @@ group: media
 </div>
 
 {% assign all_videos = site.data.youtube_main.videos %}
+{% assign video_badges = site.data.milestones.video_badges %}
 {% if all_videos and all_videos.size > 0 %}
 {% assign series_set = all_videos | map: "series" | compact | map: "series_name" | uniq %}
 {% assign recency_map = site.data.youtube_main.series_recency %}
@@ -82,7 +83,7 @@ group: media
 </div>
 {% endif %}
 
-<div id="video-grid" class="video-grid">
+<div id="video-grid" class="video-grid" data-paged>
 {% for video in all_videos %}
 <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}"
      data-published="{{ video.published }}" data-views="{{ video.view_count | default: 0 }}"
@@ -98,6 +99,10 @@ group: media
     <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/{{ video.video_id }}/hqdefault.jpg'">
     <div class="play-overlay"><i class="fas fa-play"></i></div>
     {% if video.duration_seconds and video.duration_seconds > 0 %}<span class="duration-badge">{{ video.duration_seconds | divided_by: 3600 }}:{{ video.duration_seconds | modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ video.duration_seconds | modulo: 60 | prepend: '00' | slice: -2, 2 }}</span>{% endif %}
+    {% assign vb = video_badges[video.video_id] %}
+    {% if vb and vb.msg %}
+    <span class="milestone-badge" title="{{ vb.msg }}">&#127942;</span>
+    {% endif %}
   </div>
   <div class="card-body">
     <h3>{{ video.title }}</h3>

@@ -4,6 +4,8 @@ layout: default
 
 <div class="hero-stage">
 
+    {% include stale-banner.html %}
+
     {% include banner.html %}
 
     {% if site.data.milestones and site.data.milestones.current and site.data.milestones.current.size > 0 %}

@@ -134,51 +134,27 @@ group: stats
 </div>
 
 <!-- Upcoming Milestones -->
+{% assign fm = site.data.future_milestones %}
+{% if fm %}
 <h2 class="stats-subtitle">Upcoming Milestones</h2>
-{% assign cur_subs = meta.subscriber_count | default: 0 | plus: 0 %}
-{% assign cur_views = meta.view_count | default: 0 | plus: 0 %}
-{% assign subs_goals = "81,243,729,2187" | split: "," %}
-{% assign views_tiers = "10000,20000,50000,100000" | split: "," %}
 <div class="stats-grid">
-  {% for g in subs_goals %}
-  {% assign goal = g | plus: 0 %}
-  {% if goal > cur_subs %}
-  <div class="stat-card ms-upcoming ms-ternary">
-    <span class="stat-value">{{ goal }}</span>
-    <span class="stat-label">Subs (3&#8308;)</span>
-    {% if m_subs_d > 0 %}
-    {% assign months_left = goal | minus: cur_subs | divided_by: m_subs_d %}
-    {% assign eta_days = months_left | times: 30 %}
-    {% if eta_days > 0 %}
-    {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-    {% assign s_offset = eta_days | times: 86400 %}
-    {% assign eta_date_epoch = now_epoch | plus: s_offset %}
-    <span class="stat-eta">~{{ eta_date_epoch | date: "%b %Y" }}</span>
-    {% endif %}
-    {% endif %}
-  </div>
-  {% endif %}
-  {% endfor %}
-  {% for g in views_tiers %}
-  {% assign vgoal = g | plus: 0 %}
-  {% if vgoal > cur_views %}
-  <div class="stat-card ms-upcoming ms-views">
-    <span class="stat-value">{{ vgoal }}</span>
-    <span class="stat-label">Views</span>
-    {% if m_views_d > 0 %}
-    {% assign vmonths = vgoal | minus: cur_views | divided_by: m_views_d %}
-    {% assign vdays = vmonths | times: 30 %}
-    {% if vdays > 0 %}
-    {% assign now_epoch = site.time | date: "%s" | plus: 0 %}
-    {% assign v_offset = vdays | times: 86400 %}
-    {% assign v_eta_epoch = now_epoch | plus: v_offset %}
-    <span class="stat-eta">~{{ v_eta_epoch | date: "%b %Y" }}</span>
-    {% endif %}
+  {% for pair in fm %}
+  {% assign mkey = pair[0] %}
+  {% assign mval = pair[1] %}
+  {% if mval and mval.next %}
+  <div class="stat-card ms-upcoming ms-{{ mkey }}">
+    <span class="stat-value">{{ mval.next }}</span>
+    <span class="stat-label">{{ mkey | capitalize }} ({{ mval.current }})</span>
+    {% if mval.eta and mval.eta != "" %}
+    <span class="stat-eta">~{{ mval.eta | date: "%b %Y" }}</span>
+    {% else %}
+    <span class="stat-eta">pacing unknown</span>
     {% endif %}
   </div>
   {% endif %}
   {% endfor %}
 </div>
+{% endif %}
 
 <!-- Last 30 Days delta -->
 {% assign history = site.data.history %}

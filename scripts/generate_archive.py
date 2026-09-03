@@ -120,9 +120,17 @@ def episode_card(video):
     dur = int(video.get("duration_seconds") or 0)
     date = fmt_date(video.get("published"))
     series = video.get("series") or {}
+    game = series.get("game") or ""
+    sname = series.get("series_name") or ""
     ep = series.get("episode_number")
 
-    parts = [f'<a href="/videos#{vid}" class="video-card" style="color: inherit; text-decoration: none;">']
+    parts = [
+        f'<div class="video-card" data-video-id="{esc(vid)}" data-title="{esc(title)}"'
+        f' data-published="{esc(video.get("published") or "")}" data-views="{views}"'
+        f' data-duration="{dur}" data-series="{esc(sname)}" data-game="{esc(game)}"'
+        f' data-series-slug="{esc(slugify(sname))}" data-game-slug="{esc(slugify(game))}"'
+        f' data-description="{esc(video.get("description") or "")}" onclick="openPlayer(this)">'
+    ]
     parts.append('<div class="thumb-wrap">')
     if thumb:
         onerror = f"this.onerror=null;this.src='https://i.ytimg.com/vi/{vid}/hqdefault.jpg'"
@@ -142,7 +150,7 @@ def episode_card(video):
         parts.append(f'<div class="meta-row">{" ".join(meta)}</div>')
     if ep:
         parts.append(f'<div class="series-badge">Episode {esc(ep)}</div>')
-    parts.append("</div></a>")
+    parts.append("</div></div>")
     return "\n".join(parts)
 
 
@@ -152,8 +160,24 @@ def playlist_links(sname, playlists):
     for pl in matched:
         title = pl.get("title") or sname
         url = pl.get("url") or ""
-        lines.append(f"[Watch the {esc(title)} playlist on YouTube]({esc(url)})")
+        lines.append(
+            f'<a href="{escape_url(url)}" target="_blank" rel="noopener">Watch the {esc(title)} playlist on YouTube</a>'
+        )
     return lines
+
+
+def _stats_row(items):
+    """HTML for a header stats strip: list of (label, value) pairs."""
+    cells = "".join(
+        f'<div class="stat-cell"><span class="stat-value">{esc(str(val))}</span>'
+        f'<span class="stat-label">{esc(str(label))}</span></div>'
+        for label, val in items
+    )
+    return f'<div class="card-stats">{cells}</div>'
+
+
+def _modal_include():
+    return "{% include video-modal.html %}"
 
 
 def write_series_page(sname, svideos, game_name, playlists):
@@ -166,29 +190,31 @@ def write_series_page(sname, svideos, game_name, playlists):
         "series_feed": f"/feed/series/{sslug}.xml",
     }
 
-    body = []
+    body = ["{% include banner.html %}", ""]
+
     if game_name:
         gslug = slugify(game_name)
-        overview = f'Part of the <a href="/games/{gslug}/"><strong>{esc(game_name)}</strong></a> series.'
-        body.append(f'<p class="series-overview">{overview}</p>')
+        body.append(
+            f'<p class="series-overview">Part of the '
+            f'<a href="/games/{gslug}/"><strong>{esc(game_name)}</strong></a> series.</p>'
+        )
         body.append("")
 
     ep_count = len(svideos)
     total_secs = sum(int(v.get("duration_seconds") or 0) for v in svideos)
-    body.append("## Stats")
-    body.append("")
-    body.append(f"- **Episodes:** {ep_count}")
-    body.append(f"- **Total watch time:** {fmt_hours(total_secs)}")
+    total_views = sum(int(v.get("view_count") or 0) for v in svideos)
+    body.append(_stats_row([("Episodes", ep_count), ("Watch time", fmt_hours(total_secs)), ("Views", total_views)]))
     body.append("")
 
     pl_links = playlist_links(sname, playlists)
     if pl_links:
-        body.append("## Playlist")
-        body.append("")
-        body.extend(pl_links)
+        body.append('<div class="card-cta-block">')
+        body.append("<strong>Playlist:</strong>")
+        body.extend(f"<p>{p}</p>" for p in pl_links)
+        body.append("</div>")
         body.append("")
 
-    body.append("## Episodes")
+    body.append('<h2 class="section-title">Episodes</h2>')
     body.append("")
     if svideos:
         body.append('<div class="video-grid">')
@@ -196,7 +222,10 @@ def write_series_page(sname, svideos, game_name, playlists):
             body.append(episode_card(v))
         body.append("</div>")
     else:
-        body.append("No episodes listed yet.")
+        body.append('<p class="empty-state">No episodes listed yet.</p>')
+
+    body.append("")
+    body.append(_modal_include())
 
     write_page(os.path.join(SERIES_DIR, f"{sslug}.md"), frontmatter, "\n".join(body))
     write_series_feed(sname, sslug, svideos)
@@ -211,7 +240,8 @@ def write_game_page(gname, g, games_data, playlists, game_links):
         "group": "media",
     }
 
-    body = []
+    body = ["{% include banner.html %}", ""]
+
     links = game_links.get(gname) or {}
     link_html = []
     if links.get("steam"):
@@ -231,17 +261,20 @@ def write_game_page(gname, g, games_data, playlists, game_links):
     ep_count = g.get("episode_count") or 0
     total_secs = g.get("total_duration_seconds") or 0
     total_views = g.get("total_views") or 0
-    body.append("## Stats")
-    body.append("")
-    body.append(f"- **Episodes:** {ep_count}")
-    body.append(f"- **Total watch time:** {fmt_hours(total_secs)}")
-    body.append(f"- **Total views:** {total_views}")
+    stream_count = g.get("stream_count") or 0
+    source = g.get("source")
+    stats = [("Episodes", ep_count), ("Watch time", fmt_hours(total_secs)), ("Views", total_views)]
+    if stream_count:
+        stats.append(("Streams", stream_count))
+    if source:
+        stats.append(("Source", source.title()))
+    body.append(_stats_row(stats))
     body.append("")
 
     series_names = g.get("series") or []
     series_data = g.get("series_data") or {}
     if series_names:
-        body.append("## Series")
+        body.append('<h2 class="section-title">Series</h2>')
         body.append("")
         for sname in series_names:
             sslug = slugify(sname)
@@ -249,10 +282,10 @@ def write_game_page(gname, g, games_data, playlists, game_links):
             label = sname
             if years:
                 label += f" ({years})"
-            body.append(f"- [{esc(label)}](/series/{sslug}/)")
+            body.append(f'- <a href="/series/{sslug}/">{esc(label)}</a>')
         body.append("")
 
-    body.append("[Back to all games](/games/)")
+    body.append('<p class="back-link"><a href="/games/" class="btn">&larr; All games</a></p>')
 
     write_page(os.path.join(GAMES_DIR, f"{gslug}.md"), frontmatter, "\n".join(body))
 

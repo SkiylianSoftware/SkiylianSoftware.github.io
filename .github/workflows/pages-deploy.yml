@@ -117,6 +117,9 @@ jobs:
       - name: Generate archive pages (series + game)
         run: python scripts/generate_archive.py
 
+      - name: Compute future milestone ETAs
+        run: python scripts/compute_future_milestones.py
+
       - name: Generate Year in Review pages
         run: python scripts/generate_year_review.py
 

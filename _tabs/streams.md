@@ -36,7 +36,8 @@ group: media
         </div>
     </div>
 
-{% if site.data.livestream.platform == "twitch" or site.data.livestream.platform == "youtube" %}
+<div class="section-break"></div>
+
 {% if twitch_sched and twitch_sched.size > 0 %}
 {% assign shown = 0 %}
 <div class="section-break"></div>
@@ -62,7 +63,6 @@ group: media
     {% endif %}
   </div>
 </div>
-{% endif %}
 {% endif %}
 
 <div class="section-break"></div>
@@ -106,6 +106,7 @@ group: media
   <div class="video-card" data-video-id="{{ vod.video_id }}" data-title="{{ vod.title | escape }}" data-url="{{ vod.url }}" data-platform="{{ vod.platform | default: 'youtube' }}"
       data-published="{{ vod.published }}" data-views="{{ vod.view_count | default: 0 }}"
       data-duration="{{ vod.duration_seconds | default: 0 }}"
+      data-likes="{{ vod.like_count | default: 0 }}" data-comments="{{ vod.comment_count | default: 0 }}"
       data-series="{% if vod.series %}{{ vod.series.series_name | escape }}{% endif %}"
       data-series-slug="{% if vod.series %}{{ vod.series.series_name | slugify }}{% endif %}"
       data-game="{% if vod.series %}{{ vod.series.game | escape }}{% endif %}"

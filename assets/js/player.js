@@ -68,9 +68,17 @@
     var published = el.getAttribute('data-published');
     var views = parseInt(el.getAttribute('data-views')) || 0;
     var duration = parseInt(el.getAttribute('data-duration')) || 0;
+    var views2 = views;
     if (published) parts.push('<span class="meta-date"><time datetime="' + published + '">' + new Date(published).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '</time></span>');
     if (views > 0) parts.push('<span class="meta-views">' + Number(views).toLocaleString() + ' views</span>');
     if (duration > 0) parts.push('<span class="meta-duration">' + formattedDuration(duration) + '</span>');
+    // Engagement rate: (likes + comments) / views
+    var likes = parseInt(el.getAttribute('data-likes')) || 0;
+    var comments2 = parseInt(el.getAttribute('data-comments')) || 0;
+    if (views > 0 && (likes > 0 || comments2 > 0)) {
+      var eng = ((likes + comments2) / views * 100).toFixed(1);
+      parts.push('<span class="meta-engagement" title="(likes + comments) / views">' + eng + '% engagement</span>');
+    }
     box.innerHTML = parts.join(' &middot; ');
     box.style.display = parts.length ? '' : 'none';
   }
@@ -101,7 +109,14 @@
     var box = document.getElementById('modal-description');
     if (!box) return;
     if (desc) {
-      box.innerHTML = '<div class="desc-text">' + linkify(escapeHtml(String(desc).replace(/\n/g, '<br>'))) + '</div>';
+      var text = String(desc);
+      // Jekyll's | escape filter turns newlines into literal \n sequences.
+      // Also handle HTML line-breaks if they made it through.
+      text = text.replace(/\\n/g, '\n').replace(/<br\s*\/?>/gi, '\n');
+      // Format chapter-style timestamps as clickable chips
+      text = text.replace(/(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*/g,
+        '<span class="chap-inline" data-chap-time="$1">$1 - </span>');
+      box.innerHTML = '<div class="desc-text">' + linkify(escapeHtml(text).replace(/\n/g, '<br>')) + '</div>';
       box.style.display = '';
     } else {
       box.innerHTML = '';
@@ -312,9 +327,10 @@
 
   /* Event delegation for modal actions (chapters, up-next, series-more) */
   document.addEventListener('click', function(e) {
-    var chip = e.target.closest ? e.target.closest('.chapter-chip') : null;
+    var chip = e.target.closest ? e.target.closest('.chapter-chip, .chap-inline') : null;
     if (chip && _openEl) {
-      setIframe(_openEl.getAttribute('data-video-id'), chip.getAttribute('data-start'));
+      var time = chip.getAttribute('data-start') || chip.getAttribute('data-chap-time');
+      setIframe(_openEl.getAttribute('data-video-id'), time);
       return;
     }
     var next = e.target.closest ? e.target.closest('[data-watch-next]') : null;

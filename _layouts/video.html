@@ -41,14 +41,6 @@ layout: default
   <div class="post-content">
     {{ content }}
   </div>
-
-  {% if page.tags %}
-  <div class="post-tags">
-    {% for tag in page.tags %}
-    <a href="/games/" class="btn btn-outline-primary tag-btn">{{ tag }}</a>
-    {% endfor %}
-  </div>
-  {% endif %}
 </article>
 
 <style>

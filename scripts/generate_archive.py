@@ -127,6 +127,7 @@ def episode_card(video):
     parts = [
         f'<div class="video-card" data-video-id="{esc(vid)}" data-title="{esc(title)}"'
         f' data-published="{esc(video.get("published") or "")}" data-views="{views}"'
+        f' data-likes="{video.get("like_count") or 0}" data-comments="{video.get("comment_count") or 0}"'
         f' data-duration="{dur}" data-series="{esc(sname)}" data-game="{esc(game)}"'
         f' data-series-slug="{esc(slugify(sname))}" data-game-slug="{esc(slugify(game))}"'
         f' data-description="{esc(video.get("description") or "")}" onclick="openPlayer(this)">'

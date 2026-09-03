@@ -88,6 +88,7 @@ group: media
 <div class="video-card" data-video-id="{{ video.video_id }}" data-title="{{ video.title | escape }}"
      data-published="{{ video.published }}" data-views="{{ video.view_count | default: 0 }}"
      data-duration="{{ video.duration_seconds | default: 0 }}"
+     data-likes="{{ video.like_count | default: 0 }}" data-comments="{{ video.comment_count | default: 0 }}"
      data-series="{% if video.series %}{{ video.series.series_name | escape }}{% endif %}"
      data-series-slug="{% if video.series %}{{ video.series.series_name | slugify }}{% endif %}"
      data-game="{% if video.series %}{{ video.series.game | escape }}{% endif %}"

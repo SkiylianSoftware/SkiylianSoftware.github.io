@@ -294,31 +294,4 @@ el.textContent = '\u00b7 ' + rel;
   });
 })();
 
-/* Balanced ternary day-of-year clock */
-(function() {
-  function toBalancedTernary(n) {
-    if (n === 0) return '0';
-    var digits = [];
-    while (n > 0) {
-      var r = n % 3;
-      n = Math.floor(n / 3);
-      if (r === 2) { digits.unshift('1'); n += 1; }
-      else if (r === 1) digits.unshift('1');
-      else digits.unshift('0');
-    }
-    return digits.join('');
-  }
-  document.addEventListener('DOMContentLoaded', function() {
-    var el = document.getElementById('ternary-clock');
-    if (!el) return;
-    function tick() {
-      var now = new Date();
-      var start = new Date(now.getFullYear(), 0, 0);
-      var diff = now - start;
-      var day = Math.floor(diff / 86400000);
-      el.textContent = toBalancedTernary(day) + ' (day ' + day + ' of ' + now.getFullYear() + ')';
-    }
-    tick();
-    setInterval(tick, 86400000);
-  });
-})();
+

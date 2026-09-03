@@ -1,11 +1,8 @@
 ---
-# Video content layout for generated posts (RSS feed). Mirrors the Chirpy
-# theme's post layout but without the "reading time" metric and with a
-# prominent thumbnail if the post has one in its front matter.
----
 layout: default
 ---
 {% include lang.html %}
+
 <article class="px-1" itemscope itemtype="https://schema.org/VideoObject">
   <meta itemprop="name" content="{{ page.title | xml_escape }}">
   <meta itemprop="description" content="{{ page.description | xml_escape }}">
@@ -22,12 +19,12 @@ layout: default
   <div class="post-meta text-muted">
     <div class="d-flex justify-content-between">
       <div>
+        {% if page.image %}
+        <img src="{{ page.image | absolute_url }}" alt="{{ page.title }}" class="video-featured-img" loading="lazy">
+        {% endif %}
         <span class="post-date">
           <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: site.data.locales[lang].df.post.strftime | default: "%b %e, %Y" }}</time>
         </span>
-        {% if page.image %}
-        <img src="{{ page.image }}" alt="{{ page.title }}" class="video-featured-img" loading="lazy">
-        {% endif %}
       </div>
     </div>
   </div>
@@ -39,8 +36,14 @@ layout: default
   {% if page.tags %}
   <div class="post-tags">
     {% for tag in page.tags %}
-    <a href="/tags/{{ tag | slugify }}" class="btn btn-outline-primary tag-btn">{{ tag }}</a>
+    <a href="/games/" class="btn btn-outline-primary tag-btn">{{ tag }}</a>
     {% endfor %}
   </div>
   {% endif %}
 </article>
+
+<style>
+.video-featured-img { width: 100%; max-width: 640px; border-radius: 8px; margin: 0 0 1rem; aspect-ratio: 16/9; object-fit: cover; border: 1px solid rgba(45,212,191,0.12); }
+.post-tags { margin-top: 1.5rem; }
+.tag-btn { margin: 0.2rem; font-size: 0.8rem; }
+</style>

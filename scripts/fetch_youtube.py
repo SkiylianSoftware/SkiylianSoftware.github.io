@@ -1198,6 +1198,78 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
     }
 
 
+def compute_twitch_game_stats():
+    """Aggregate game stats from Twitch VODs and clips.
+
+    Games that are streamed but never uploaded to YouTube should still
+    appear on the Games page. VODs and clips both carry a game_name (the
+    Twitch category at broadcast time).
+    """
+    stats = {}
+    for fname in ("twitch_vods.json", "twitch_clips.json"):
+        path = os.path.join(DATA_DIR, fname)
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path) as f:
+                data = json.load(f)
+        except Exception:
+            continue
+        items = data.get("videos") if fname == "twitch_vods.json" else data.get("clips", [])
+        if not items:
+            continue
+        for item in items:
+            gname = item.get("game_name") or item.get("game") or "Misc"
+            if gname in ("", "Just Chatting", "Science & Technology", "Software and Game Development"):
+                gname = "Misc"
+            if gname not in stats:
+                stats[gname] = {
+                    "episode_count": 0,
+                    "total_duration_seconds": 0,
+                    "total_views": 0,
+                    "first_video": None,
+                    "latest_video": None,
+                    "active_years": set(),
+                    "series_data": {},
+                }
+            g = stats[gname]
+            g["episode_count"] += 1
+            g["total_duration_seconds"] += item.get("duration_seconds", 0)
+            g["total_views"] += item.get("view_count", 0)
+            published = item.get("published") or item.get("created_at") or item.get("started_at") or ""
+            if published:
+                if g["first_video"] is None or published < g["first_video"]:
+                    g["first_video"] = published
+                if g["latest_video"] is None or published > g["latest_video"]:
+                    g["latest_video"] = published
+                g["active_years"].add(published[:4])
+            # A pseudo-series per game so series pages have something to show
+            sname = gname
+            if sname not in g["series_data"]:
+                g["series_data"][sname] = {
+                    "episode_count": 0,
+                    "first_video": None,
+                    "latest_video": None,
+                    "active_years": set(),
+                }
+            sd = g["series_data"][sname]
+            sd["episode_count"] += 1
+            if published:
+                if sd["first_video"] is None or published < sd["first_video"]:
+                    sd["first_video"] = published
+                if sd["latest_video"] is None or published > sd["latest_video"]:
+                    sd["latest_video"] = published
+                sd["active_years"].add(published[:4])
+
+    # Convert active_years sets and drop empty extra
+    for g in stats.values():
+        g["active_years"] = format_years(g["active_years"])
+        for sd in g["series_data"].values():
+            sd["active_years"] = format_years(sd["active_years"])
+        g["series"] = list(g["series_data"].keys())
+    return stats
+
+
 def main():
     print("Fetching YouTube uploads...")
     videos = fetch_uploads(UPLOADS_PLAYLIST_ID, "main channel uploads")
@@ -1221,6 +1293,35 @@ def main():
             all_videos, alias_map=ALIAS_MAP, content_types=CONTENT_TYPES, valid_games=VALID_GAMES
         )
         game_stats["_schema_version"] = 1
+
+        # Merge in Twitch-sourced game stats (games played on stream but
+        # never uploaded to YouTube). This ensures stream-only games appear
+        # on the Games page and get series pages alongside video games.
+        twitch_games = compute_twitch_game_stats()
+        for gname, gdata in twitch_games.items():
+            if gname in game_stats.get("games", {}):
+                existing = game_stats["games"][gname]
+                existing["episode_count"] += gdata.get("episode_count", 0)
+                existing["total_duration_seconds"] += gdata.get("total_duration_seconds", 0)
+                existing["total_views"] += gdata.get("total_views", 0)
+                if not existing.get("latest_video") or (
+                    gdata.get("latest_video") and gdata["latest_video"] > existing["latest_video"]
+                ):
+                    existing["latest_video"] = gdata.get("latest_video")
+                if not existing.get("first_video") or (
+                    gdata.get("first_video") and gdata["first_video"] < existing["first_video"]
+                ):
+                    existing["first_video"] = gdata.get("first_video")
+                existing.setdefault("series_data", {}).update(gdata.get("series_data", {}))
+                existing.setdefault("stream_count", 0)
+                existing["stream_count"] += gdata.get("episode_count", 0)
+                existing.setdefault("source", "video")
+            else:
+                gdata["source"] = "twitch"
+                gdata.setdefault("stream_count", gdata.get("episode_count", 0))
+                gdata["series"] = list(gdata.get("series_data", {}).keys())
+                game_stats.setdefault("games", {})[gname] = gdata
+
         save("games.json", game_stats)
 
     print("Fetching YouTube playlists...")

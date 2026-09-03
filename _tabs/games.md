@@ -67,18 +67,7 @@ group: media
       </div>
       <div class="game-series">
         {% if g.active_years %}
-        <div class="game-activity" title="Active years: {{ g.active_years | join: ', ' }}">
-          {% assign ay_start = g.active_years | sort | first | plus: 0 %}
-          {% assign ay_end = g.active_years | sort | last | plus: 0 %}
-          {% for ay in (ay_start..ay_end) %}
-          {% assign ay_str = ay | append: "" %}
-          {% if g.active_years contains ay_str %}
-          <span class="act-year act-on" title="{{ ay }}"></span>
-          {% else %}
-          <span class="act-year act-off" title="{{ ay }}"></span>
-          {% endif %}
-          {% endfor %}
-        </div>
+        <div class="game-years">Active: {{ g.active_years | join: ", " | split: "," | uniq | sort | join: ", " }}</div>
         {% endif %}
         {% for sname in g.series %}
         {% assign sd = g.series_data[sname] %}

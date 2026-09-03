@@ -28,6 +28,14 @@ permalink: /support/
     <span class="metric-label">Twitch followers</span>
   </div>
   {% endif %}
+  {% assign kofi = site.data.kofi %}
+  {% if kofi.total and kofi.total > 0 %}
+  <div class="metric-card">
+    <i class="fas fa-mug-hot"></i>
+    <span class="metric-value">{{ kofi.total }}</span>
+    <span class="metric-label">Ko-fi raised</span>
+  </div>
+  {% endif %}
 </div>
 {% endif %}
 

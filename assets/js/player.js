@@ -101,7 +101,7 @@
     var box = document.getElementById('modal-description');
     if (!box) return;
     if (desc) {
-      box.innerHTML = '<p class="desc-label">Description</p><div class="desc-text">' + linkify(escapeHtml(desc).replace(/\n/g, '<br>')) + '</div>';
+      box.innerHTML = '<div class="desc-text">' + linkify(escapeHtml(String(desc).replace(/\n/g, '<br>'))) + '</div>';
       box.style.display = '';
     } else {
       box.innerHTML = '';

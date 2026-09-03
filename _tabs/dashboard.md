@@ -20,6 +20,7 @@ group: stats
 {% if vods_list.size > 0 or meta.vods_subscriber_count %}{% assign has_vods = true %}{% endif %}
 
 {% if videos.size > 0 %}
+  {% assign first_video = videos | sort: "published" | first %}
   {% assign total_watch_seconds = 0 %}
   {% assign total_video_views = 0 %}
   {% assign total_likes = 0 %}
@@ -267,8 +268,10 @@ group: stats
     </div>
     {% endif %}
     <div class="stat-card">
-      <span class="stat-value">{{ yt_start }}</span>
-      <span class="stat-label">First Video</span>
+      <a href="https://www.youtube.com/watch?v={{ first_video.video_id }}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+        <span class="stat-value">{{ yt_start }}</span>
+        <span class="stat-label">First Video</span>
+      </a>
     </div>
     {% if meta.memberships_available %}
     <div class="stat-card accent-purple">

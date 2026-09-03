@@ -144,10 +144,12 @@ def generate_video_posts(videos, label, channel_url):
 
         content_url = f"https://www.youtube.com/watch?v={vid}"
         embed_url = f"https://www.youtube.com/embed/{vid}"
-        body = f"[Watch on YouTube]({channel_url}/watch?v={vid})"
-        body += f"\n\n{_json_ld_block(v, embed_url, content_url)}"
+        body = _json_ld_block(v, embed_url, content_url)
+        body += "\n\n"
+        body += f"**[Watch on YouTube]({channel_url}/watch?v={vid})**"
         if desc:
-            body += f"\n\n{desc}"
+            body += "\n\n"
+            body += f"{desc[:300]}\u2026" if len(desc) > 300 else desc
 
         write_post(filename, frontmatter, body)
 
@@ -184,10 +186,12 @@ def generate_livestream_post(vods):
 
         content_url = f"https://www.youtube.com/watch?v={vid}"
         embed_url = f"https://www.youtube.com/embed/{vid}"
-        body = f"[Watch VOD on YouTube](https://watch.skiylia.dev/watch?v={vid})"
-        body += f"\n\n{_json_ld_block(v, embed_url, content_url)}"
+        body = _json_ld_block(v, embed_url, content_url)
+        body += "\n\n"
+        body += f"**[Watch VOD on YouTube](https://watch.skiylia.dev/watch?v={vid})**"
         if desc:
-            body += f"\n\n{desc}"
+            body += "\n\n"
+            body += f"{desc[:300]}\u2026" if len(desc) > 300 else desc
 
         write_post(filename, frontmatter, body)
 
@@ -223,10 +227,12 @@ def generate_twitch_post(vods):
         if desc:
             frontmatter["description"] = desc
 
-        body = f"[Watch VOD on Twitch]({vod_url})"
-        body += f"\n\n{_json_ld_block(v, vod_url, vod_url)}"
+        body = _json_ld_block(v, vod_url, vod_url)
+        body += "\n\n"
+        body += f"**[Watch VOD on Twitch]({vod_url})**"
         if desc:
-            body += f"\n\n{desc}"
+            body += "\n\n"
+            body += f"{desc[:300]}\u2026" if len(desc) > 300 else desc
 
         write_post(filename, frontmatter, body)
 

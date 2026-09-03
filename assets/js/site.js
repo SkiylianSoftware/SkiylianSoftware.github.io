@@ -85,19 +85,13 @@ function filterSeries(btn) {
   var dd = document.getElementById('filter-more-dropdown');
   if (dd) dd.classList.remove('open');
 
-  // Reset pagination: reveal all cards and remove the load-more button
-  var pagedGrids = document.querySelectorAll('[data-paged]');
-  Array.prototype.forEach.call(pagedGrids, function(g) {
-    if (g.__paginationReset) g.__paginationReset();
-    // Also remove any load-more-btn
-    var btn2 = g.parentNode.querySelector('.load-more-btn');
-    if (btn2) btn2.style.display = 'none';
-  });
-  // Remove paged-hidden from any orphaned cards
+  // Remove pagination: reveal all, then remove the button
   Array.prototype.forEach.call(document.querySelectorAll('.paged-hidden'), function(el) {
     el.classList.remove('paged-hidden');
     el.style.display = '';
   });
+  var loadBtn = document.querySelector('.load-more-btn');
+  if (loadBtn) loadBtn.style.display = 'none';
 
   var grid = document.getElementById('video-grid');
   if (!grid) return;
@@ -274,47 +268,6 @@ el.textContent = '\u00b7 ' + rel;
   });
 })();
 
-/* Accent colour picker (persisted per-device) */
-(function() {
-  var ACCENTS = {
-    teal:  { brand: '45, 212, 191',  lilac: '192, 132, 252', teal: '#2dd4bf', tealLight: '#5ee4d4', lilacCol: '#c084fc', lilacLight: '#d8b4fe' },
-    lilac: { brand: '192, 132, 252', lilac: '45, 212, 191',  teal: '#c084fc', tealLight: '#d8b4fe', lilacCol: '#2dd4bf', lilacLight: '#5ee4d4' },
-    gold:  { brand: '251, 191, 36',  lilac: '192, 132, 252', teal: '#fbbf24', tealLight: '#fcd34d', lilacCol: '#c084fc', lilacLight: '#d8b4fe' },
-    rose:  { brand: '251, 113, 133', lilac: '192, 132, 252', teal: '#fb7185', tealLight: '#fda4af', lilacCol: '#c084fc', lilacLight: '#d8b4fe' },
-    azure: { brand: '56, 189, 248',  lilac: '192, 132, 252', teal: '#38bdf8', tealLight: '#7dd3fc', lilacCol: '#c084fc', lilacLight: '#d8b4fe' },
-  };
-  var STORE_KEY = 'skiylia-accent';
-
-  function apply(name, persist) {
-    var a = ACCENTS[name];
-    if (!a) return;
-    var root = document.documentElement;
-    root.style.setProperty('--brand-rgb', a.brand);
-    root.style.setProperty('--brand-lilac-rgb', a.lilac);
-    root.style.setProperty('--clr-teal', a.teal);
-    root.style.setProperty('--clr-teal-light', a.tealLight);
-    root.style.setProperty('--clr-lilac', a.lilacCol);
-    root.style.setProperty('--clr-lilac-light', a.lilacLight);
-    document.querySelectorAll('.accent-swatch').forEach(function(s) {
-      s.classList.toggle('active', s.getAttribute('data-accent') === name);
-    });
-    if (persist) { try { localStorage.setItem(STORE_KEY, name); } catch (e) {} }
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    var saved = null;
-    try { saved = localStorage.getItem(STORE_KEY); } catch (e) {}
-    if (saved && ACCENTS[saved]) apply(saved, false);
-    var picker = document.querySelector('.accent-picker');
-    if (picker) {
-      picker.addEventListener('click', function(e) {
-        var sw = e.target.closest ? e.target.closest('.accent-swatch') : null;
-        if (sw) apply(sw.getAttribute('data-accent'), true);
-      });
-    }
-  });
-})();
-
 /* Balanced ternary age on the home page */
 (function() {
   function toBalancedTernary(n) {
@@ -338,5 +291,34 @@ el.textContent = '\u00b7 ' + rel;
     var days = Math.floor((Date.now() - t0) / 86400000);
     var val = document.getElementById('ternary-age-value');
     if (val) val.textContent = toBalancedTernary(days + 1);
+  });
+})();
+
+/* Balanced ternary day-of-year clock */
+(function() {
+  function toBalancedTernary(n) {
+    if (n === 0) return '0';
+    var digits = [];
+    while (n > 0) {
+      var r = n % 3;
+      n = Math.floor(n / 3);
+      if (r === 2) { digits.unshift('1'); n += 1; }
+      else if (r === 1) digits.unshift('1');
+      else digits.unshift('0');
+    }
+    return digits.join('');
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('ternary-clock');
+    if (!el) return;
+    function tick() {
+      var now = new Date();
+      var start = new Date(now.getFullYear(), 0, 0);
+      var diff = now - start;
+      var day = Math.floor(diff / 86400000);
+      el.textContent = toBalancedTernary(day) + ' (day ' + day + ' of ' + now.getFullYear() + ')';
+    }
+    tick();
+    setInterval(tick, 86400000);
   });
 })();

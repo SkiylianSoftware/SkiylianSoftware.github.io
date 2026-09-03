@@ -74,8 +74,8 @@ defaults:
       path: ""
       type: posts
     values:
-      layout: post
-      comments: true
+      layout: video
+      comments: false
       toc: true
       permalink: /posts/:title/
   - scope:

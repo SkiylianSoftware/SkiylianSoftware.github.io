@@ -1,0 +1,46 @@
+---
+# Video content layout for generated posts (RSS feed). Mirrors the Chirpy
+# theme's post layout but without the "reading time" metric and with a
+# prominent thumbnail if the post has one in its front matter.
+---
+layout: default
+---
+{% include lang.html %}
+<article class="px-1" itemscope itemtype="https://schema.org/VideoObject">
+  <meta itemprop="name" content="{{ page.title | xml_escape }}">
+  <meta itemprop="description" content="{{ page.description | xml_escape }}">
+  <meta itemprop="uploadDate" content="{{ page.date | date_to_xmlschema }}">
+  {% if page.image %}
+  <meta itemprop="thumbnailUrl" content="{{ page.image | absolute_url }}">
+  {% endif %}
+  {% if page.duration_seconds %}
+  <meta itemprop="duration" content="PT{{ page.duration_seconds }}S">
+  {% endif %}
+
+  <h1 data-toc-skip>{{ page.title }}</h1>
+
+  <div class="post-meta text-muted">
+    <div class="d-flex justify-content-between">
+      <div>
+        <span class="post-date">
+          <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: site.data.locales[lang].df.post.strftime | default: "%b %e, %Y" }}</time>
+        </span>
+        {% if page.image %}
+        <img src="{{ page.image }}" alt="{{ page.title }}" class="video-featured-img" loading="lazy">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="post-content">
+    {{ content }}
+  </div>
+
+  {% if page.tags %}
+  <div class="post-tags">
+    {% for tag in page.tags %}
+    <a href="/tags/{{ tag | slugify }}" class="btn btn-outline-primary tag-btn">{{ tag }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>

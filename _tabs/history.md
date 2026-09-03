@@ -42,11 +42,6 @@ group: stats
   {% endif %}
 </div>
 
-<div class="heatmap-wrap">
-  <h2 class="milestones-heading">Upload Heatmap</h2>
-  <div id="upload-heatmap" class="upload-heatmap"></div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
 window.HIST_DATA = {{ history | jsonify }};
@@ -69,6 +64,11 @@ window.HIST_ORDERS = {% if site.data.fourthwall.products.size > 0 %}true{% else 
   <button class="ms-filter-btn" data-filter="likes">Likes</button>
   <button class="ms-filter-btn" data-filter="comments">Comments</button>
   <button class="ms-filter-btn" data-filter="other">Other</button>
+</div>
+
+<div class="heatmap-wrap">
+  <h2 class="milestones-heading">Upload Heatmap</h2>
+  <div id="upload-heatmap" class="upload-heatmap"></div>
 </div>
 
 <script>

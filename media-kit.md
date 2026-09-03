@@ -102,6 +102,15 @@ permalink: /partners/media-kit/
     </div>
   </div>
 
+  <div class="mk-section">
+    <h2>Open Source Repos</h2>
+    <ul>
+      {% for r in site.data.github.top_repos %}
+      <li><strong>{{ r.name }}</strong> &mdash; {{ r.stars }} stars, {{ r.forks }} forks<br><small>{{ r.description }}</small></li>
+      {% endfor %}
+    </ul>
+  </div>
+
   <div class="mk-footer">
     <p>Interested in working together?</p>
     <a href="mailto:skiyliansoftware@gmail.com?subject=Partnership%20Inquiry" class="btn btn-primary">skiyliansoftware@gmail.com</a>

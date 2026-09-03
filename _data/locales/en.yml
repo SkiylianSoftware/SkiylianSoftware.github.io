@@ -19,7 +19,9 @@ tabs:
   history: History
   dashboard: Dashboard
   support: Support
+  start-here: Start Here
   partners: Partners
+  "start here": Start Here
   categories: Categories
   tags: Tags
   archives: Archives
@@ -31,7 +33,6 @@ search:
   no_results: Oops! No results found.
 
 panel:
-  lastmod: Recently Updated
   trending_tags: Trending Tags
   toc: Contents
 

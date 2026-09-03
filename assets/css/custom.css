@@ -1501,7 +1501,6 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 .clip-card .clips-game { font-size: 0.75rem; opacity: 0.6; display: block; margin-top: 0.1rem; }
 
 /* Game activity year bars */
-.game-years { font-size: 0.8rem; opacity: 0.6; margin: 0.2rem 0; }
 
 /* Balanced ternary age + On This Day widget */
 .ternary-age {
@@ -1513,3 +1512,25 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 .ternary-age strong { color: #2dd4bf; font-variant-numeric: tabular-nums; }
 .otm-item { margin-bottom: 0.4rem; font-size: 0.82rem; line-height: 1.4; }
 .otm-year { display: inline-block; min-width: 3em; color: #2dd4bf; font-size: 0.75rem; }
+
+/* Game series comparison bars */
+.game-series-bars { margin: 0.5rem 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.gsb-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; }
+.gsb-label { min-width: 6em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.85; }
+.gsb-bar-wrap { flex: 1; height: 0.5rem; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.gsb-bar { height: 100%; background: var(--clr-teal); border-radius: 3px; transition: width 0.3s; min-width: 2px; }
+.gsb-count { min-width: 2em; text-align: right; opacity: 0.7; font-variant-numeric: tabular-nums; }
+
+/* About page badges */
+.about-badge { margin: 0 0 0.75rem; }
+.badge-twitch { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; background: rgba(169,112,255,0.15); border: 1px solid rgba(169,112,255,0.3); color: #a970ff; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Roadmap page */
+.roadmap-hero { margin: 0 0 2rem; padding: 1rem; border: 1px solid rgba(45,212,191,0.1); border-radius: 10px; background: rgba(45,212,191,0.03); line-height: 1.5; }
+.roadmap-hero p { margin: 0; font-size: 0.9rem; }
+.roadmap-list { margin: 0 0 2rem; padding: 0; list-style: none; }
+.roadmap-list li { padding: 0.5rem 0; border-bottom: 1px solid rgba(45,212,191,0.06); font-size: 0.88rem; line-height: 1.5; }
+.roadmap-list li:last-child { border: none; }
+.roadmap-list li strong { color: #5eead4; }
+.roadmap-no li { opacity: 0.5; }
+.roadmap-no li:hover { opacity: 0.8; }

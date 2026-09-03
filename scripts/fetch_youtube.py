@@ -1142,6 +1142,14 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
             g["engagement_rate"] = round((g["total_likes"] + g["total_comments"]) / total_v * 100, 1)
         else:
             g["engagement_rate"] = 0
+        # Per-series episode bar data for the Games page sidebar
+        series_bars = []
+        _max_ep = max((sd.get("episode_count", 0) for sd in g.get("series_data", {}).values()), default=0)
+        for _sn, _sd in g.get("series_data", {}).items():
+            _ec = _sd.get("episode_count", 0)
+            _pct = round(_ec / _max_ep * 100) if _max_ep > 0 else 0
+            series_bars.append({"name": _sn, "count": _ec, "pct": _pct})
+        g["series_bars"] = series_bars
         result[name] = g
 
         if not g.get("accent_color"):

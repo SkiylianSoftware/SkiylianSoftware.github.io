@@ -354,6 +354,12 @@ group: stats
     <span class="stat-label">Account Age</span>
   </div>
   {% endif %}
+  {% if twitch.stream_count and twitch.stream_count > 0 %}
+  <div class="stat-card">
+    <span class="stat-value">{{ twitch.stream_count }}</span>
+    <span class="stat-label">Streams</span>
+  </div>
+  {% endif %}
 </div>
 
 <!-- Store -->

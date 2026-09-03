@@ -74,6 +74,14 @@ def save(filename, data):
     print(f"Written {path}")
 
 
+def read_json(filename):
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
 def fetch_followers(user_id, token):
     resp = requests.get(
         f"{API_URL}/channels/followers?broadcaster_id={user_id}&first=1",
@@ -237,7 +245,9 @@ def main():
 
     print(f"Checking Twitch stream status for {TWITCH_USERNAME}...")
     stream = fetch_stream(user_id, token)
-    save("twitch.json", stream or {"platform": None, "checked_at": datetime.now(timezone.utc).isoformat()})
+    stream_active = stream is not None
+    stream_now = stream or {"platform": None, "checked_at": datetime.now(timezone.utc).isoformat()}
+    save("twitch.json", stream_now)
 
     print("Fetching Twitch follower count...")
     try:
@@ -249,7 +259,26 @@ def main():
             "created_at": twitch_created,
             "fetched_at": datetime.now(timezone.utc).isoformat(),
             "_schema_version": 1,
+            "last_stream_check": None,
         }
+
+        # Load previous stats to preserve cumulative stream count
+        prev_stats = read_json("twitch_stats.json")
+        stats["stream_count"] = (prev_stats or {}).get("stream_count", 0)
+
+        # Detect stream start: this check was offline but is now live -> a new stream started
+        # Detect stream end: was live but now offline -> stream finished, increment count
+        prev_status = (prev_stats or {}).get("last_stream_check")
+        if stream_active:
+            stats["last_stream_check"] = "live"
+            if prev_status != "live":
+                print(f"  Stream started (previous: {prev_status})")
+        else:
+            stats["last_stream_check"] = "offline"
+            if prev_status == "live":
+                stats["stream_count"] = stats["stream_count"] + 1
+                print(f"  Stream ended! Total streams tracked: {stats['stream_count']}")
+
         save("twitch_stats.json", stats)
         print(f"Twitch followers: {followers}")
     except Exception as e:

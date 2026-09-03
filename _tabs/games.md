@@ -67,7 +67,17 @@ group: media
       </div>
       <div class="game-series">
         {% if g.active_years %}
-        <div class="game-years">Active: {{ g.active_years | join: ", " | split: "," | uniq | sort | join: ", " }}</div>
+        {% if g.series_bars and g.series_bars.size > 1 %}
+        <div class="game-series-bars" title="Episodes per series">
+          {% for sb in g.series_bars %}
+          <span class="gsb-item" title="{{ sb.name }}: {{ sb.count }} episodes">
+            <span class="gsb-label">{{ sb.name }}</span>
+            <span class="gsb-bar-wrap"><span class="gsb-bar" style="width:{{ sb.pct }}%"></span></span>
+            <span class="gsb-count">{{ sb.count }}</span>
+          </span>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% endif %}
         {% for sname in g.series %}
         {% assign sd = g.series_data[sname] %}
@@ -75,9 +85,14 @@ group: media
         {% for try_name in g.original_names %}
           {% assign candidate = try_name | append: ": " | append: sname %}
           {% for pl in playlists %}
-            {% if pl.title contains candidate %}{% assign pl_url = pl.url %}{% break %}{% endif %}
+          {% if pl.title contains candidate %}
+          {% assign pl_url = pl.url %}
+          {% break %}
+          {% endif %}
           {% endfor %}
-          {% if pl_url %}{% break %}{% endif %}
+          {% if pl_url %}
+          {% break %}
+          {% endif %}
         {% endfor %}
         <a href="/videos#{{ sname | url_encode }}" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
         {% endfor %}

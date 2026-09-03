@@ -108,6 +108,10 @@ jsonld:
 
   <div class="about-section">
     <h2>Links</h2>
+    {% assign bt = site.data.twitch_stats.broadcaster_type | default: "" %}
+    {% if bt == "affiliate" or bt == "partner" %}
+    <p class="about-badge"><span class="badge badge-twitch">Twitch {{ bt | capitalize }}</span></p>
+    {% endif %}
     <div class="quick-links">
       <a href="https://watch.skiylia.dev" class="btn"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://live.skiylia.dev" class="btn"><i class="fab fa-twitch"></i> Twitch</a>
@@ -132,7 +136,7 @@ jsonld:
     </div>
     {% endfor %}
   </div>
-  <p class="parts-attribution">Auto-updated from <a href="{{ site.data.pc_parts.list_url }}" target="_blank" rel="noopener">PCPartPicker</a> &middot; Runs Ubuntu</p>
+  <p class="parts-attribution">Auto-updated from <a href="{{ site.data.pc_parts.list_url }}" target="_blank" rel="noopener">PCPartPicker</a>{% if site.data.pc_parts.total_grand %} &middot; Total: <strong>{{ site.data.pc_parts.total_grand }}</strong>{% endif %} &middot; Runs Ubuntu</p>
 </div>
 {% endif %}
 

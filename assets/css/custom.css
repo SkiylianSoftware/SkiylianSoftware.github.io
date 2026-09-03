@@ -1644,3 +1644,21 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 .platform-btn.github-btn:hover { background: rgba(136, 146, 176, 0.15); border-color: rgba(136, 146, 176, 0.6); }
 .platform-btn.kofi-btn { color: var(--clr-teal); border-color: rgba(var(--brand-rgb), 0.35); background: rgba(var(--brand-rgb), 0.06); }
 .platform-btn.kofi-btn:hover { background: rgba(var(--brand-rgb), 0.15); border-color: rgba(var(--brand-rgb), 0.6); }
+
+/* Per-video hotness badge (views gained in last 7 days) */
+.hotness-badge {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 0.4rem;
+  z-index: 2;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(255, 68, 68, 0.75);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  line-height: 1.2;
+}

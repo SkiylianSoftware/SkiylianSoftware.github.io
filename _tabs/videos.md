@@ -100,6 +100,10 @@ group: media
     <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/{{ video.video_id }}/hqdefault.jpg'">
     <div class="play-overlay"><i class="fas fa-play"></i></div>
     {% if video.duration_seconds and video.duration_seconds > 0 %}<span class="duration-badge">{{ video.duration_seconds | divided_by: 3600 }}:{{ video.duration_seconds | modulo: 3600 | divided_by: 60 | prepend: '00' | slice: -2, 2 }}:{{ video.duration_seconds | modulo: 60 | prepend: '00' | slice: -2, 2 }}</span>{% endif %}
+    {% assign vm = site.data.video_momentum[video.video_id] %}
+    {% if vm and vm.views_7d and vm.views_7d > 0 %}
+    <span class="hotness-badge" title="{{ vm.views_7d }} views in last 7 days">&#128293; {{ vm.views_7d }}</span>
+    {% endif %}
     {% assign vb = video_badges[video.video_id] %}
     {% if vb and vb.msg %}
     <span class="milestone-badge" title="{{ vb.msg }}">&#127942;</span>

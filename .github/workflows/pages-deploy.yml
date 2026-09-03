@@ -63,6 +63,9 @@ jobs:
             echo "::warning::video_history.json missing - YouTube Analytics fetch failed (check YOUTUBE_REFRESH_TOKEN). Watch-time milestones will be unavailable."
           fi
 
+      - name: Compute per-video momentum (hotness)
+        run: python scripts/compute_video_momentum.py
+
       - name: Fetch Twitch data
         env:
           TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}

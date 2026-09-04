@@ -154,12 +154,18 @@ def build_year(year, videos, history, milestones):
     }
 
 
-def render_year(r, series_registry):
+def render_year(r, series_registry, is_first=False):
     y = r["year"]
     lines = []
 
+    # Distinct separator between years (skipped for the first one)
+    if not is_first:
+        lines.append('<hr class="year-divider">')
+        lines.append("")
+
     # Section heading with anchor
     lines.append(f'<h2 id="year-{y}">{y}</h2>')
+    lines.append("")
 
     # Stat cards
     subs_delta = r["subs_end"] - r["subs_start"]
@@ -171,15 +177,17 @@ def render_year(r, series_registry):
         return prefix + f"{val:,}" if isinstance(val, int) else str(val)
 
     lines.append('<div class="card-stats">')
-    _c = '<div class="stat-cell"><span class="stat-value">'
-    _ec = '</span><span class="stat-label">'
+    _c = '<div class="stat-cell">'
+    _v = '<span class="stat-value">'
+    _l = '</span><span class="stat-label">'
     _e = "</span></div>"
-    lines.append(f"{_c}{sc(subs_delta)}{_ec}Subs{_e}")
-    lines.append(f"{_c}{sc(views_delta)}{_ec}Views{_e}")
-    lines.append(f"{_c}+{vids_delta}{_ec}Videos{_e}")
-    lines.append(f"{_c}{r['uploads']}{_ec}Uploads{_e}")
-    lines.append(f"{_c}{r['watch_h']:,}h{_ec}Watch time{_e}")
+    lines.append(_c + _v + sc(subs_delta) + _l + "Subs" + _e)
+    lines.append(_c + _v + sc(views_delta) + _l + "Views" + _e)
+    lines.append(_c + _v + "+" + str(vids_delta) + _l + "Videos" + _e)
+    lines.append(_c + _v + str(r["uploads"]) + _l + "Uploads" + _e)
+    lines.append(_c + _v + f"{r['watch_h']:,}h" + _l + "Watch time" + _e)
     lines.append("</div>")
+    lines.append("")
 
     # Highlights
     lines.append('<h3 class="section-title">Highlights</h3>')
@@ -207,6 +215,22 @@ def render_year(r, series_registry):
     if r["ms_count"]:
         lines.append(f"<p>Milestones crossed: <strong>{r['ms_count']}</strong></p>")
 
+    # Per-game breakdown, merged alongside the highlights
+    gb = r["game_breakdown"]
+    if gb:
+        lines.append('<p class="game-breakdown-label">Games played this year:</p>')
+        lines.append('<div class="game-breakdown">')
+        for gname in sorted(gb.keys()):
+            gdata = gb[gname]
+            gcount = gdata["episodes"]
+            ghours = int(gdata.get("duration_seconds", 0) // 3600) if gdata.get("duration_seconds") else 0
+            lines.append(
+                f'<span class="game-breakdown-pill">'
+                f"<strong>{gcount}</strong> &times; {gname}" + (f" &middot; {ghours}h" if ghours else "") + "</span>"
+            )
+        lines.append("</div>")
+        lines.append("")
+
     # Top video thumbnails (first 4 by view count)
     top_vids = sorted(r["year_videos"], key=lambda v: v.get("view_count", 0), reverse=True)[:4]
     if top_vids:
@@ -217,12 +241,15 @@ def render_year(r, series_registry):
             vt = v.get("title", "").replace('"', "&quot;")
             thumb = v.get("thumbnail", "")
             vc = v.get("view_count", 0)
+            # Use a background-image div instead of <img> so Chirpy's
+            # refactor-content doesn't wrap it in a nested lightbox anchor.
             lines.append(f'<a href="/videos#{vid}" class="video-thumb" title="{vt}">')
-            lines.append(f'  <img src="{thumb}" alt="{vt}" loading="lazy">')
+            lines.append(f'  <span class="video-thumb-img" style="background-image:url(\'{thumb}\')"></span>')
             lines.append(f'  <span class="thumb-views">{vc:,} views</span>')
             lines.append(f'  <span class="thumb-title">{vt}</span>')
             lines.append("</a>")
         lines.append("</div>")
+        lines.append("")
 
     # Series active in this year
     active_in_year = []
@@ -252,20 +279,6 @@ def render_year(r, series_registry):
     if ended_series:
         lines.append(f"<p><strong>Concluded this year:</strong> {', '.join(sorted(ended_series))}</p>")
 
-    # Per-game breakdown
-    gb = r["game_breakdown"]
-    if gb:
-        lines.append('<h3 class="section-title">Game Breakdown</h3>')
-        lines.append('<div class="card-stats">')
-        for gname in sorted(gb.keys()):
-            gdata = gb[gname]
-            lines.append(
-                f'<div class="stat-cell"><span class="stat-value">{gdata["episodes"]}</span>'
-                f'<span class="stat-label">{gname} episodes</span></div>'
-            )
-        lines.append("</div>")
-
-    lines.append("")
     return "\n".join(lines)
 
 
@@ -300,7 +313,7 @@ def main():
         if not r:
             continue
         toc_entries.append(f'- <a href="#year-{year}">{year}</a>')
-        body_parts.append(render_year(r, series_registry))
+        body_parts.append(render_year(r, series_registry, is_first=not body_parts))
 
     if not body_parts:
         print("No data rendered; skipping")

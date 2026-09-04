@@ -4,6 +4,7 @@ icon: "fa-solid fa-heart"
 title: Support
 order: 8
 permalink: /support/
+group: support
 ---
 
 <div class="support-hero">

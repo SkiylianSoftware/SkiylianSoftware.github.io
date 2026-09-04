@@ -71,13 +71,6 @@
     if (published) parts.push('<span class="meta-date"><time datetime="' + published + '">' + new Date(published).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '</time></span>');
     if (views > 0) parts.push('<span class="meta-views">' + Number(views).toLocaleString() + ' views</span>');
     if (duration > 0) parts.push('<span class="meta-duration">' + formattedDuration(duration) + '</span>');
-    // Engagement rate: (likes + comments) / views
-    var likes = parseInt(el.getAttribute('data-likes')) || 0;
-    var comments2 = parseInt(el.getAttribute('data-comments')) || 0;
-    if (views > 0 && (likes > 0 || comments2 > 0)) {
-      var eng = ((likes + comments2) / views * 100).toFixed(1);
-      parts.push('<span class="meta-engagement" title="(likes + comments) / views">' + eng + '% engagement</span>');
-    }
     box.innerHTML = parts.join(' &middot; ');
     box.style.display = parts.length ? '' : 'none';
   }

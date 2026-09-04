@@ -37,11 +37,17 @@ jsonld:
       {% assign info = pair[1] %}
       {% assign ep_count = info.episodes | default: 0 %}
       {% assign playlist_url = nil %}
+      {% assign playlist_thumb = nil %}
       {% for pl in site.data.playlists.playlists %}
-        {% if pl.title contains name %}{% assign playlist_url = pl.url %}{% break %}{% endif %}
+        {% if pl.title contains name %}
+          {% assign playlist_url = pl.url %}
+          {% if pl.thumbnail %}{% assign playlist_thumb = pl.thumbnail %}{% endif %}
+          {% break %}
+        {% endif %}
       {% endfor %}
+      {% assign series_slug = name | slugify %}
       {% if playlist_url %}
-        {% assign url = playlist_url %}
+        {% assign url = "/series/" | append: series_slug | append: "/" %}
       {% else %}
         {% assign url = "/videos#" | append: name | url_encode %}
       {% endif %}
@@ -49,7 +55,7 @@ jsonld:
       {% if info.status == "current" %}{% assign dot = "current" %}
       {% elsif info.status == "recent" %}{% assign dot = "recent" %}
       {% endif %}
-      {% capture item %}<span class="series-dot {{ dot }}"></span> <a href="{{ url }}" class="btn series-btn"><strong>{{ name }}</strong></a>{% if ep_count > 0 %} <span class="ep-count">{{ ep_count }} episodes</span>{% endif %}{% endcapture %}
+      {% capture item %}<span class="series-dot {{ dot }}"></span> <a href="{{ url }}" class="btn series-btn series-btn-icon">{% if playlist_thumb %}<span class="mini-thumb" style="background-image:url('{{ playlist_thumb }}')"></span>{% endif %}<strong>{{ name }}</strong></a>{% if ep_count > 0 %} <span class="ep-count">{{ ep_count }} ep</span>{% endif %}{% endcapture %}
       {% if info.status == "current" %}
         {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
       {% elsif info.status == "recent" %}
@@ -77,7 +83,9 @@ jsonld:
             {% elsif lu_days < rec_days %}{% assign status = "recent" %}
             {% endif %}
             {% if status != "historical" %}
-              {% capture item %}<span class="series-dot {{ status }}"></span> <a href="{{ pl.url }}" class="btn series-btn"><strong>{{ pl.title }}</strong></a>{% if pl.item_count > 0 %} <span class="ep-count">{{ pl.item_count }} episodes</span>{% endif %}{% endcapture %}
+              {% assign pl_series = pl.title | split: " | " | first | strip %}
+              {% assign pl_slug = pl_series | slugify %}
+              {% capture item %}<span class="series-dot {{ status }}"></span> <a href="/series/{{ pl_slug }}/" class="btn series-btn series-btn-icon">{% if pl.thumbnail %}<span class="mini-thumb" style="background-image:url('{{ pl.thumbnail }}')"></span>{% endif %}<strong>{{ pl.title }}</strong></a>{% if pl.item_count > 0 %} <span class="ep-count">{{ pl.item_count }} ep</span>{% endif %}{% endcapture %}
               {% if status == "current" %}
                 {% capture current_html %}{{ current_html }}<li>{{ item }}</li>{% endcapture %}
               {% else %}

@@ -52,10 +52,6 @@ def build_snapshot():
         snapshot["youtube_main"]["duration_seconds"] = total_dur
         snapshot["youtube_main"]["likes"] = total_likes
         snapshot["youtube_main"]["comments"] = total_comments
-        if total_views > 0:
-            snapshot["youtube_main"]["engagement_rate"] = round((total_likes + total_comments) / total_views * 100, 1)
-        else:
-            snapshot["youtube_main"]["engagement_rate"] = 0.0
         vods_subs = meta.get("vods_subscriber_count", 0)
         vods_views = meta.get("vods_view_count", 0)
         vods_videos = meta.get("vods_video_count", 0)
@@ -191,9 +187,6 @@ def backfill_history():
                         "likes": cum_likes,
                         "comments": cum_comments,
                         "views_cumulative": cum_views,
-                        "engagement_rate": (
-                            round((cum_likes + cum_comments) / cum_views * 100, 1) if cum_views > 0 else 0.0
-                        ),
                     },
                     "youtube_vods": {},
                     "twitch": {},

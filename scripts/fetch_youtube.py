@@ -224,11 +224,6 @@ def fetch_uploads(playlist_id, label="uploads"):
             if d.get("game") and v.get("series"):
                 v["series"]["game"] = d["game"]
                 v["series"]["game_source"] = "api"
-        # Engage = (likes + comments) / views. 0 when no views yet.
-        views = v.get("view_count", 0)
-        if views > 0:
-            engage = (v.get("like_count", 0) + v.get("comment_count", 0)) / views * 100
-            v["engagement_rate"] = round(engage, 1)
         # Cache the thumbnail locally (same-origin, CI-cached)
         if v.get("thumbnail"):
             v["thumbnail"] = _thumbnail_local(v["video_id"], v["thumbnail"])
@@ -1167,11 +1162,6 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
                 g["status"] = "historical"
         else:
             g["status"] = "historical"
-        total_v = g["total_views"]
-        if total_v > 0:
-            g["engagement_rate"] = round((g["total_likes"] + g["total_comments"]) / total_v * 100, 1)
-        else:
-            g["engagement_rate"] = 0
         # Per-series episode bar data for the Games page sidebar
         series_bars = []
         _max_ep = max((sd.get("episode_count", 0) for sd in g.get("series_data", {}).values()), default=0)
@@ -1207,17 +1197,6 @@ def compute_game_stats(videos, alias_map=None, content_types=None, valid_games=N
     for _cat_name, cat in ordered.items():
         for _cs_name, csd in cat.get("series_data", {}).items():
             csd["active_years"] = format_years(csd["active_years"])
-
-    def _engagement(d):
-        tv = d.get("total_views", 0)
-        if tv > 0:
-            d["engagement_rate"] = round((d.get("total_likes", 0) + d.get("total_comments", 0)) / tv * 100, 1)
-        else:
-            d["engagement_rate"] = 0
-
-    _engagement(non_game_total)
-    for cat in ordered.values():
-        _engagement(cat)
 
     return {
         "games": result,

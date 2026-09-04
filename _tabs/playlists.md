@@ -7,6 +7,8 @@ permalink: /playlists/
 group: media
 ---
 
+<p class="page-intro">Complete series, collected into easy-to-binge playlists. Each one links to its archive page where you can browse every episode and subscribe to that series' feed.</p>
+
 <div class="sort-bar">
   <button class="sort-btn active" data-sort="date" onclick="sortPlaylists(this, 'date')">Newest</button>
   <button class="sort-btn" data-sort="views" onclick="sortPlaylists(this, 'views')">Most viewed</button>
@@ -81,6 +83,15 @@ group: media
           <span class="meta-date"><span class="playlist-row-date">&#9655; {{ pl.last_updated | date: "%b %Y" }}</span>
           <span class="reltime" datetime="{{ pl.last_updated }}"></span></span>
         {% endif %}
+        {% assign pl_series = pl.title | split: " | " | first | strip %}
+        {% assign pl_game = pl.title | split: " | " | last | strip %}
+        {% if pl_game == pl_series %}{% assign pl_game = "" %}{% endif %}
+        <span class="playlist-row-badges">
+          <a href="/series/{{ pl_series | slugify }}/" class="playlist-badge"><i class="fas fa-list-ul"></i> {{ pl_series }}</a>
+          {% if pl_game and pl_game != "" %}
+          <a href="/games/{{ pl_game | slugify }}/" class="playlist-badge playlist-badge-game"><i class="fas fa-gamepad"></i> {{ pl_game }}</a>
+          {% endif %}
+        </span>
       </div>
     </div>
   </a>

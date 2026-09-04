@@ -51,12 +51,15 @@
       {% assign groups_shown = "" %}
       {% for tab in site.tabs %}
         {% if tab.no_sidebar %}{% continue %}{% endif %}
+        {% assign store_products = site.data.fourthwall.products | default: nil %}
+        {% if tab.url == "/store/" and store_products == nil %}{% continue %}{% endif %}
+        {% if tab.url == "/store/" and store_products.size == 0 %}{% continue %}{% endif %}
         {% if tab.group %}
           {% unless groups_shown contains tab.group %}
           {% assign groups_shown = groups_shown | append: "|" | append: tab.group %}
           <li class="nav-item nav-group-label">
             <span class="nav-group-link">
-              <i class="fa-fw {% if tab.group == 'media' %}fa-solid fa-photo-film{% elsif tab.group == 'stats' %}fa-solid fa-chart-simple{% endif %}"></i>
+              <i class="fa-fw {% if tab.group == 'media' %}fa-solid fa-photo-film{% elsif tab.group == 'stats' %}fa-solid fa-chart-simple{% elsif tab.group == 'support' %}fa-solid fa-heart{% endif %}"></i>
               <span>{{ tab.group | upcase }}</span>
             </span>
           </li>

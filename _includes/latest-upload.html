@@ -1,4 +1,5 @@
 <!-- Latest-upload banner: shows the most recent video if it's fresh -->
+{% if site.data.youtube_main.videos %}
 {% assign newest = site.data.youtube_main.videos | sort: "published" | reverse | first %}
 {% if newest and newest.published %}
 {% assign newest_ts = newest.published | date: "%s" | plus: 0 %}
@@ -11,5 +12,6 @@
   <a href="/videos" class="latest-link">{{ newest.title }}</a>
   <span class="latest-date">{{ newest.published | date: "%d %b" }}</span>
 </div>
+{% endif %}
 {% endif %}
 {% endif %}

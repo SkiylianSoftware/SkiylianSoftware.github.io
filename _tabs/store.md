@@ -4,7 +4,7 @@ icon: "fa-solid fa-store"
 title: Store
 order: 12
 permalink: /store/
-group: media
+group: support
 ---
 
 {% include banner.html %}

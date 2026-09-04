@@ -49,8 +49,8 @@ group: media
   {% endif %}
   {% if rec == 'historical' %}{% assign has_hidden = true %}{% endif %}
 {% endfor %}
-<div class="filter-row">
-<div class="filter-bar" id="filter-bar">
+<div class="filter-strip">
+<div class="filter-bar-scroll" id="filter-bar">
   <button class="filter-btn active" onclick="filterSeries(this, 'series')">All</button>
   {% for name in series_set %}
   {% if recency_map and recency_map != "" %}
@@ -62,9 +62,8 @@ group: media
   <button class="filter-btn recency-{{ rec }}" data-series-name="{{ name | escape }}" onclick="filterSeries(this, 'series')"><span class="recency-dot"></span> {{ name }}</button>
   {% endif %}
   {% endfor %}
-</div>
-{% if has_hidden %}
-<div class="filter-more-wrap">
+  {% if has_hidden %}
+  <span class="filter-more-wrap">
   <button class="filter-btn filter-more-btn" id="filter-more-btn" onclick="toggleMoreFilters()">More &#9660;</button>
   <div class="filter-more-dropdown" id="filter-more-dropdown">
     {% for name in series_set %}
@@ -78,20 +77,19 @@ group: media
     {% endif %}
     {% endfor %}
   </div>
+  </span>
+  {% endif %}
 </div>
-{% endif %}
-</div>
-{% endif %}
 
 {% assign games_seen = all_videos | map: "series" | compact | map: "game" | compact | uniq | sort %}
 {% if games_seen.size > 1 %}
-<div class="filter-row">
-<div class="filter-bar" id="filter-bar-games">
-  <button class="filter-btn active" onclick="filterSeries(this, 'game')">All Games</button>
+<div class="filter-bar-scroll" id="filter-bar-games">
+  <button class="filter-btn active" data-game-name="" onclick="filterSeries(this, 'game')">All Games</button>
   {% for gname in games_seen %}
   <button class="filter-btn" data-game-name="{{ gname | escape }}" onclick="filterSeries(this, 'game')">{{ gname }}</button>
   {% endfor %}
 </div>
+{% endif %}
 </div>
 {% endif %}
 

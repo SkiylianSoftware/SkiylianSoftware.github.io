@@ -344,6 +344,10 @@ body::after {
 .filter-bar { display: flex; gap: 0.4rem; flex: 1; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 2px; min-width: 0; }
 .filter-bar::-webkit-scrollbar { height: 3px; }
 .filter-bar::-webkit-scrollbar-thumb { background: rgba(var(--brand-lilac-rgb),0.3); border-radius: 2px; }
+.filter-strip { display: flex; flex-direction: column; gap: 0.4rem; margin: 0 0 1rem; }
+.filter-bar-scroll { display: flex; gap: 0.3rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 3px; align-items: center; }
+.filter-bar-scroll::-webkit-scrollbar { height: 3px; }
+.filter-bar-scroll::-webkit-scrollbar-thumb { background: rgba(var(--brand-lilac-rgb),0.3); border-radius: 2px; }
 .filter-more-wrap { position: relative; flex-shrink: 0; margin-left: auto; }
 .filter-more-btn { flex-shrink: 0; }
 .filter-more-dropdown {
@@ -1812,3 +1816,23 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 .video-mention { display: flex; align-items: center; gap: 0.5rem; margin: 0.4rem 0; }
 .series-mention-list { list-style: none; padding-left: 0; margin: 0.5rem 0 0; }
 .series-mention { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0; }
+
+/* Playlists page polish */
+.page-intro { margin: 0 0 1.25rem; font-size: 0.9rem; opacity: 0.85; line-height: 1.5; }
+.playlist-row-badges { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+.playlist-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.15rem 0.5rem; border-radius: 999px;
+  background: rgba(var(--brand-rgb),0.08);
+  border: 1px solid rgba(var(--brand-rgb),0.2);
+  color: var(--clr-teal-light);
+  font-size: 0.72rem; font-weight: 600;
+  text-decoration: none;
+}
+.playlist-badge:hover { background: rgba(var(--brand-rgb),0.16); }
+.playlist-badge-game { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.22); color: var(--clr-lilac-light); }
+.playlist-badge-game:hover { background: rgba(168,85,247,0.16); }
+
+/* About page series buttons with playlist mini-thumbnail */
+.series-btn-icon { display: inline-flex !important; align-items: center; gap: 0.4rem; }
+.series-btn-icon .mini-thumb { width: 2rem; height: 1.1rem; }

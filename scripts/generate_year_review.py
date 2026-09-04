@@ -115,12 +115,6 @@ def build_year(year, videos, history, milestones):
         game_min[g] += v.get("duration_seconds", 0) / 60
     top_game = max(game_min, key=game_min.get) if game_min else None
 
-    def eng(v):
-        vc = v.get("view_count", 0)
-        return (v.get("like_count", 0) + v.get("comment_count", 0)) / vc * 100 if vc else 0
-
-    eng_leader = max(year_videos, key=eng) if year_videos else None
-
     ms_count = sum(1 for d in milestones.values() if str(d).startswith(year))
 
     # Per-game breakdown
@@ -147,17 +141,17 @@ def build_year(year, videos, history, milestones):
         "busiest_count": busiest_count,
         "top_game": top_game,
         "top_game_h": int(game_min.get(top_game, 0) // 60) if top_game else 0,
-        "eng_leader": eng_leader,
         "ms_count": ms_count,
         "game_breakdown": dict(game_breakdown),
         "year_videos": year_videos,
     }
 
 
-def render_year(r, series_registry, is_first=False, series_covers=None):
+def render_year(r, series_registry, is_first=False, series_covers=None, game_covers=None):
     y = r["year"]
     lines = []
     series_covers = series_covers or {}
+    game_covers = game_covers or {}
 
     def mini_thumb(url, alt=""):
         """Small 16:9 thumbnail chip used next to video/series mentions."""
@@ -215,16 +209,13 @@ def render_year(r, series_registry, is_first=False, series_covers=None):
         )
 
     if r["top_game"]:
-        lines.append(f"<p>Top game by watch time: <strong>{r['top_game']}</strong> ({r['top_game_h']}h)</p>")
-
-    if r["eng_leader"]:
-        el = r["eng_leader"]
-        evid = el.get("video_id", "")
-        etitle = el.get("title", "").replace('"', "&quot;")
-        ethumb = el.get("thumbnail", "") or ""
+        tg = r["top_game"]
+        tg_hours = r["top_game_h"]
+        tgcover = game_covers.get(tg, "")
         lines.append(
-            f'<p class="video-mention">{mini_thumb(ethumb, etitle)} '
-            f'<span>Engagement leader: <a href="/videos#{evid}"><strong>{etitle}</strong></a></span></p>'
+            f'<p class="video-mention">{mini_thumb(tgcover, tg)} '
+            f'<span>Top game by watch time: <a href="/games/{slugify(tg)}/">'
+            f"<strong>{tg}</strong></a> ({tg_hours}h)</span></p>"
         )
 
     if r["ms_count"]:
@@ -238,9 +229,13 @@ def render_year(r, series_registry, is_first=False, series_covers=None):
         for gname, gdata in sorted(gb.items(), key=lambda kv: kv[1]["episodes"], reverse=True):
             gcount = gdata["episodes"]
             ghours = int(gdata.get("duration_seconds", 0) // 3600) if gdata.get("duration_seconds") else 0
+            gcover = game_covers.get(gname, "")
             lines.append(
-                f'<span class="game-breakdown-pill">'
-                f"<strong>{gcount}</strong> &times; {gname}" + (f" &middot; {ghours}h" if ghours else "") + "</span>"
+                '<span class="game-breakdown-pill">'
+                + (mini_thumb(gcover, gname) + " " if gcover else "")
+                + f"<strong>{gcount}</strong> &times; {gname}"
+                + (f" &middot; {ghours}h" if ghours else "")
+                + "</span>"
             )
         lines.append("</div>")
         lines.append("")
@@ -332,6 +327,28 @@ def main():
         if title and cover:
             series_covers.setdefault(title.split(" | ")[0].strip(), cover)
 
+    # Map game names to their cover artwork (game_links icon or Steam header)
+    import yaml as _yaml
+
+    game_covers = {}
+    gl_path = os.path.join(DATA_DIR, "game_links.yml")
+    if os.path.exists(gl_path):
+        with open(gl_path) as f:
+            gl = _yaml.safe_load(f) or {}
+        for gname, glink in gl.items():
+            if not isinstance(glink, dict):
+                continue
+            icon = glink.get("icon")
+            if icon:
+                game_covers[gname] = icon
+            else:
+                steam = glink.get("steam") or ""
+                parts = steam.split("/")
+                if len(parts) >= 6 and parts[4]:
+                    game_covers[gname] = (
+                        f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{parts[4]}/header.jpg"
+                    )
+
     body_parts = []
     toc_entries = []
 
@@ -340,7 +357,15 @@ def main():
         if not r:
             continue
         toc_entries.append(f'- <a href="#year-{year}">{year}</a>')
-        body_parts.append(render_year(r, series_registry, is_first=not body_parts, series_covers=series_covers))
+        body_parts.append(
+            render_year(
+                r,
+                series_registry,
+                is_first=not body_parts,
+                series_covers=series_covers,
+                game_covers=game_covers,
+            )
+        )
 
     if not body_parts:
         print("No data rendered; skipping")

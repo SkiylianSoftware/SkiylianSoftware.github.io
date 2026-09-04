@@ -5,8 +5,10 @@ on:
     branches: [master]
   # Note: GitHub Actions free-tier schedules are approximate and may be delayed.
   # Actual interval may be 2-4x the cron value due to queueing.
+  # Hourly keeps analytics fresh at a fraction of the quota of 15-min runs,
+  # and push-triggered builds keep deployed changes instant.
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:

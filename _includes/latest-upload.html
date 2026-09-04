@@ -1,0 +1,15 @@
+<!-- Latest-upload banner: shows the most recent video if it's fresh -->
+{% assign newest = site.data.youtube_main.videos | sort: "published" | reverse | first %}
+{% if newest and newest.published %}
+{% assign newest_ts = newest.published | date: "%s" | plus: 0 %}
+{% assign now_ts = site.time | date: "%s" | plus: 0 %}
+{% assign age_days = now_ts | minus: newest_ts | divided_by: 86400 %}
+{% if age_days < 30 %}
+<div class="latest-banner">
+  <span class="latest-dot"></span>
+  <span class="latest-label">New:</span>
+  <a href="/videos" class="latest-link">{{ newest.title }}</a>
+  <span class="latest-date">{{ newest.published | date: "%d %b" }}</span>
+</div>
+{% endif %}
+{% endif %}

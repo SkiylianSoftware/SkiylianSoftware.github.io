@@ -1,26 +1,36 @@
 """
-Compute per-video momentum (hotness) from video_history.json.
+Compute per-video and per-game momentum (hotness) from video_history.json.
 
-For each tracked video, looks at the last 7 days of per-day view data and
-computes:
-- views_7d: total views gained in the last 7 days
-- views_30d: total views gained in the last 30 days
+For each tracked video, looks at the last 7 / 30 / 90 days of per-day view
+data and computes:
+- views_7d / views_30d / views_90d: views gained in each window
 - surge_pct: views_7d as percentage of total lifetime views
-- trend: "rising" if 7d > 30d/4 (scaled), "peaked" if 30d much higher,
-         "steady" otherwise
+- trend: "rising" / "steady" / "cold"
 
-Output: _data/video_momentum.json keyed by video_id.
+Also aggregates per game ("most watched lately") so the Games page can
+rank by recent activity.
 
-This script runs after fetch_youtube_analytics.py in CI.
+Outputs:
+- _data/video_momentum.json keyed by video_id
+- _data/game_momentum.json keyed by game name
+
+Runs after fetch_youtube_analytics.py in CI.
 """
 
 import json
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
 DATA_DIR = "_data"
 IN_FILE = os.path.join(DATA_DIR, "video_history.json")
 OUT_FILE = os.path.join(DATA_DIR, "video_momentum.json")
+GAME_OUT_FILE = os.path.join(DATA_DIR, "game_momentum.json")
+
+
+def _date_set(days):
+    now = datetime.now(timezone.utc)
+    return {((now - timedelta(days=i)).strftime("%Y-%m-%d")) for i in range(days)}
 
 
 def main():
@@ -31,30 +41,21 @@ def main():
     with open(IN_FILE) as f:
         video_history = json.load(f)
 
-    now = datetime.now(timezone.utc)
-
-    # Walk back 7 and 30 days
-    d7 = []
-    for i in range(7):
-        d = now - timedelta(days=i)
-        d7.append(d.strftime("%Y-%m-%d"))
-    d30 = []
-    for i in range(30):
-        d = now - timedelta(days=i)
-        d30.append(d.strftime("%Y-%m-%d"))
-
-    s7 = set(d7)
-    s30 = set(d30)
+    s7 = _date_set(7)
+    s30 = _date_set(30)
+    s90 = _date_set(90)
 
     out = {}
+    game_agg = defaultdict(lambda: {"views_7d": 0, "views_30d": 0, "views_90d": 0, "active_videos": 0})
+
     for vid, vdata in video_history.items():
         daily = vdata.get("daily", {})
+        total = sum(entry.get("views", 0) for entry in daily.values())
         views_7d = sum(entry.get("views", 0) for date_str, entry in daily.items() if date_str in s7)
         views_30d = sum(entry.get("views", 0) for date_str, entry in daily.items() if date_str in s30)
-        total = sum(entry.get("views", 0) for entry in daily.values())
+        views_90d = sum(entry.get("views", 0) for date_str, entry in daily.items() if date_str in s90)
         surge_pct = round(views_7d / max(1, total) * 100, 1) if total else 0.0
 
-        # Trend classification
         if views_7d == 0 and views_30d == 0:
             trend = "cold"
         elif views_7d > 0 and views_30d > 0 and views_7d > views_30d / 4:
@@ -64,17 +65,31 @@ def main():
         else:
             trend = "cold"
 
-        if views_7d > 0 or views_30d > 0:
+        if views_7d > 0 or views_30d > 0 or views_90d > 0:
             out[vid] = {
                 "views_7d": views_7d,
                 "views_30d": views_30d,
+                "views_90d": views_90d,
                 "surge_pct": surge_pct,
                 "trend": trend,
             }
 
+        # Per-game aggregate
+        game = vdata.get("game") or "Misc"
+        g = game_agg[game]
+        if views_7d > 0 or views_30d > 0:
+            g["views_7d"] += views_7d
+            g["views_30d"] += views_30d
+            g["views_90d"] += views_90d
+            g["active_videos"] += 1
+
     with open(OUT_FILE, "w") as f:
         json.dump(out, f, indent=2)
     print(f"  Video momentum computed for {len(out)} videos")
+
+    with open(GAME_OUT_FILE, "w") as f:
+        json.dump(dict(game_agg), f, indent=2)
+    print(f"  Game momentum computed for {len(game_agg)} games")
 
 
 if __name__ == "__main__":

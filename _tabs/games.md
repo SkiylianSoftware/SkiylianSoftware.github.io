@@ -63,6 +63,10 @@ group: media
         {% if g.engagement_rate and g.engagement_rate > 0 %}
         <span class="game-stat"><span class="game-stat-value">{{ g.engagement_rate }}%</span> engagement</span>
         {% endif %}
+        {% assign gm = site.data.game_momentum[gname] %}
+        {% if gm and gm.views_30d and gm.views_30d > 0 %}
+        <span class="game-stat"><span class="game-stat-value">+{{ gm.views_30d }}</span> views 30d</span>
+        {% endif %}
         {% if g.series.size > 1 %}
         <span class="game-stat"><span class="game-stat-value">{{ g.series | size }}</span> series</span>
         {% endif %}

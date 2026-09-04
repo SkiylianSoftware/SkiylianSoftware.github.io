@@ -41,12 +41,12 @@ permalink: /support/
 
 <div class="support-grid">
 {% if site.data.fourthwall.products.size > 0 %}
-  <a href="https://store.skiylia.dev" target="_blank" rel="noopener" class="support-card card-merch btn">
+  <a href="/store/" class="support-card card-merch btn">
     <div class="card-icon"><i class="fas fa-tshirt"></i></div>
     <div class="card-body">
       <h3>Merch Store</h3>
       <p>Featuring {% for p in site.data.fourthwall.products limit:3 %}{{ p.name }}{% unless forloop.last %}, {% endunless %}{% endfor %} and more; powered by Fourthwall.</p>
-      <span class="card-cta">Browse the store &rarr;</span>
+      <span class="card-cta">Visit the store &rarr;</span>
     </div>
   </a>
 {% endif %}
@@ -84,23 +84,6 @@ permalink: /support/
   </a>
   {% endif %}
 </div>
-
-{% if site.data.fourthwall.products.size > 0 %}
-<div class="support-products">
-  <h2>Merchandise</h2>
-  <div class="product-grid">
-    {% for p in site.data.fourthwall.products %}
-    <a href="{{ p.url }}" target="_blank" rel="noopener" class="product-card btn">
-      {% if p.thumbnail %}<div class="product-thumb" style="background-image: url('{{ p.thumbnail }}')"></div>{% endif %}
-      <div class="product-info">
-        <span class="product-name">{{ p.name }}</span>
-        {% if p.price %}<span class="product-price">{{ p.price }} {{ p.currency }}</span>{% endif %}
-      </div>
-    </a>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
 
 <div class="support-free">
   <h2>Free ways to support</h2>

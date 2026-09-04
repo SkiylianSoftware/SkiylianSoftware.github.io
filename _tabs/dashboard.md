@@ -88,7 +88,7 @@ group: stats
   <span>
     {% if hist and hist.size > 1 %}
     In the last 30 days the channel gained <strong>{% if m_subs_d >= 0 %}+{% endif %}{{ m_subs_d }}</strong> subscribers, <strong>{% if m_views_d >= 0 %}+{% endif %}{{ m_views_d }}</strong> views ({% if m_avg_view >= 0 %}+{% endif %}{{ m_avg_view }}/day) and <strong>{% if m_videos_d >= 0 %}+{% endif %}{{ m_videos_d }}</strong> videos, for <strong>{{ m_watch_h }}h</strong> of viewer watch time.
-    {% if most_viewed %}Currently most-watched: <strong>{{ most_viewed.title }}</strong> ({{ most_viewed.view_count }} views).{% endif %}
+    {% if most_viewed %}<div class="video-mention"><span class="mini-thumb" style="background-image:url('{{ most_viewed.thumbnail }}')" role="img" aria-label="{{ most_viewed.title }}"></span><span>Currently most-watched: <strong>{{ most_viewed.title }}</strong> ({{ most_viewed.view_count }} views).</span></div>{% endif %}
     {% else %}
     Stats will populate here as the tracking pipeline starts collecting history.
     {% endif %}
@@ -244,6 +244,7 @@ group: stats
     {% endif %}
     <div class="stat-card">
       <a href="https://www.youtube.com/watch?v={{ first_video.video_id }}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+        <span class="video-mention"><span class="mini-thumb" style="background-image:url('{{ first_video.thumbnail }}')" role="img" aria-label="{{ first_video.title }}"></span></span>
         <span class="stat-value">{{ yt_start }}</span>
         <span class="stat-label">First Video</span>
       </a>

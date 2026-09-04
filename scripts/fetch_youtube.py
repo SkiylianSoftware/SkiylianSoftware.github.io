@@ -229,6 +229,9 @@ def fetch_uploads(playlist_id, label="uploads"):
         if views > 0:
             engage = (v.get("like_count", 0) + v.get("comment_count", 0)) / views * 100
             v["engagement_rate"] = round(engage, 1)
+        # Cache the thumbnail locally (same-origin, CI-cached)
+        if v.get("thumbnail"):
+            v["thumbnail"] = _thumbnail_local(v["video_id"], v["thumbnail"])
 
     print(f"  Total: {len(videos)} videos fetched for {label}")
     return videos
@@ -304,6 +307,7 @@ def enrich_playlist_stats(playlists):
 
 
 PLAYLIST_COVER_DIR = os.path.join("assets", "img", "playlists")
+THUMB_DIR = os.path.join("assets", "img", "thumbs")
 
 
 def _yt_headers():
@@ -350,6 +354,32 @@ def _download_playlist_cover(pid, cover_url):
         return f"/{PLAYLIST_COVER_DIR}/{pid}.jpg"
     except Exception:
         return ""
+
+
+def _thumbnail_local(video_id, remote_url):
+    """Cache a video thumbnail into site assets so every page load is same-origin.
+
+    Returns a local /assets/img/thumbs/<id>.jpg path when the download
+    succeeds, falling back to the remote URL on any error. CI caches the
+    thumbs directory so we don't re-download on every run.
+    """
+    if not remote_url or not video_id:
+        return remote_url
+    try:
+        os.makedirs(THUMB_DIR, exist_ok=True)
+        path = os.path.join(THUMB_DIR, f"{video_id}.jpg")
+        if not os.path.exists(path) or os.path.getsize(path) == 0:
+            resp = requests.get(remote_url, timeout=15, headers=_yt_headers())
+            resp.raise_for_status()
+            if not resp.content or resp.headers.get("content-type", "").startswith("text/"):
+                return remote_url
+            with open(path, "wb") as f:
+                f.write(resp.content)
+        if os.path.exists(path) and os.path.getsize(path) > 0:
+            return f"/{THUMB_DIR}/{video_id}.jpg"
+    except Exception:
+        pass
+    return remote_url
 
 
 def fetch_playlists():

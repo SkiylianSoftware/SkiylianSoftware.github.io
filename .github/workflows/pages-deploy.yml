@@ -4,11 +4,11 @@ on:
   push:
     branches: [master]
   # Note: GitHub Actions free-tier schedules are approximate and may be delayed.
-  # Actual interval may be 2-4x the cron value due to queueing.
-  # Hourly keeps analytics fresh at a fraction of the quota of 15-min runs,
-  # and push-triggered builds keep deployed changes instant.
+  # Live/offline on the home page is resolved client-side (Twitch embed
+  # ONLINE/OFFLINE events), so the pipeline only refreshes analytics + stats.
+  # Every 6 hours is plenty; pushes still redeploy instantly.
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -42,6 +42,13 @@ jobs:
           # "platform" field).
           key: site-data-v3
 
+      - name: Cache locally-cached video thumbnails
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: assets/img/thumbs/
+          # Bump when the thumbnail format/source changes.
+          key: site-thumbs-v1
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -51,6 +58,9 @@ jobs:
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: python scripts/fetch_youtube.py
+
+      - name: Ensure local video thumbnails (cache-restore fallback)
+        run: python scripts/fetch_thumbnails.py
 
       - name: Fetch YouTube Analytics (historical daily + per-video data)
         env:

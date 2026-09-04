@@ -154,9 +154,16 @@ def build_year(year, videos, history, milestones):
     }
 
 
-def render_year(r, series_registry, is_first=False):
+def render_year(r, series_registry, is_first=False, series_covers=None):
     y = r["year"]
     lines = []
+    series_covers = series_covers or {}
+
+    def mini_thumb(url, alt=""):
+        """Small 16:9 thumbnail chip used next to video/series mentions."""
+        if not url:
+            return ""
+        return f'<span class="mini-thumb" style="background-image:url(\'{url}\')" role="img" aria-label="{alt}"></span>'
 
     # Distinct separator between years (skipped for the first one)
     if not is_first:
@@ -199,9 +206,13 @@ def render_year(r, series_registry, is_first=False):
     if r["most_viewed"]:
         mv = r["most_viewed"]
         vid = mv.get("video_id", "")
-        vt = mv.get("title", "")
+        vt = mv.get("title", "").replace('"', "&quot;")
         vc = mv.get("view_count", 0)
-        lines.append(f'<p>Most watched: <a href="/videos#{vid}"><strong>{vt}</strong></a> ({vc:,} views)</p>')
+        vthumb = mv.get("thumbnail", "") or ""
+        lines.append(
+            f'<p class="video-mention">{mini_thumb(vthumb, vt)} '
+            f'<span>Most watched: <a href="/videos#{vid}"><strong>{vt}</strong></a> ({vc:,} views)</span></p>'
+        )
 
     if r["top_game"]:
         lines.append(f"<p>Top game by watch time: <strong>{r['top_game']}</strong> ({r['top_game_h']}h)</p>")
@@ -209,8 +220,12 @@ def render_year(r, series_registry, is_first=False):
     if r["eng_leader"]:
         el = r["eng_leader"]
         evid = el.get("video_id", "")
-        etitle = el.get("title", "")
-        lines.append(f'<p>Engagement leader: <a href="/videos#{evid}"><strong>{etitle}</strong></a></p>')
+        etitle = el.get("title", "").replace('"', "&quot;")
+        ethumb = el.get("thumbnail", "") or ""
+        lines.append(
+            f'<p class="video-mention">{mini_thumb(ethumb, etitle)} '
+            f'<span>Engagement leader: <a href="/videos#{evid}"><strong>{etitle}</strong></a></span></p>'
+        )
 
     if r["ms_count"]:
         lines.append(f"<p>Milestones crossed: <strong>{r['ms_count']}</strong></p>")
@@ -220,8 +235,7 @@ def render_year(r, series_registry, is_first=False):
     if gb:
         lines.append('<p class="game-breakdown-label">Games played this year:</p>')
         lines.append('<div class="game-breakdown">')
-        for gname in sorted(gb.keys()):
-            gdata = gb[gname]
+        for gname, gdata in sorted(gb.items(), key=lambda kv: kv[1]["episodes"], reverse=True):
             gcount = gdata["episodes"]
             ghours = int(gdata.get("duration_seconds", 0) // 3600) if gdata.get("duration_seconds") else 0
             lines.append(
@@ -267,11 +281,15 @@ def render_year(r, series_registry, is_first=False):
 
     if active_in_year:
         lines.append('<h3 class="section-title">Active Series</h3>')
-        lines.append("<ul>")
+        lines.append('<ul class="series-mention-list">')
         for s in sorted(active_in_year):
             games = series_registry[s]["games"]
             games_str = ", ".join(sorted(games))
-            lines.append(f"  <li><strong>{s}</strong> ({games_str})</li>")
+            cover = series_covers.get(s, "")
+            lines.append(
+                f'  <li class="series-mention">{mini_thumb(cover, s)}'
+                f"<span><strong>{s}</strong> ({games_str})</span></li>"
+            )
         lines.append("</ul>")
 
     if new_series:
@@ -305,6 +323,15 @@ def main():
 
     series_registry = build_series_registry(videos)
 
+    # Map series names to their downloaded playlist cover artwork
+    series_covers = {}
+    playlists = (read_json("playlists.json") or {}).get("playlists") or []
+    for pl in playlists:
+        title = pl.get("title") or ""
+        cover = pl.get("thumbnail") or pl.get("cover") or ""
+        if title and cover:
+            series_covers.setdefault(title.split(" | ")[0].strip(), cover)
+
     body_parts = []
     toc_entries = []
 
@@ -313,7 +340,7 @@ def main():
         if not r:
             continue
         toc_entries.append(f'- <a href="#year-{year}">{year}</a>')
-        body_parts.append(render_year(r, series_registry, is_first=not body_parts))
+        body_parts.append(render_year(r, series_registry, is_first=not body_parts, series_covers=series_covers))
 
     if not body_parts:
         print("No data rendered; skipping")

@@ -41,6 +41,8 @@ _data/*.json
 assets/img/playlists/
 # Branded OG share cards (generated per CI run)
 assets/img/og/
+# Locally cached video thumbnails (download per CI run, cached between runs)
+assets/img/thumbs/
 # Posts (generated for RSS feed)
 _posts/
 # Archive pages (generated for series/game landing pages)

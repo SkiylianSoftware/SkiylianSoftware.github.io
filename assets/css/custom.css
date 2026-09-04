@@ -1795,3 +1795,20 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
   font-size: 0.8rem;
 }
 .game-breakdown-pill strong { color: var(--clr-teal-light); }
+
+/* Small 16:9 thumbnail chip shown beside video/series mentions */
+.mini-thumb {
+  display: inline-block;
+  width: 2.4rem;
+  height: 1.35rem;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--clr-card-bg);
+  border: 1px solid rgba(var(--brand-rgb),0.15);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.video-mention { display: flex; align-items: center; gap: 0.5rem; margin: 0.4rem 0; }
+.series-mention-list { list-style: none; padding-left: 0; margin: 0.5rem 0 0; }
+.series-mention { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0; }

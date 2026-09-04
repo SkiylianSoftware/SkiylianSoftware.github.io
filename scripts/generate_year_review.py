@@ -1,14 +1,9 @@
 """
-Generate "Year in Review" landing pages from history + video data.
+Generate "Year in Review" landing page from history + video data.
 
-For each calendar year present in the history data, writes
-archive/year/<year>.md -> permalink /year/<year>/ with:
-- overall growth (subs/views/videos) that year
-- most-watched video, top game by watch time, engagement leader
-- busiest upload month, total watch time, milestone count
-- a link to the History page for the full picture
-
-Also writes archive/year/index.md -> /year/ listing all years.
+Writes archive/year.md -> permalink /year/ with all years combined,
+an inline TOC at the top, and per-year sections with stats, highlights,
+series info, and video thumbnails.
 """
 
 import json
@@ -18,7 +13,7 @@ from collections import defaultdict
 import yaml
 
 DATA_DIR = "_data"
-YEAR_DIR = os.path.join("archive", "year")
+OUTPUT_DIR = "archive"
 
 
 def read_json(name):
@@ -47,12 +42,42 @@ def write_page(path, frontmatter, body):
     print(f"  {path}")
 
 
-def build_year(year):
-    history = read_json("history.json") or []
-    yt = read_json("youtube_main.json") or {}
-    videos = yt.get("videos") or []
-    milestones = (read_json("milestones.json") or {}).get("reached") or {}
+def parse_active_years(active_years_str):
+    """Parse a string like '2024-2025' or '2025' into a set of years."""
+    if not active_years_str:
+        return set()
+    parts = active_years_str.split("-")
+    if len(parts) == 1:
+        return {int(parts[0])}
+    if len(parts) == 2:
+        start = int(parts[0])
+        end = int(parts[1])
+        return set(range(start, end + 1))
+    return set()
 
+
+def build_series_registry(videos):
+    """Build a dict of series_name -> {games, active_years, start_year, end_year} from video data."""
+    series = {}  # name -> {"games": set, "years": set}
+    for v in videos:
+        s = v.get("series")
+        if not s or not isinstance(s, dict):
+            continue
+        sn = s.get("series_name", "")
+        if not sn:
+            continue
+        g = s.get("game", "Other")
+        pub = v.get("published", "")
+        year = int(pub[:4]) if len(pub) >= 4 else None
+        if sn not in series:
+            series[sn] = {"games": set(), "years": set()}
+        series[sn]["games"].add(g)
+        if year:
+            series[sn]["years"].add(year)
+    return series
+
+
+def build_year(year, videos, history, milestones):
     year_entries = [e for e in history if (e.get("date") or "").startswith(year)]
     if not year_entries:
         return None
@@ -70,23 +95,19 @@ def build_year(year):
     videos_start = pick(first, "youtube_main", "videos")
     videos_end = pick(last, "youtube_main", "videos")
 
-    # watch time from _analytics deltas within the year
     watch_min = sum(e.get("_analytics", {}).get("watch_time_minutes", 0) for e in year_entries)
     watch_h = watch_min // 60
 
-    # per-video: that year's uploads
     year_videos = [v for v in videos if (v.get("published") or "").startswith(year)]
     total_views_year = sum(v.get("view_count", 0) for v in year_videos)
     most_viewed = max(year_videos, key=lambda v: v.get("view_count", 0)) if year_videos else None
 
-    # busiest upload month
     months = defaultdict(int)
     for v in year_videos:
         months[(v.get("published") or "")[:7]] += 1
     busiest = max(months, key=months.get) if months else None
     busiest_count = months.get(busiest, 0) if busiest else 0
 
-    # top game by watch time
     game_min = defaultdict(float)
     for v in year_videos:
         s = v.get("series") or {}
@@ -94,7 +115,6 @@ def build_year(year):
         game_min[g] += v.get("duration_seconds", 0) / 60
     top_game = max(game_min, key=game_min.get) if game_min else None
 
-    # engagement leader
     def eng(v):
         vc = v.get("view_count", 0)
         return (v.get("like_count", 0) + v.get("comment_count", 0)) / vc * 100 if vc else 0
@@ -103,8 +123,16 @@ def build_year(year):
 
     ms_count = sum(1 for d in milestones.values() if str(d).startswith(year))
 
+    # Per-game breakdown
+    game_breakdown = defaultdict(lambda: {"episodes": 0, "watch_seconds": 0})
+    for v in year_videos:
+        s = v.get("series") or {}
+        g = s.get("game") or "Other"
+        game_breakdown[g]["episodes"] += 1
+        game_breakdown[g]["watch_seconds"] += v.get("duration_seconds", 0)
+
     return {
-        "year": year,
+        "year": int(year),
         "subs_start": subs_start,
         "subs_end": subs_end,
         "views_start": views_start,
@@ -121,14 +149,19 @@ def build_year(year):
         "top_game_h": int(game_min.get(top_game, 0) // 60) if top_game else 0,
         "eng_leader": eng_leader,
         "ms_count": ms_count,
+        "game_breakdown": dict(game_breakdown),
+        "year_videos": year_videos,
     }
 
 
-def render(r):
+def render_year(r, series_registry):
     y = r["year"]
     lines = []
-    lines.append("{% include banner.html %}")
-    lines.append("")
+
+    # Section heading with anchor
+    lines.append(f'<h2 id="year-{y}">{y}</h2>')
+
+    # Stat cards
     subs_delta = r["subs_end"] - r["subs_start"]
     views_delta = r["views_end"] - r["views_start"]
     vids_delta = r["videos_end"] - r["videos_start"]
@@ -137,84 +170,163 @@ def render(r):
         prefix = "+" if val >= 0 else ""
         return prefix + f"{val:,}" if isinstance(val, int) else str(val)
 
-    lines.append("<h1 class='dynamic-title'>" + y + " in Review</h1>")
-    _c = '<div class="stat-cell">'
-    _ec = "</div>"
     lines.append('<div class="card-stats">')
-    lines.append(
-        _c + f'<span class="stat-value">{sc(subs_delta)}</span>' + '<span class="stat-label">Subs</span>' + _ec
-    )
-    lines.append(
-        _c + f'<span class="stat-value">{sc(views_delta)}</span>' + '<span class="stat-label">Views</span>' + _ec
-    )
-    lines.append(_c + f'<span class="stat-value">+{vids_delta}</span>' + '<span class="stat-label">Videos</span>' + _ec)
-    lines.append(
-        _c + f'<span class="stat-value">{r["uploads"]}</span>' + '<span class="stat-label">Uploads</span>' + _ec
-    )
-    lines.append(
-        _c + f'<span class="stat-value">{r["watch_h"]:,}h</span>' + '<span class="stat-label">Watch time</span>' + _ec
-    )
+    _c = '<div class="stat-cell"><span class="stat-value">'
+    _ec = '</span><span class="stat-label">'
+    _e = "</span></div>"
+    lines.append(f"{_c}{sc(subs_delta)}{_ec}Subs{_e}")
+    lines.append(f"{_c}{sc(views_delta)}{_ec}Views{_e}")
+    lines.append(f"{_c}+{vids_delta}{_ec}Videos{_e}")
+    lines.append(f"{_c}{r['uploads']}{_ec}Uploads{_e}")
+    lines.append(f"{_c}{r['watch_h']:,}h{_ec}Watch time{_e}")
     lines.append("</div>")
 
-    lines.append("<h2 class='section-title'>Highlights</h2>")
+    # Highlights
+    lines.append('<h3 class="section-title">Highlights</h3>')
     if r["busiest"]:
         bc = r["busiest"]
         bcount = r["busiest_count"]
         lines.append(f'<div class="insight-box">Busiest month: <strong>{bc}</strong> ({bcount} uploads)</div>')
-        lines.append("")
+
     if r["most_viewed"]:
         mv = r["most_viewed"]
         vid = mv.get("video_id", "")
         vt = mv.get("title", "")
         vc = mv.get("view_count", 0)
         lines.append(f'<p>Most watched: <a href="/videos#{vid}"><strong>{vt}</strong></a> ({vc:,} views)</p>')
+
     if r["top_game"]:
         lines.append(f"<p>Top game by watch time: <strong>{r['top_game']}</strong> ({r['top_game_h']}h)</p>")
+
     if r["eng_leader"]:
         el = r["eng_leader"]
         evid = el.get("video_id", "")
         etitle = el.get("title", "")
         lines.append(f'<p>Engagement leader: <a href="/videos#{evid}"><strong>{etitle}</strong></a></p>')
+
     if r["ms_count"]:
         lines.append(f"<p>Milestones crossed: <strong>{r['ms_count']}</strong></p>")
+
+    # Top video thumbnails (first 4 by view count)
+    top_vids = sorted(r["year_videos"], key=lambda v: v.get("view_count", 0), reverse=True)[:4]
+    if top_vids:
+        lines.append('<h3 class="section-title">Top Videos</h3>')
+        lines.append('<div class="thumbnail-gallery">')
+        for v in top_vids:
+            vid = v.get("video_id", "")
+            vt = v.get("title", "").replace('"', "&quot;")
+            thumb = v.get("thumbnail", "")
+            vc = v.get("view_count", 0)
+            lines.append(f'<a href="/videos#{vid}" class="video-thumb" title="{vt}">')
+            lines.append(f'  <img src="{thumb}" alt="{vt}" loading="lazy">')
+            lines.append(f'  <span class="thumb-views">{vc:,} views</span>')
+            lines.append(f'  <span class="thumb-title">{vt}</span>')
+            lines.append("</a>")
+        lines.append("</div>")
+
+    # Series active in this year
+    active_in_year = []
+    new_series = []
+    ended_series = []
+    for sname, sinfo in series_registry.items():
+        if r["year"] in sinfo["years"]:
+            active_in_year.append(sname)
+        # Determine if this series started or ended this year
+        syears = sorted(sinfo["years"])
+        if syears and syears[0] == r["year"]:
+            new_series.append(sname)
+        if syears and syears[-1] == r["year"] and (len(syears) == 1 or r["year"] != max(syears)):
+            ended_series.append(sname)
+
+    if active_in_year:
+        lines.append('<h3 class="section-title">Active Series</h3>')
+        lines.append("<ul>")
+        for s in sorted(active_in_year):
+            games = series_registry[s]["games"]
+            games_str = ", ".join(sorted(games))
+            lines.append(f"  <li><strong>{s}</strong> ({games_str})</li>")
+        lines.append("</ul>")
+
+    if new_series:
+        lines.append(f"<p><strong>New this year:</strong> {', '.join(sorted(new_series))}</p>")
+    if ended_series:
+        lines.append(f"<p><strong>Concluded this year:</strong> {', '.join(sorted(ended_series))}</p>")
+
+    # Per-game breakdown
+    gb = r["game_breakdown"]
+    if gb:
+        lines.append('<h3 class="section-title">Game Breakdown</h3>')
+        lines.append('<div class="card-stats">')
+        for gname in sorted(gb.keys()):
+            gdata = gb[gname]
+            lines.append(
+                f'<div class="stat-cell"><span class="stat-value">{gdata["episodes"]}</span>'
+                f'<span class="stat-label">{gname} episodes</span></div>'
+            )
+        lines.append("</div>")
+
     lines.append("")
-    lines.append('<p class="back-link"><a href="/year/" class="btn">&larr; All years</a></p>')
     return "\n".join(lines)
 
 
 def main():
+    videos = (read_json("youtube_main.json") or {}).get("videos") or []
     history = read_json("history.json") or []
-    if not history:
-        print("No history data; skipping year pages")
-        return
-    years = sorted({(e.get("date") or "")[:4] for e in history if e.get("date")})
+    milestones = (read_json("milestones.json") or {}).get("reached") or {}
 
-    index_rows = []
+    if not videos and not history:
+        print("No data; skipping year page")
+        return
+
+    # Derive years from history, falling back to video publish years
+    years = set()
+    if history:
+        years.update((e.get("date") or "")[:4] for e in history if e.get("date"))
+    if videos:
+        years.update((v.get("published") or "")[:4] for v in videos if v.get("published"))
+    years = sorted(y for y in years if y)
+
+    if not years:
+        print("No years found; skipping")
+        return
+
+    series_registry = build_series_registry(videos)
+
+    body_parts = []
+    toc_entries = []
+
     for year in years:
-        r = build_year(year)
+        r = build_year(year, videos, history, milestones)
         if not r:
             continue
-        safe = slugify(r["year"])
-        front = {
-            "layout": "page",
-            "title": f"{r['year']} in Review",
-            "permalink": f"/year/{safe}/",
-            "group": "stats",
-        }
-        write_page(os.path.join(YEAR_DIR, f"{safe}.md"), front, render(r))
-        index_rows.append(f"- [{r['year']}](/year/{safe}/)")
+        toc_entries.append(f'- <a href="#year-{year}">{year}</a>')
+        body_parts.append(render_year(r, series_registry))
 
-    if index_rows:
-        front = {
-            "layout": "page",
-            "title": "Year in Review",
-            "permalink": "/year/",
-            "group": "stats",
-        }
-        body = "# Year in Review\n\n" + "\n".join(sorted(index_rows)) + "\n"
-        write_page(os.path.join(YEAR_DIR, "index.md"), front, body)
+    if not body_parts:
+        print("No data rendered; skipping")
+        return
 
-    print(f"Year pages written for: {', '.join(years)}")
+    front = {
+        "layout": "page",
+        "title": "Year in Review",
+        "permalink": "/year/",
+        "group": "stats",
+    }
+
+    toc = "# Year in Review\n\nJump to year:\n\n" + "\n".join(toc_entries) + "\n\n---\n"
+    body = toc + "\n\n".join(body_parts)
+    write_page(os.path.join(OUTPUT_DIR, "year.md"), front, body)
+
+    # Remove old individual year files if they exist
+    old_dir = os.path.join(OUTPUT_DIR, "year")
+    if os.path.isdir(old_dir):
+        for fname in os.listdir(old_dir):
+            fpath = os.path.join(old_dir, fname)
+            if fname.endswith(".md") and fname != "index.md":
+                os.remove(fpath)
+                print(f"  Removed old: {fpath}")
+
+    print(f"Year page written for: {', '.join(years)}")
 
 
 if __name__ == "__main__":

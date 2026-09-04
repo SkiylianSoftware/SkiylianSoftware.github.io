@@ -97,7 +97,20 @@ group: media
           {% endif %}
         {% endfor %}
         {% assign sslug = sname | slugify %}
-        <a href="/series/{{ sslug }}/" class="btn game-series-link{% if pl_url == nil %} no-playlist{% endif %}">{{ sname }} ({{ sd.active_years }})</a>
+        {% assign series_link = glinks[gname] %}
+        {% if series_link.icon %}
+          {% assign series_img_url = series_link.icon %}
+        {% elsif series_link.steam %}
+          {% assign steam_parts = series_link.steam | split: '/' %}
+          {% assign series_img_url = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/" | append: steam_parts[4] | append: "/header.jpg" %}
+        {% endif %}
+        <a href="/series/{{ sslug }}/" class="game-series-card">
+          <div class="game-series-card-img" style="background-image: url('{{ series_img_url }}')"></div>
+          <div class="game-series-card-body">
+            <strong>{{ sname }}</strong>
+            <span>{{ sd.episode_count }} ep &middot; {{ sd.active_years }}</span>
+          </div>
+        </a>
         {% endfor %}
       </div>
     </div>
@@ -149,7 +162,12 @@ group: media
           {% for pl in playlists %}
             {% if pl.title contains cs_name %}{% assign cs_pl_url = pl.url %}{% break %}{% endif %}
           {% endfor %}
-          <a href="/videos#{{ cs_name | url_encode }}" class="btn game-series-link{% if cs_pl_url == nil %} no-playlist{% endif %}">{{ cs_name }} ({{ csd.active_years }})</a>
+          <a href="/videos#{{ cs_name | url_encode }}" class="game-series-card">
+            <div class="game-series-card-body">
+              <strong>{{ cs_name }}</strong>
+              <span>{{ csd.episode_count }} ep &middot; {{ csd.active_years }}</span>
+            </div>
+          </a>
           {% endfor %}
         </div>
         {% endif %}

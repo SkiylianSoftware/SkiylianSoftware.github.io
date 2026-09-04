@@ -79,13 +79,14 @@ document.addEventListener('click', function(e) {
   }
 });
 
-/* Series filter */
-function filterSeries(btn) {
+/* Series / Game filter */
+function filterSeries(btn, filterBy) {
+  filterBy = filterBy || 'series';
   // Close the More dropdown if open
   var dd = document.getElementById('filter-more-dropdown');
   if (dd) dd.classList.remove('open');
 
-  // Remove pagination: reveal all, then remove the button
+  // Reset pagination: reveal all, then remove the button
   Array.prototype.forEach.call(document.querySelectorAll('.paged-hidden'), function(el) {
     el.classList.remove('paged-hidden');
     el.style.display = '';
@@ -93,15 +94,26 @@ function filterSeries(btn) {
   var loadBtn = document.querySelector('.load-more-btn');
   if (loadBtn) loadBtn.style.display = 'none';
 
+  var attr = filterBy === 'game' ? 'data-game' : 'data-series';
+  var name = btn ? btn.getAttribute(filterBy === 'game' ? 'data-game-name' : 'data-series-name') : null;
+
+  // Update active class on ALL filter buttons
+  document.querySelectorAll('.filter-btn').forEach(function(b) {
+    if (filterBy === 'game' || b.getAttribute('data-game-name')) {
+      b.classList.remove('active');
+    }
+    if (filterBy === 'series' || b.getAttribute('data-series-name')) {
+      b.classList.remove('active');
+    }
+  });
+  if (btn) btn.classList.add('active');
+
   var grid = document.getElementById('video-grid');
   if (!grid) return;
-  var name = btn ? btn.getAttribute('data-series-name') : null;
   var cards = grid.querySelectorAll('.video-card');
-  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
   cards.forEach(function(c) {
-    var series = c.getAttribute('data-series');
-    if (!name || series === name) {
+    var val = c.getAttribute(attr);
+    if (!name || val === name) {
       c.style.display = '';
     } else {
       c.style.display = 'none';

@@ -111,7 +111,7 @@ group: media
       data-series-slug="{% if vod.series %}{{ vod.series.series_name | slugify }}{% endif %}"
       data-game="{% if vod.series %}{{ vod.series.game | escape }}{% endif %}"
       data-game-slug="{% if vod.series %}{{ vod.series.game | slugify }}{% endif %}"
-      data-description="{{ vod.description | escape }}"
+      data-description="{{ vod.description | strip_newlines | escape }}"
       onclick="openPlayer(this)">
     <div class="thumb-wrap">
       <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">
@@ -142,10 +142,10 @@ group: media
 <div class="streams-empty">
   <div class="empty-icon"><i class="fas fa-video"></i></div>
   <h3>No VODs Yet</h3>
-  <p>Stream archives will appear here once I go live and save the broadcast.</p>
+  <p>Stream archives will appear here once I go live and save the broadcast. Past broadcasts on Twitch are automatically saved, and the best ones get uploaded to the YouTube VODs channel with a proper player.</p>
   <div class="streams-empty-links">
-    <a href="https://live.skiylia.dev" class="btn" target="_blank"><i class="fab fa-twitch"></i> Watch on Twitch</a>
-    <a href="https://vods.skiylia.dev" class="btn" target="_blank"><i class="fab fa-youtube"></i> Browse VODs</a>
+    <a href="https://live.skiylia.dev" class="btn" target="_blank"><i class="fab fa-twitch"></i> Watch Live on Twitch</a>
+    <a href="https://vods.skiylia.dev" class="btn" target="_blank"><i class="fab fa-youtube"></i> Browse YouTube VODs</a>
   </div>
 </div>
 {% endif %}

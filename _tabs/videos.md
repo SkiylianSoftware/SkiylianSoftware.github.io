@@ -51,7 +51,7 @@ group: media
 {% endfor %}
 <div class="filter-row">
 <div class="filter-bar" id="filter-bar">
-  <button class="filter-btn active" onclick="filterSeries(this)">All</button>
+  <button class="filter-btn active" onclick="filterSeries(this, 'series')">All</button>
   {% for name in series_set %}
   {% if recency_map and recency_map != "" %}
     {% assign r = recency_map[name] %}{% assign rec = r.status | default: 'historical' %}
@@ -59,7 +59,7 @@ group: media
     {% assign rec = 'current' %}
   {% endif %}
   {% if rec != 'historical' %}
-  <button class="filter-btn recency-{{ rec }}" data-series-name="{{ name | escape }}" onclick="filterSeries(this)"><span class="recency-dot"></span> {{ name }}</button>
+  <button class="filter-btn recency-{{ rec }}" data-series-name="{{ name | escape }}" onclick="filterSeries(this, 'series')"><span class="recency-dot"></span> {{ name }}</button>
   {% endif %}
   {% endfor %}
 </div>
@@ -74,12 +74,24 @@ group: media
       {% assign rec = 'current' %}
     {% endif %}
     {% if rec == 'historical' %}
-    <button class="filter-btn dropdown-item" data-series-name="{{ name | escape }}" onclick="filterSeries(this)"><span class="recency-dot"></span> {{ name }}</button>
+    <button class="filter-btn dropdown-item" data-series-name="{{ name | escape }}" onclick="filterSeries(this, 'series')"><span class="recency-dot"></span> {{ name }}</button>
     {% endif %}
     {% endfor %}
   </div>
 </div>
 {% endif %}
+</div>
+{% endif %}
+
+{% assign games_seen = all_videos | map: "series" | compact | map: "game" | compact | uniq | sort %}
+{% if games_seen.size > 1 %}
+<div class="filter-row">
+<div class="filter-bar" id="filter-bar-games">
+  <button class="filter-btn active" onclick="filterSeries(this, 'game')">All Games</button>
+  {% for gname in games_seen %}
+  <button class="filter-btn" data-game-name="{{ gname | escape }}" onclick="filterSeries(this, 'game')">{{ gname }}</button>
+  {% endfor %}
+</div>
 </div>
 {% endif %}
 
@@ -93,7 +105,7 @@ group: media
      data-series-slug="{% if video.series %}{{ video.series.series_name | slugify }}{% endif %}"
      data-game="{% if video.series %}{{ video.series.game | escape }}{% endif %}"
      data-game-slug="{% if video.series %}{{ video.series.game | slugify }}{% endif %}"
-     data-description="{{ video.description | escape }}"
+     data-description="{{ video.description | strip_newlines | escape }}"
      data-episode="{% if video.series %}{{ video.series.episode_number }}{% endif %}"
      onclick="openPlayer(this)">
   <div class="thumb-wrap">

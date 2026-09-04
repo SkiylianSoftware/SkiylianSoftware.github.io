@@ -96,8 +96,11 @@ permalink: /partners/media-kit/
     <h2>Share Card Samples</h2>
     <p>Branded 1280x720 Open Graph cards are auto-generated for every upload; ask for the raw files and I'll send them over.</p>
     <div class="mk-cards">
-      {% for v in videos limit: 3 %}
-      <img src="/assets/img/og/{{ v.video_id }}.jpg" alt="{{ v.title }}" loading="lazy">
+      {% for v in videos limit: 4 %}
+      <div class="mk-card-sample">
+        <img src="{{ v.thumbnail }}" alt="{{ v.title }}" loading="lazy">
+        <span class="mk-card-label">{{ v.title | truncate: 40 }}</span>
+      </div>
       {% endfor %}
     </div>
   </div>
@@ -251,5 +254,20 @@ permalink: /partners/media-kit/
   .mk-outer { max-width: 100%; padding: 0; }
   .mk-stat { break-inside: avoid; }
   body { background: #fff !important; color: #000 !important; }
+}
+.mk-card-sample {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.mk-card-sample img {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 212, 191, 0.15);
+}
+.mk-card-label {
+  font-size: 0.78rem;
+  opacity: 0.7;
+  line-height: 1.3;
 }
 </style>

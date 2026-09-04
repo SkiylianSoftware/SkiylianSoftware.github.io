@@ -142,7 +142,7 @@ layout: default
          data-series-slug="{% if video.series %}{{ video.series.series_name | slugify }}{% endif %}"
          data-game="{% if video.series %}{{ video.series.game | escape }}{% endif %}"
          data-game-slug="{% if video.series %}{{ video.series.game | slugify }}{% endif %}"
-         data-description="{{ video.description | escape }}"
+         data-description="{{ video.description | strip_newlines | escape }}"
          onclick="openPlayer(this)">
         <div class="thumb-wrap">
             <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy">
@@ -188,7 +188,7 @@ layout: default
          data-series-slug="{% if vod.series %}{{ vod.series.series_name | slugify }}{% endif %}"
          data-game="{% if vod.series %}{{ vod.series.game | escape }}{% endif %}"
          data-game-slug="{% if vod.series %}{{ vod.series.game | slugify }}{% endif %}"
-         data-description="{{ vod.description | escape }}"
+         data-description="{{ vod.description | strip_newlines | escape }}"
          onclick="openPlayer(this)">
         <div class="thumb-wrap">
             <img src="{{ vod.thumbnail }}" alt="{{ vod.title }}" loading="lazy">

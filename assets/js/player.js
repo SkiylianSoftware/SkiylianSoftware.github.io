@@ -109,12 +109,19 @@
     if (!box) return;
     if (desc) {
       var text = String(desc);
-      // Jekyll's | escape filter turns newlines into literal \n sequences
-      text = text.replace(/\\n/g, '\n');
-      // Escape HTML first, then replace newlines with <br>, then linkify URLs
+      // Jekyll strips newlines in HTML attributes, so chapters come
+      // space-separated.  Replace common separators with line breaks so
+      // the description is readable and chapter chips appear.
+      // Split on 'Chapters:' marker to put the chapters section on its own
+      var idx = text.search(/Chapters:\s*/i);
+      if (idx >= 0) {
+        // Put chapters on a new line
+        text = text.slice(0, idx) + '<br><br>' + text.slice(idx);
+      }
+      // Also break on 'Playlist:' and 'Mod Collection:' markers
+      text = text.replace(/(Playlist:|Mod Collection:)/gi, '<br><br>$1');
       text = escapeHtml(text);
-      text = text.replace(/\n/g, '<br>');
-      // Format chapter timestamps into clickable chips (after escaping)
+      // Format timestamps as clickable chips (after escaping)
       text = text.replace(/(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*/g,
         '<span class="chap-inline" data-chap-time="$1">$1 &ndash; </span>');
       text = linkify(text);
@@ -162,7 +169,7 @@
     var siblings = seriesSiblings(card);
     if (siblings.length) {
       var html = '<p class="series-more-label">More from this series</p><div class="series-more-grid">';
-      siblings.slice(0, 6).forEach(function(c) {
+      siblings.slice(0, 10).forEach(function(c) {
         var img = c.querySelector('img');
         var src = img ? img.getAttribute('src') : '';
         var id = c.getAttribute('data-video-id');
@@ -294,10 +301,18 @@
     var grid = document.getElementById('video-grid');
     if (!grid) return;
 
-    // Reset pagination: reveal all cards
-    if (grid.__paginationReset) grid.__paginationReset();
-    var lmBtn = grid.parentNode.querySelector('.load-more-btn');
-    if (lmBtn) lmBtn.style.display = 'none';
+    // Don't reset pagination if a series or game filter is active
+    var hasActiveFilter = false;
+    qa('.filter-btn').forEach(function(b) {
+      if (b.classList.contains('active') && (b.getAttribute('data-series-name') || b.getAttribute('data-game-name'))) {
+        hasActiveFilter = true;
+      }
+    });
+    if (!hasActiveFilter) {
+      if (grid.__paginationReset) grid.__paginationReset();
+      var lmBtn = grid.parentNode.querySelector('.load-more-btn');
+      if (lmBtn) lmBtn.style.display = 'none';
+    }
 
     var cards = qa('.video-card');
     cards.sort(function(a, b) {
@@ -466,7 +481,7 @@
 
     qa('.filter-btn').forEach(function(btn) {
       if (!isSeriesHash && (btn.getAttribute('data-series-name') === name || btn.textContent.trim() === name)) {
-        filterSeries(btn);
+        filterSeries(btn, 'series');
         btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         isSeriesHash = true;
       }

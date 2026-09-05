@@ -56,6 +56,39 @@ def parse_active_years(active_years_str):
     return set()
 
 
+def build_alias_map(game_links):
+    """Resolve video-game shorthand (KSP, StationFlow) to canonical names.
+
+    game_links.yml keys canonicals (e.g. 'Kerbal Space Program') with
+    `aliases:` lists. Returns {alias: canonical} and also maps a canonical to
+    itself so lookups by either name resolve.
+    """
+    if not game_links:
+        return {}
+    aliases = {}
+    for canon, entry in game_links.items():
+        if not isinstance(entry, dict):
+            continue
+        aliases[canon] = canon
+        for alias in entry.get("aliases", []) or []:
+            aliases[alias] = canon
+    return aliases
+
+
+def resolve_game(game, alias_map):
+    """Map a raw video game name to its canonical display name."""
+    if not alias_map:
+        return game
+    if game in alias_map:
+        return alias_map[game]
+    # Fall back to case-insensitive lookup
+    lower = game.lower()
+    for k, v in alias_map.items():
+        if k.lower() == lower:
+            return v
+    return game
+
+
 def build_series_registry(videos):
     """Build a dict of series_name -> {games, active_years, start_year, end_year} from video data."""
     series = {}  # name -> {"games": set, "years": set}
@@ -77,7 +110,7 @@ def build_series_registry(videos):
     return series
 
 
-def build_year(year, videos, history, milestones):
+def build_year(year, videos, history, milestones, alias_map=None):
     year_entries = [e for e in history if (e.get("date") or "").startswith(year)]
     if not year_entries:
         return None
@@ -111,7 +144,7 @@ def build_year(year, videos, history, milestones):
     game_min = defaultdict(float)
     for v in year_videos:
         s = v.get("series") or {}
-        g = s.get("game") or "Other"
+        g = resolve_game(s.get("game") or "Other", alias_map)
         game_min[g] += v.get("duration_seconds", 0) / 60
     top_game = max(game_min, key=game_min.get) if game_min else None
 
@@ -121,7 +154,7 @@ def build_year(year, videos, history, milestones):
     game_breakdown = defaultdict(lambda: {"episodes": 0, "watch_seconds": 0})
     for v in year_videos:
         s = v.get("series") or {}
-        g = s.get("game") or "Other"
+        g = resolve_game(s.get("game") or "Other", alias_map)
         game_breakdown[g]["episodes"] += 1
         game_breakdown[g]["watch_seconds"] += v.get("duration_seconds", 0)
 
@@ -331,10 +364,12 @@ def main():
     import yaml as _yaml
 
     game_covers = {}
+    alias_map = {}
     gl_path = os.path.join(DATA_DIR, "game_links.yml")
     if os.path.exists(gl_path):
         with open(gl_path) as f:
             gl = _yaml.safe_load(f) or {}
+        alias_map = build_alias_map(gl)
         for gname, glink in gl.items():
             if not isinstance(glink, dict):
                 continue
@@ -353,7 +388,7 @@ def main():
     toc_entries = []
 
     for year in years:
-        r = build_year(year, videos, history, milestones)
+        r = build_year(year, videos, history, milestones, alias_map)
         if not r:
             continue
         toc_entries.append(f'- <a href="#year-{year}">{year}</a>')

@@ -47,3 +47,6 @@ assets/img/thumbs/
 _posts/
 # Archive pages (generated for series/game landing pages)
 archive/
+# Year-in-Review tab (generated per CI run; written into _tabs so the sidebar
+# picks it up under the Stats group)
+_tabs/year.md

@@ -1,9 +1,9 @@
 """
-Generate "Year in Review" landing page from history + video data.
+Generate "Year in Review" tab from history + video data.
 
-Writes archive/year.md -> permalink /year/ with all years combined,
-an inline TOC at the top, and per-year sections with stats, highlights,
-series info, and video thumbnails.
+Writes _tabs/year.md so it appears in the sidebar under the Stats group,
+with all years combined, an inline TOC at the top, and per-year sections
+with stats, highlights, series info, and video thumbnails.
 """
 
 import json
@@ -13,7 +13,7 @@ from collections import defaultdict
 import yaml
 
 DATA_DIR = "_data"
-OUTPUT_DIR = "archive"
+OUTPUT_DIR = "_tabs"
 
 
 def read_json(name):
@@ -89,8 +89,12 @@ def resolve_game(game, alias_map):
     return game
 
 
-def build_series_registry(videos):
-    """Build a dict of series_name -> {games, active_years, start_year, end_year} from video data."""
+def build_series_registry(videos, alias_map=None):
+    """Build a dict of series_name -> {games, active_years, start_year, end_year} from video data.
+
+    Game names are resolved to their canonical form (KSP -> Kerbal Space
+    Program) so the Active Series list matches the /games page naming.
+    """
     series = {}  # name -> {"games": set, "years": set}
     for v in videos:
         s = v.get("series")
@@ -99,7 +103,7 @@ def build_series_registry(videos):
         sn = s.get("series_name", "")
         if not sn:
             continue
-        g = s.get("game", "Other")
+        g = resolve_game(s.get("game", "Other"), alias_map)
         pub = v.get("published", "")
         year = int(pub[:4]) if len(pub) >= 4 else None
         if sn not in series:
@@ -349,18 +353,7 @@ def main():
         print("No years found; skipping")
         return
 
-    series_registry = build_series_registry(videos)
-
-    # Map series names to their downloaded playlist cover artwork
-    series_covers = {}
-    playlists = (read_json("playlists.json") or {}).get("playlists") or []
-    for pl in playlists:
-        title = pl.get("title") or ""
-        cover = pl.get("thumbnail") or pl.get("cover") or ""
-        if title and cover:
-            series_covers.setdefault(title.split(" | ")[0].strip(), cover)
-
-    # Map game names to their cover artwork (game_links icon or Steam header)
+    # Load game alias + cover info from game_links.yml
     import yaml as _yaml
 
     game_covers = {}
@@ -383,6 +376,17 @@ def main():
                     game_covers[gname] = (
                         f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{parts[4]}/header.jpg"
                     )
+
+    series_registry = build_series_registry(videos, alias_map)
+
+    # Map series names to their downloaded playlist cover artwork
+    series_covers = {}
+    playlists = (read_json("playlists.json") or {}).get("playlists") or []
+    for pl in playlists:
+        title = pl.get("title") or ""
+        cover = pl.get("thumbnail") or pl.get("cover") or ""
+        if title and cover:
+            series_covers.setdefault(title.split(" | ")[0].strip(), cover)
 
     body_parts = []
     toc_entries = []
@@ -411,20 +415,25 @@ def main():
         "title": "Year in Review",
         "permalink": "/year/",
         "group": "stats",
+        "order": 6.5,
     }
 
     toc = "# Year in Review\n\nJump to year:\n\n" + "\n".join(toc_entries) + "\n\n---\n"
     body = toc + "\n\n".join(body_parts)
     write_page(os.path.join(OUTPUT_DIR, "year.md"), front, body)
 
-    # Remove old individual year files if they exist
-    old_dir = os.path.join(OUTPUT_DIR, "year")
-    if os.path.isdir(old_dir):
-        for fname in os.listdir(old_dir):
-            fpath = os.path.join(old_dir, fname)
-            if fname.endswith(".md") and fname != "index.md":
-                os.remove(fpath)
-                print(f"  Removed old: {fpath}")
+    # Remove any stale outputs from when this wrote into archive/ instead
+    for stale in ("archive/year.md", "archive/year"):
+        if os.path.exists(stale):
+            if os.path.isdir(stale):
+                for fname in os.listdir(stale):
+                    p = os.path.join(stale, fname)
+                    if os.path.isfile(p):
+                        os.remove(p)
+                os.rmdir(stale)
+            else:
+                os.remove(stale)
+            print(f"  Removed old: {stale}")
 
     print(f"Year page written for: {', '.join(years)}")
 

@@ -1103,39 +1103,32 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 }
 
 /* Playlists page */
-.playlist-rows { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.25rem 0; }
-.playlist-row {
-  display: flex; align-items: flex-start; gap: 0;
-  padding: 1rem; border-radius: 10px;
-  background: var(--clr-card-bg);
-  border: 1px solid rgba(var(--brand-rgb),0.08);
-  text-decoration: none; color: inherit;
-  transition: border-color 0.2s, transform 0.15s;
-  border-left: 3px solid transparent;
+/* === Playlists page (card grid) === */
+.playlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.playlist-card { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; background: var(--clr-card-bg); border: 1px solid rgba(var(--brand-rgb),0.08); text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
+.playlist-card:hover { border-color: rgba(var(--brand-rgb),0.3); transform: translateY(-2px); }
+.playlist-card.recency-current { border-left: 3px solid var(--clr-teal); }
+.playlist-card.recency-recent { border-left: 3px solid var(--clr-lilac); }
+.playlist-card-thumb { width: 100%; aspect-ratio: 16/9; background-size: cover; background-position: center; background-color: #0a0a14; }
+.playlist-card-body { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.playlist-card-body h3 { font-size: 0.9rem; margin: 0; line-height: 1.3; }
+.playlist-card-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; font-size: 0.78rem; opacity: 0.55; }
+.playlist-card-badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.15rem; }
+.pl-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.15rem 0.55rem; border-radius: 999px;
+  background: rgba(var(--brand-rgb),0.08);
+  border: 1px solid rgba(var(--brand-rgb),0.2);
+  color: var(--clr-teal-light);
+  font-size: 0.72rem; font-weight: 600;
+  text-decoration: none;
 }
-.playlist-row.recency-current { border-left-color: var(--clr-teal); }
-.playlist-row.recency-recent { border-left-color: var(--clr-lilac); }
-.playlist-row:hover {
-  transform: translateY(-2px);
-}
-.playlist-row-thumb {
-  width: 200px; flex-shrink: 0;
-  aspect-ratio: 16/9;
-  background-size: cover;
-  background-position: center;
-  border-radius: 6px;
-}
-.playlist-row-info { flex: 1; min-width: 0; margin-left: 1rem; text-align: left; }
-.playlist-row-info h3 { font-size: 0.95rem; margin: 0 0 0.35rem; line-height: 1.3; }
-.playlist-row-desc { font-size: 0.85rem; margin: 0 0 0.4rem; opacity: 0.7; line-height: 1.5; white-space: pre-wrap; }
-.playlist-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.8rem; font-size: 0.8rem; opacity: 0.55; }
-.reltime { opacity: 0.65; white-space: nowrap; }
-.meta-date { white-space: nowrap; }
-@media (max-width: 500px) {
-  .playlist-row { flex-direction: column; align-items: stretch; }
-  .playlist-row-thumb { width: 100%; }
-  .playlist-row-info { margin-left: 0; margin-top: 1rem; }
-}
+.pl-badge:hover { background: rgba(var(--brand-rgb),0.16); }
+.pl-badge-game { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.22); color: var(--clr-lilac-light); }
+.pl-badge-game:hover { background: rgba(168,85,247,0.16); }
+.playlist-card-recency { position: absolute; top: 0.4rem; left: 0.4rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; z-index: 1; }
+.playlist-card-recency.recency-current { background: rgba(45,212,191,0.2); color: var(--clr-teal); }
+.playlist-card-recency.recency-recent { background: rgba(192,132,252,0.2); color: var(--clr-lilac); }
 
 /* === UNIVERSAL PLATFORM HOVER COLORS === */
 [href*="youtube.com"] i,
@@ -1836,3 +1829,7 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 /* About page series buttons with playlist mini-thumbnail */
 .series-btn-icon { display: inline-flex !important; align-items: center; gap: 0.4rem; }
 .series-btn-icon .mini-thumb { width: 2rem; height: 1.1rem; }
+
+/* Shared meta-date / reltime (used by playlists, history, home) */
+.reltime { opacity: 0.65; white-space: nowrap; }
+.meta-date { white-space: nowrap; }

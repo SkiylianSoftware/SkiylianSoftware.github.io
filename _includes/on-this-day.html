@@ -20,8 +20,9 @@
 {% endif %}
 {% assign todays_videos = "" | split: "," %}
 {% for v in site.data.youtube_main.videos %}
-  {% assign vmd = v.published | date: "%m-%d" %}
-  {% if vmd == today_mmdd %}
+  {% assign v_year = v.published | date: "%Y" %}
+  {% assign v_mmdd = v.published | date: "%m-%d" %}
+  {% if v_mmdd == today_mmdd and v_year != today_year %}
     {% assign todays_videos = todays_videos | push: v.title %}
   {% endif %}
 {% endfor %}

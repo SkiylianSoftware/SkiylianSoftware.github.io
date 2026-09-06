@@ -413,6 +413,7 @@ def main():
     front = {
         "layout": "page",
         "title": "Year in Review",
+        "icon": "fa-solid fa-timeline",
         "permalink": "/year/",
         "group": "stats",
         "order": 6.5,

@@ -18,7 +18,7 @@ group: media
 
 {% assign playlists = site.data.playlists.playlists %}
 {% if playlists.size > 0 %}
-<div class="playlist-rows" id="playlist-rows">
+<div class="playlist-grid" id="playlist-rows">
 {% for pl in playlists %}
   {% assign recency = "historical" %}
   {% assign sr = site.data.youtube_main.series_recency %}
@@ -49,52 +49,30 @@ group: media
     {% endif %}
     {% if recency == "historical" %}{% assign recency = nil %}{% endif %}
   {% endif %}
-  <a id="pl-{{ pl.playlist_id }}" href="{{ pl.url }}" target="_blank" class="playlist-row btn{% if recency %} recency-{{ recency }}{% endif %}"
-     data-published="{{ pl.published | default: '' }}"
-     data-views="{{ pl.total_views | default: 0 }}"
-     data-duration="{{ pl.total_duration_seconds | default: 0 }}"
-     data-last-updated="{{ pl.last_updated | default: '' }}">
-    {% if pl.thumbnail %}
-      <div class="playlist-row-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
-    {% endif %}
-    <div class="playlist-row-info">
-      <h3>{{ pl.title }}</h3>
-      {% if pl.description_parts %}
-        <p class="playlist-row-desc">{{ pl.description_parts | join: "<br>" }}</p>
-      {% elsif pl.description %}
-        <p class="playlist-row-desc">{{ pl.description }}</p>
-      {% endif %}
-      <div class="playlist-row-meta">
-        <span class="playlist-row-count">{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>
-        {% if pl.total_duration_seconds and pl.total_duration_seconds > 0 %}
-          {% assign hours = pl.total_duration_seconds | divided_by: 3600 %}
-          {% assign rem = pl.total_duration_seconds | modulo: 3600 %}
-          {% assign mins = rem | divided_by: 60 %}
-          <span class="playlist-row-duration">{{ hours }}h {{ mins }}m</span>
-        {% endif %}
-        {% if pl.total_views and pl.total_views > 0 %}
-          <span class="playlist-row-views">{{ pl.total_views }} views</span>
-        {% endif %}
-        {% if pl.published %}
-          <span class="meta-date"><span class="playlist-row-date">{{ pl.published | date: "%b %Y" }}</span>
-          <span class="reltime" datetime="{{ pl.published }}"></span></span>
-        {% endif %}
-        {% if pl.last_updated and pl.last_updated != pl.published %}
-          <span class="meta-date"><span class="playlist-row-date">&#9655; {{ pl.last_updated | date: "%b %Y" }}</span>
-          <span class="reltime" datetime="{{ pl.last_updated }}"></span></span>
-        {% endif %}
-        {% assign pl_series = pl.title | split: " | " | first | strip %}
-        {% assign pl_game = pl.title | split: " | " | last | strip %}
-        {% if pl_game == pl_series %}{% assign pl_game = "" %}{% endif %}
-        <span class="playlist-row-badges">
-          <a href="/series/{{ pl_series | slugify }}/" class="playlist-badge"><i class="fas fa-list-ul"></i> {{ pl_series }}</a>
-          {% if pl_game and pl_game != "" %}
-          <a href="/games/{{ pl_game | slugify }}/" class="playlist-badge playlist-badge-game"><i class="fas fa-gamepad"></i> {{ pl_game }}</a>
-          {% endif %}
-        </span>
-      </div>
+  {% assign pl_series = pl.title | split: " | " | first | strip %}
+  {% assign pl_game = pl.title | split: " | " | last | strip %}
+  {% if pl_game == pl_series %}{% assign pl_game = "" %}{% endif %}
+<a href="{{ pl.url }}" target="_blank" rel="noopener" class="playlist-card btn{% if recency %} recency-{{ recency }}{% endif %}">
+  <div class="playlist-card-thumb" style="background-image: url('{{ pl.thumbnail }}')"></div>
+  {% if recency %}<span class="playlist-card-recency recency-{{ recency }}">{{ recency }}</span>{% endif %}
+  <div class="playlist-card-body">
+    <h3>{{ pl.title }}</h3>
+    <div class="playlist-card-meta">
+      <span>{{ pl.item_count }} video{% if pl.item_count > 1 %}s{% endif %}</span>
+      {% assign hours = pl.total_duration_seconds | divided_by: 3600 %}
+      {% assign rem = pl.total_duration_seconds | modulo: 3600 %}
+      {% assign mins = rem | divided_by: 60 %}
+      <span>{{ hours }}h {{ mins }}m</span>
+      <span>{{ pl.total_views }} views</span>
     </div>
-  </a>
+    <div class="playlist-card-badges">
+      <a href="/series/{{ pl_series | slugify }}/" class="pl-badge"><i class="fas fa-list-ul"></i> {{ pl_series }}</a>
+      {% if pl_game != "" %}
+      <a href="/games/{{ pl_game | slugify }}/" class="pl-badge pl-badge-game"><i class="fas fa-gamepad"></i> {{ pl_game }}</a>
+      {% endif %}
+    </div>
+  </div>
+</a>
 {% endfor %}
 </div>
 {% else %}

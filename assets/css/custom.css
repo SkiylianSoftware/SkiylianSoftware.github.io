@@ -1105,7 +1105,7 @@ a.timeline-item:hover { background: rgba(var(--brand-rgb),0.04); }
 /* Playlists page */
 /* === Playlists page (card grid) === */
 .playlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
-.playlist-card { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; background: var(--clr-card-bg); border: 1px solid rgba(var(--brand-rgb),0.08); text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
+.playlist-card { display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; background: var(--clr-card-bg); border: 1px solid rgba(var(--brand-rgb),0.08); text-decoration: none; color: inherit; transition: border-color 0.2s, transform 0.15s; cursor: pointer; position: relative; }
 .playlist-card:hover { border-color: rgba(var(--brand-rgb),0.3); transform: translateY(-2px); }
 .playlist-card.recency-current { border-left: 3px solid var(--clr-teal); }
 .playlist-card.recency-recent { border-left: 3px solid var(--clr-lilac); }
